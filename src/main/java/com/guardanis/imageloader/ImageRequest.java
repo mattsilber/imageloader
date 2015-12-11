@@ -11,7 +11,9 @@ import android.view.View;
 import android.widget.ImageView;
 
 import com.guardanis.imageloader.filters.BitmapBlurFilter;
+import com.guardanis.imageloader.filters.BitmapCircularCropFilter;
 import com.guardanis.imageloader.filters.BitmapColorOverlayFilter;
+import com.guardanis.imageloader.filters.BitmapRotationFilter;
 import com.guardanis.imageloader.filters.ImageFilter;
 
 import java.io.File;
@@ -98,6 +100,16 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> addColorOverlayFilter(int colorOverlay) {
         bitmapImageFilters.add(new BitmapColorOverlayFilter(context, colorOverlay));
+        return this;
+    }
+
+    public ImageRequest<V> addRotationFilter(int rotationDegrees) {
+        bitmapImageFilters.add(new BitmapRotationFilter(context, rotationDegrees));
+        return this;
+    }
+
+    public ImageRequest<V> addCircularCropFilter() {
+        bitmapImageFilters.add(new BitmapCircularCropFilter(context));
         return this;
     }
 
