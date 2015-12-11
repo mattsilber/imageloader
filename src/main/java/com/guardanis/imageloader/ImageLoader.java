@@ -129,7 +129,7 @@ public class ImageLoader {
 
         @Override
         public Drawable getErrorDrawable(Context context) {
-            return ContextCompat.getDrawable(context, R.drawable.ail__image_loader_stub);
+            return ContextCompat.getDrawable(context, R.drawable.ail__image_loader_stub_error);
         }
     };
 }
