@@ -40,7 +40,8 @@ repositories {
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     compile 'com.android.support:appcompat-v7:22.1.+'
-    compile 'com.caverock:androidsvg:1.2.2-beta-1'
+//    compile 'com.caverock:androidsvg:1.2.2-beta-1'
+    compile project(':AndroidSVG')
 }
 
 group = 'com.guardanis'

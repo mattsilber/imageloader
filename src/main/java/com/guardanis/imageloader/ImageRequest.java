@@ -10,25 +10,30 @@ import android.os.Looper;
 import android.view.View;
 import android.widget.ImageView;
 
+import com.guardanis.imageloader.filters.BitmapBlurFilter;
+import com.guardanis.imageloader.filters.BitmapColorOverlayFilter;
+import com.guardanis.imageloader.filters.ImageFilter;
+
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ImageRequest<V extends View> implements Runnable {
 
-    private Context context;
-    private String targetUrl;
+    protected static final int DEFAULT_BLUR_RADIUS = 15;
 
-    private V targetView;
-    private boolean setImageAsBackground = false;
+    protected Context context;
+    protected String targetUrl;
 
-    private boolean blurImage = false;
-    private int blurRadius = 15;
+    protected V targetView;
+    protected boolean setImageAsBackground = false;
 
-    private int colorOverlay = -1;
+    protected List<ImageFilter<Bitmap>> bitmapImageFilters = new ArrayList<ImageFilter<Bitmap>>();
 
-    private boolean showStubOnExecute = true;
-    private boolean showStubOnError = false;
+    protected boolean showStubOnExecute = true;
+    protected boolean showStubOnError = false;
 
-    private boolean fromAssets = false;
+    protected boolean fromAssets = false;
 
     public ImageRequest(Context context) {
         this(context, "");
@@ -75,18 +80,22 @@ public class ImageRequest<V extends View> implements Runnable {
         return this;
     }
 
-    public ImageRequest<V> setBlurImage() {
-        this.blurImage = true;
+    public ImageRequest<V> addBlurFilter(){
+        return addBlurFilter(DEFAULT_BLUR_RADIUS);
+    }
+
+    public ImageRequest<V> addBlurFilter(int blurRadius){
+        bitmapImageFilters.add(new BitmapBlurFilter(context, blurRadius));
         return this;
     }
 
-    public ImageRequest<V> setBlurRadius(int blurRadius) {
-        this.blurRadius = blurRadius;
+    public ImageRequest<V> addColorOverlayFilter(int colorOverlay) {
+        bitmapImageFilters.add(new BitmapColorOverlayFilter(context, colorOverlay));
         return this;
     }
 
-    public ImageRequest<V> setColorOverlay(int colorOverlay) {
-        this.colorOverlay = colorOverlay;
+    public ImageRequest<V> addImageFilter(ImageFilter<Bitmap> imageFilter){
+        bitmapImageFilters.add(imageFilter);
         return this;
     }
 
@@ -136,12 +145,9 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     private void processImage(File imageFile, Bitmap bitmap) {
-        if(isImageEditingRequired()){
-            if(blurImage)
-                bitmap = BlurHandler.blurImageWithRenderScript(context, bitmap, blurRadius);
-
-            if(colorOverlay > 0)
-                bitmap = ImageUtils.getInstance().drawColorOverlay(bitmap, colorOverlay);
+        if(0 < bitmapImageFilters.size()){
+            for(ImageFilter<Bitmap> filter : bitmapImageFilters)
+                    bitmap = filter.filter(bitmap);
 
             // Don't save it if it's from assets, even if we've edited it
             if(!fromAssets)
@@ -149,10 +155,6 @@ public class ImageRequest<V extends View> implements Runnable {
         }
 
         onRequestSuccessful(bitmap);
-    }
-
-    private boolean isImageEditingRequired() {
-        return blurImage || 0 < colorOverlay;
     }
 
     private void onRequestSuccessful(final Bitmap bitmap) {
@@ -182,10 +184,15 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     private String getFullRequestFileCacheName() {
-        return targetUrl
-                + (blurImage ? "_blurred" : "")
-                + (colorOverlay < 0 ? "" : "_" + colorOverlay)
-                + ((fromAssets || targetUrl.endsWith(".svg")) ? ".svg" : "");
+        String adjustedName = targetUrl;
+
+        for(ImageFilter<Bitmap> filter : bitmapImageFilters)
+            adjustedName += "_" + filter.getAdjustmentInfo();
+
+        if(fromAssets || targetUrl.endsWith(".svg"))
+            adjustedName += ".svg";
+
+        return adjustedName;
     }
 
     private File getEditedRequestFile() {

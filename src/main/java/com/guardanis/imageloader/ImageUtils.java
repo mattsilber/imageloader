@@ -207,15 +207,4 @@ public class ImageUtils {
         return new BitmapDrawable(context.getResources(), decodeBitmap(svg, (int) svg.getDocumentWidth()));
     }
 
-    public Bitmap drawColorOverlay(Bitmap bitmap, int colorOverlay) {
-        if(bitmap != null && colorOverlay > -1){
-            Paint paint = new Paint();
-            paint.setColor(colorOverlay);
-
-            Canvas canvas = new Canvas(bitmap);
-            canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), paint);
-        }
-        return bitmap;
-    }
-
 }
