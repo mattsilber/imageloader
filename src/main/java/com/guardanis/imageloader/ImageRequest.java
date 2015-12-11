@@ -35,6 +35,8 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected boolean fromAssets = false;
 
+    protected StubHolder stubHolder;
+
     public ImageRequest(Context context) {
         this(context, "");
     }
@@ -60,7 +62,12 @@ public class ImageRequest<V extends View> implements Runnable {
         return this;
     }
 
-    public ImageRequest<V> setSetImageAsBackground(boolean setImageAsBackground) {
+    public ImageRequest<V> setImageAsBackground() {
+        this.setImageAsBackground = true;
+        return this;
+    }
+
+    public ImageRequest<V> setImageAsBackground(boolean setImageAsBackground) {
         this.setImageAsBackground = setImageAsBackground;
         return this;
     }
@@ -96,6 +103,11 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> addImageFilter(ImageFilter<Bitmap> imageFilter){
         bitmapImageFilters.add(imageFilter);
+        return this;
+    }
+
+    public ImageRequest<V> overrideStubs(StubHolder stubHolder){
+        this.stubHolder = stubHolder;
         return this;
     }
 
@@ -179,7 +191,7 @@ public class ImageRequest<V extends View> implements Runnable {
             return;
 
         if(showStubOnError)
-            setTargetViewDrawable(ImageLoader.getInstance(context).getStubs().getErrorDrawable(context));
+            setTargetViewDrawable(getStubs().getErrorDrawable(context));
         else setTargetViewDrawable(null);
     }
 
@@ -224,13 +236,19 @@ public class ImageRequest<V extends View> implements Runnable {
         else v.setBackground(drawable);
     }
 
+    private StubHolder getStubs(){
+        if(stubHolder == null)
+            return ImageLoader.getInstance(context).getStubs();
+        else return stubHolder;
+    }
+
     public void execute() {
         if(targetView != null){
             ImageLoader.getInstance(context)
                     .addViewAndTargetUrl(targetView, targetUrl);
 
             if(showStubOnExecute)
-                setTargetViewDrawable(ImageLoader.getInstance(context).getStubs().getLoadingDrawable(context));
+                setTargetViewDrawable(getStubs().getLoadingDrawable(context));
             else setTargetViewDrawable(null);
         }
 
