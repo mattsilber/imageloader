@@ -143,7 +143,7 @@ public class ImageRequest<V extends View> implements Runnable {
         if(!imageFile.exists()){
             File originalImageFile = getOriginalRequestFile();
             if(originalImageFile.exists()){
-                Bitmap original = ImageUtils.getInstance().decodeFile(originalImageFile, requiredImageWidth);
+                Bitmap original = ImageUtils.decodeFile(originalImageFile, requiredImageWidth);
                 if(original == null)
                     downloadAndProcess(originalImageFile, imageFile, requiredImageWidth);
                 else processImage(imageFile, original);
@@ -151,7 +151,7 @@ public class ImageRequest<V extends View> implements Runnable {
             else downloadAndProcess(originalImageFile, imageFile, requiredImageWidth);
         }
         else
-            onRequestSuccessful(ImageUtils.getInstance().decodeFile(imageFile, requiredImageWidth));
+            onRequestSuccessful(ImageUtils.decodeFile(imageFile, requiredImageWidth));
     }
 
     private void downloadAndProcess(File originalImageFile, File imageFile, int requiredImageWidth) {
@@ -163,7 +163,7 @@ public class ImageRequest<V extends View> implements Runnable {
 
     private Bitmap downloadImage(File originalImageFile, int requiredImageWidth) {
         if(fromAssets)
-            return ImageUtils.getInstance().decodeSVGAsset(context, targetUrl, requiredImageWidth);
+            return ImageUtils.decodeSVGAsset(context, targetUrl, requiredImageWidth);
         else
             return ImageLoader.getInstance(context).download(targetUrl, requiredImageWidth, originalImageFile);
     }
@@ -175,7 +175,7 @@ public class ImageRequest<V extends View> implements Runnable {
 
             // Don't save it if it's from assets, even if we've edited it
             if(!fromAssets)
-                ImageUtils.getInstance().saveBitmap(context, imageFile, bitmap);
+                ImageUtils.saveBitmap(context, imageFile, bitmap);
         }
 
         onRequestSuccessful(bitmap);

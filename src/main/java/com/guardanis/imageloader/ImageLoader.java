@@ -49,9 +49,9 @@ public class ImageLoader {
         try{
             conn = openImageDownloadConnection(getCorrectDownloadUrl(url));
             is = conn.getInputStream();
-            ImageUtils.getInstance().saveStream(file, is);
+            ImageUtils.saveStream(file, is);
 
-            return ImageUtils.getInstance().decodeFile(file, requiredWidth);
+            return ImageUtils.decodeFile(file, requiredWidth);
         }
         catch(Throwable ex){ ex.printStackTrace(); }
         finally{ closeConnection(is); }
