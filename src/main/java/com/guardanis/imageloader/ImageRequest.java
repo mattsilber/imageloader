@@ -35,8 +35,6 @@ public class ImageRequest<V extends View> implements Runnable {
     protected boolean showStubOnExecute = true;
     protected boolean showStubOnError = false;
 
-    protected boolean fromAssets = false;
-
     protected StubHolder stubHolder;
 
     public ImageRequest(Context context) {
@@ -50,12 +48,6 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> setTargetUrl(String targetUrl) {
         this.targetUrl = targetUrl;
-        return this;
-    }
-
-    public ImageRequest<V> setTargetAssetUrl(String targetUrl) {
-        this.targetUrl = targetUrl;
-        this.fromAssets = true;
         return this;
     }
 
@@ -81,11 +73,6 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> setShowStubOnError(boolean showStubOnError) {
         this.showStubOnError = showStubOnError;
-        return this;
-    }
-
-    public ImageRequest<V> setFromAssets() {
-        this.fromAssets = true;
         return this;
     }
 
@@ -125,68 +112,48 @@ public class ImageRequest<V extends View> implements Runnable {
 
     @Override
     public void run() {
-        if(targetView == null)
-            prefetchOriginalImage();
-        else performFullImageRequest();
+        if(targetView != null)
+            performFullImageRequest();
     }
 
-    private void prefetchOriginalImage() {
-        File originalImageFile = getOriginalRequestFile();
-        if(!originalImageFile.exists())
-            downloadImage(originalImageFile, 10);
-    }
-
-    private void performFullImageRequest() {
+    protected void performFullImageRequest() {
         int requiredImageWidth = targetView.getLayoutParams().width;
 
         File imageFile = getEditedRequestFile();
         if(!imageFile.exists()){
             File originalImageFile = getOriginalRequestFile();
-            if(originalImageFile.exists()){
-                Bitmap original = ImageUtils.decodeFile(originalImageFile, requiredImageWidth);
-                if(original == null)
-                    downloadAndProcess(originalImageFile, imageFile, requiredImageWidth);
-                else processImage(imageFile, original);
-            }
-            else downloadAndProcess(originalImageFile, imageFile, requiredImageWidth);
+            if(!originalImageFile.exists())
+                onRequestFailed();
+            else processImage(imageFile, ImageUtils.decodeFile(originalImageFile, requiredImageWidth));
         }
         else
             onRequestSuccessful(ImageUtils.decodeFile(imageFile, requiredImageWidth));
     }
 
-    private void downloadAndProcess(File originalImageFile, File imageFile, int requiredImageWidth) {
-        Bitmap original = downloadImage(originalImageFile, requiredImageWidth);
-        if(original == null)
-            onRequestFailed();
-        else processImage(imageFile, original);
-    }
-
-    private Bitmap downloadImage(File originalImageFile, int requiredImageWidth) {
-        if(fromAssets)
-            return ImageUtils.decodeSVGAsset(context, targetUrl, requiredImageWidth);
-        else
-            return ImageLoader.getInstance(context).download(targetUrl, requiredImageWidth, originalImageFile);
-    }
-
-    private void processImage(File imageFile, Bitmap bitmap) {
+    protected void processImage(File imageFile, Bitmap bitmap) {
         if(0 < bitmapImageFilters.size()){
-            for(ImageFilter<Bitmap> filter : bitmapImageFilters)
-                    bitmap = filter.filter(bitmap);
-
-            // Don't save it if it's from assets, even if we've edited it
-            if(!fromAssets)
-                ImageUtils.saveBitmap(context, imageFile, bitmap);
+            applyBitmapFilters(bitmap);
+            saveBitmap(imageFile, bitmap);
         }
 
         onRequestSuccessful(bitmap);
     }
 
-    private void onRequestSuccessful(final Bitmap bitmap) {
+    protected void applyBitmapFilters(Bitmap bitmap){
+        for(ImageFilter<Bitmap> filter : bitmapImageFilters)
+            bitmap = filter.filter(bitmap);
+    }
+
+    protected void saveBitmap(File imageFile, Bitmap bitmap){
+        ImageUtils.saveBitmap(context, imageFile, bitmap);
+    }
+
+    protected void onRequestSuccessful(final Bitmap bitmap) {
         if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(targetView, targetUrl))
             return;
 
         try{
-            new Handler(Looper.getMainLooper()).post(new Runnable() {
+            targetView.post(new Runnable() {
                 public void run() {
                     if(targetView instanceof ImageView && !setImageAsBackground)
                         ((ImageView) targetView).setImageBitmap(bitmap);
@@ -198,7 +165,7 @@ public class ImageRequest<V extends View> implements Runnable {
         catch(Throwable e){ e.printStackTrace(); }
     }
 
-    private void onRequestFailed() {
+    protected void onRequestFailed() {
         if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(targetView, targetUrl))
             return;
 
@@ -207,31 +174,37 @@ public class ImageRequest<V extends View> implements Runnable {
         else setTargetViewDrawable(null);
     }
 
-    private String getFullRequestFileCacheName() {
+    protected String getFullRequestFileCacheName() {
         String adjustedName = targetUrl;
 
         for(ImageFilter<Bitmap> filter : bitmapImageFilters)
             adjustedName += "_" + filter.getAdjustmentInfo();
 
-        if(fromAssets || targetUrl.endsWith(".svg"))
-            adjustedName += ".svg";
-
         return adjustedName;
     }
 
-    private File getEditedRequestFile() {
+    protected File getEditedRequestFile() {
         return ImageLoader.getInstance(context).getFileCache().getFile(getFullRequestFileCacheName());
     }
 
-    private String getOriginalRequestFileCacheName() {
-        return targetUrl + ((fromAssets || targetUrl.endsWith(".svg")) ? ".svg" : "");
+    protected String getOriginalRequestFileCacheName() {
+        return targetUrl;
     }
 
-    private File getOriginalRequestFile() {
-        return ImageLoader.getInstance(context).getFileCache().getFile(getOriginalRequestFileCacheName());
+    public Context getContext(){
+        return context;
     }
 
-    private void setTargetViewDrawable(final Drawable drawable){
+    /**
+     * @return the File associated with the target URL. File won't be null, but may not exist.
+     */
+    public File getOriginalRequestFile() {
+        return ImageLoader.getInstance(context)
+                .getFileCache()
+                .getFile(getOriginalRequestFileCacheName());
+    }
+
+    protected void setTargetViewDrawable(final Drawable drawable){
         targetView.post(new Runnable(){
             public void run(){
                 if(targetView instanceof ImageView && !setImageAsBackground)
@@ -242,31 +215,39 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     @SuppressLint("NewApi")
-    private void setBackgroundDrawable(View v, Drawable drawable) {
+    protected void setBackgroundDrawable(View v, Drawable drawable) {
         if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
             v.setBackgroundDrawable(drawable);
         else v.setBackground(drawable);
     }
 
-    private StubHolder getStubs(){
+    protected StubHolder getStubs(){
         if(stubHolder == null)
             return ImageLoader.getInstance(context).getStubs();
         else return stubHolder;
     }
 
+    public String getTargetUrl(){
+        return targetUrl;
+    }
+
     public void execute() {
-        if(targetView != null){
-            ImageLoader.getInstance(context)
-                    .addViewAndTargetUrl(targetView, targetUrl);
+        if(targetView == null)
+            ImageLoader.getInstance(context).submit(this);
+        else {
+            targetView.post(new Runnable(){
+                public void run(){
+                    ImageLoader.getInstance(context)
+                            .addViewAndTargetUrl(targetView, targetUrl);
 
-            if(showStubOnExecute)
-                setTargetViewDrawable(getStubs().getLoadingDrawable(context));
-            else setTargetViewDrawable(null);
+                    if(showStubOnExecute)
+                        setTargetViewDrawable(getStubs().getLoadingDrawable(context));
+                    else setTargetViewDrawable(null);
+
+                    ImageLoader.getInstance(context).submit(ImageRequest.this);
+                }
+            });
         }
-
-        ImageLoader.getInstance(context)
-                .getExecutorService()
-                .submit(this);
     }
 
 }
