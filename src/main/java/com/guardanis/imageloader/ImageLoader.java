@@ -35,7 +35,6 @@ public class ImageLoader {
     protected ExecutorService executorService;
 
     private StubHolder stubHolder;
-    private BitmapDrawable stubImage;
 
     protected ImageLoader(Context context) {
         this.context = context.getApplicationContext();
