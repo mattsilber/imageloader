@@ -137,7 +137,7 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     private void performFullImageRequest() {
-        int requiredImageWidth = targetView == null ? 10 : targetView.getLayoutParams().width;
+        int requiredImageWidth = targetView.getLayoutParams().width;
 
         File imageFile = getEditedRequestFile();
         if(!imageFile.exists()){
