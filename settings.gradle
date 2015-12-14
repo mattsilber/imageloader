@@ -1,2 +1,0 @@
-include ':AndroidSVG'
-project(':AndroidSVG').projectDir = new File('../../android_libraries/AndroidSVG')

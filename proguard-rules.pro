@@ -15,3 +15,19 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+
+-printmapping mapping.txt
+-verbose
+-dontoptimize
+-dontshrink
+-dontskipnonpubliclibraryclassmembers
+-dontusemixedcaseclassnames
+
+-keep class android.support.v8.renderscript.** { *; }
+-keepclassmembers class android.support.v8.renderscript.** { *; }
+
+-keep class com.caverock.androidsvg.** { *; }
+-keepclassmembers class com.caverock.androidsvg.** { *; }
+
+-keep class com.guardanis.imageloader.** { *; }
+-keepclassmembers class com.guardanis.imageloader.** { *; }
