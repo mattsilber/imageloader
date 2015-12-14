@@ -132,16 +132,18 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected void processImage(File imageFile, Bitmap bitmap) {
         if(0 < bitmapImageFilters.size()){
-            applyBitmapFilters(bitmap);
+            bitmap = applyBitmapFilters(bitmap);
             saveBitmap(imageFile, bitmap);
         }
 
         onRequestSuccessful(bitmap);
     }
 
-    protected void applyBitmapFilters(Bitmap bitmap){
+    protected Bitmap applyBitmapFilters(Bitmap bitmap){
         for(ImageFilter<Bitmap> filter : bitmapImageFilters)
             bitmap = filter.filter(bitmap);
+
+        return bitmap;
     }
 
     protected void saveBitmap(File imageFile, Bitmap bitmap){
