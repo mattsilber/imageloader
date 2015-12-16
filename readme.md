@@ -10,7 +10,7 @@ Another lazy image loading library with AndroidSVG support built-in
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.0.2')
+        compile('com.guardanis:imageloader:1.0.3')
     }
 ```
 
@@ -19,7 +19,7 @@ If you want to use a custom version of *com.caverock.androidsvg*, ensure that yo
 
 # Usage
 
-This was originally written several years ago as an included lazy loader for downloading/caching images, but then evolved to allow the chaining of adjustments on the underlying Bitmap (what I call an ImageFilter). Let's say, for instance, I want to download my Facebook profile picture, throw a blur on top, overlay a dark-transparent color, and then throw it into an ImageView. Well, you could actually do all of that pretty easily:
+This was originally written several years ago as an included lazy loader for downloading/caching images, but then evolved to allow the chaining of adjustments on the underlying Bitmap (what I call an ImageFilter). Let's say, for instance, I want to download my Facebook profile picture, throw a blur on top, overlay a dark-transparent color, and then throw it into an ImageView, but fade in for a duration of 150ms. Well, you could actually do all of that pretty easily:
 
 ```
     new ImageRequest<ImageView>(context)
@@ -27,6 +27,7 @@ This was originally written several years ago as an included lazy loader for dow
         .setTargetView(myImageView)
         .addBlurFilter()
         .addColorOverlayFilter(activity.getResources().getColor(R.color.menu_header_user_image_parent_blurred_overlay))
+        .setFadeTransition(150)
         .execute();
 ```
 
@@ -96,7 +97,6 @@ By default, the ImageRequest will show the loading stub, but not the error stub,
 * Adjustments via ImageFilter are only saved when a target View is present
 
 ### Things I plan on adding when I get the chance
-* Animations between images
 * Custom SVG Image Filters (e.g. replacing colors)
 * Cache extra image adjustments by file size
 * Restart image downloads on failed images (if 

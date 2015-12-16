@@ -113,12 +113,20 @@ public class ImageRequest<V extends View> implements Runnable {
         return this;
     }
 
-    public ImageRequest<V> addFadeTransition(){
-        return addFadeTransition(DEFAULT_CROSS_FADE_DURATION);
+    public ImageRequest<V> setDefaultImageTransition(){
+        return setImageTransitionController(new DefaultTransitionController(this));
     }
 
-    public ImageRequest<V> addFadeTransition(int crossFadeDuration){
-        this.transitionController = new FadeTransitionController(this, crossFadeDuration);
+    public ImageRequest<V> setFadeTransition(){
+        return setFadeTransition(DEFAULT_CROSS_FADE_DURATION);
+    }
+
+    public ImageRequest<V> setFadeTransition(int fadeDuration){
+        return setImageTransitionController(new FadeTransitionController(this, fadeDuration));
+    }
+
+    public ImageRequest<V> setImageTransitionController(TransitionController controller){
+        this.transitionController = controller;
         return this;
     }
 
@@ -246,8 +254,6 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     public void execute() {
-        addFadeTransition();
-
         if(targetView == null)
             ImageLoader.getInstance(context).submit(this);
         else {

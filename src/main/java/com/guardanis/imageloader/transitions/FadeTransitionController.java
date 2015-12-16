@@ -10,18 +10,22 @@ import com.guardanis.imageloader.ImageRequest;
 
 public class FadeTransitionController extends TransitionController {
 
-    private int crossFadeDuration;
+    private int fadeDuration;
 
-    public FadeTransitionController(ImageRequest request, int crossFadeDuration) {
+    public FadeTransitionController(ImageRequest request, int fadeDuration) {
         super(request);
-        this.crossFadeDuration = crossFadeDuration;
+        this.fadeDuration = fadeDuration;
     }
 
     @Override
     protected void performTransition(final Drawable to) {
         request.getTargetView().post(new Runnable(){
             public void run(){
-                FadingTransitionDrawable transition = new FadingTransitionDrawable(request.getContext(), getCurrentTargetDrawable(), getTargetBitmap(to), crossFadeDuration);
+                FadingTransitionDrawable transition = new FadingTransitionDrawable(request.getContext(),
+                        getCurrentTargetDrawable().getConstantState().newDrawable().mutate(),
+                        getTargetBitmap(to),
+                        fadeDuration);
+
                 setTransitionDrawable(transition);
             }
         });
@@ -45,6 +49,7 @@ public class FadeTransitionController extends TransitionController {
             Canvas canvas = new Canvas(bitmap);
             drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
             drawable.draw(canvas);
+
             return bitmap;
         }
     }
