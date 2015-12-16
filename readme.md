@@ -99,4 +99,7 @@ By default, the ImageRequest will show the loading stub, but not the error stub,
 ### Things I plan on adding when I get the chance
 * Custom SVG Image Filters (e.g. replacing colors)
 * Cache extra image adjustments by file size
-* Restart image downloads on failed images (if 
+* Restart image downloads for certain failed images download errors
+
+### Known issue(s)
+* BitmapCircularCropFilter apparently doesn't want to work with the FadeTransitionController
