@@ -1,9 +1,6 @@
 package com.guardanis.imageloader;
 
 import android.content.Context;
-import android.content.res.Resources;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
@@ -159,6 +156,10 @@ public class ImageLoader implements ImageDownloadRequest.DownloadEventListener {
 
     public boolean isViewStillUsable(View target, String expectedTag) {
         return expectedTag.equals(views.get(target));
+    }
+
+    public boolean isViewStillUsable(ImageRequest request) {
+        return isViewStillUsable(request.getTargetView(), request.getTargetUrl());
     }
 
     public FileCache getFileCache() {

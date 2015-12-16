@@ -1,12 +1,10 @@
 package com.guardanis.imageloader;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Looper;
+import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -15,6 +13,9 @@ import com.guardanis.imageloader.filters.BitmapCircularCropFilter;
 import com.guardanis.imageloader.filters.BitmapColorOverlayFilter;
 import com.guardanis.imageloader.filters.BitmapRotationFilter;
 import com.guardanis.imageloader.filters.ImageFilter;
+import com.guardanis.imageloader.transitions.DefaultTransitionController;
+import com.guardanis.imageloader.transitions.FadeTransitionController;
+import com.guardanis.imageloader.transitions.TransitionController;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import java.util.List;
 public class ImageRequest<V extends View> implements Runnable {
 
     protected static final int DEFAULT_BLUR_RADIUS = 15;
+    protected static final int DEFAULT_CROSS_FADE_DURATION = 300;
 
     protected Context context;
     protected String targetUrl;
@@ -34,8 +36,9 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected boolean showStubOnExecute = true;
     protected boolean showStubOnError = false;
-
     protected StubHolder stubHolder;
+
+    protected TransitionController transitionController = new DefaultTransitionController(this);
 
     public ImageRequest(Context context) {
         this(context, "");
@@ -110,6 +113,15 @@ public class ImageRequest<V extends View> implements Runnable {
         return this;
     }
 
+    public ImageRequest<V> addFadeTransition(){
+        return addFadeTransition(DEFAULT_CROSS_FADE_DURATION);
+    }
+
+    public ImageRequest<V> addFadeTransition(int crossFadeDuration){
+        this.transitionController = new FadeTransitionController(this, crossFadeDuration);
+        return this;
+    }
+
     @Override
     public void run() {
         if(targetView != null)
@@ -154,26 +166,23 @@ public class ImageRequest<V extends View> implements Runnable {
         if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(targetView, targetUrl))
             return;
 
-        try{
-            targetView.post(new Runnable() {
-                public void run() {
-                    if(targetView instanceof ImageView && !setImageAsBackground)
-                        ((ImageView) targetView).setImageBitmap(bitmap);
-                    else
-                        setBackgroundDrawable(targetView, new BitmapDrawable(targetView.getContext().getResources(), bitmap));
-                }
-            });
-        }
-        catch(Throwable e){ e.printStackTrace(); }
+        BitmapDrawable targetDrawable = new BitmapDrawable(targetView.getContext().getResources(), bitmap);
+        transitionController.transitionTo(targetDrawable);
     }
 
     protected void onRequestFailed() {
         if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(targetView, targetUrl))
             return;
 
-        if(showStubOnError)
-            setTargetViewDrawable(getStubs().getErrorDrawable(context));
-        else setTargetViewDrawable(null);
+        handleShowStubOnError();
+    }
+
+    protected void handleShowStubOnError(){
+        final Drawable targetDrawable = showStubOnError
+                ? getStubs().getErrorDrawable(context)
+                : ContextCompat.getDrawable(context, R.drawable.ail__default_fade_placeholder);
+
+        transitionController.transitionTo(targetDrawable);
     }
 
     protected String getFullRequestFileCacheName() {
@@ -197,6 +206,18 @@ public class ImageRequest<V extends View> implements Runnable {
         return context;
     }
 
+    public boolean isSetImageAsBackgroundForced(){
+        return setImageAsBackground;
+    }
+
+    public boolean isRequestForBackgroundImage(){
+        return setImageAsBackground || !(targetView instanceof ImageView);
+    }
+
+    public V getTargetView(){
+        return targetView;
+    }
+
     /**
      * @return the File associated with the target URL. File won't be null, but may not exist.
      */
@@ -204,23 +225,6 @@ public class ImageRequest<V extends View> implements Runnable {
         return ImageLoader.getInstance(context)
                 .getFileCache()
                 .getFile(getOriginalRequestFileCacheName());
-    }
-
-    protected void setTargetViewDrawable(final Drawable drawable){
-        targetView.post(new Runnable(){
-            public void run(){
-                if(targetView instanceof ImageView && !setImageAsBackground)
-                    ((ImageView) targetView).setImageDrawable(drawable);
-                else setBackgroundDrawable(targetView, drawable);
-            }
-        });
-    }
-
-    @SuppressLint("NewApi")
-    protected void setBackgroundDrawable(View v, Drawable drawable) {
-        if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
-            v.setBackgroundDrawable(drawable);
-        else v.setBackground(drawable);
     }
 
     protected StubHolder getStubs(){
@@ -233,7 +237,17 @@ public class ImageRequest<V extends View> implements Runnable {
         return targetUrl;
     }
 
+    private void handleShowStubOnExecute(){
+        final Drawable targetDrawable = showStubOnExecute
+                ? getStubs().getLoadingDrawable(context)
+                : ContextCompat.getDrawable(context, R.drawable.ail__default_fade_placeholder);
+
+        transitionController.transitionTo(targetDrawable);
+    }
+
     public void execute() {
+        addFadeTransition();
+
         if(targetView == null)
             ImageLoader.getInstance(context).submit(this);
         else {
@@ -242,9 +256,7 @@ public class ImageRequest<V extends View> implements Runnable {
                     ImageLoader.getInstance(context)
                             .addViewAndTargetUrl(targetView, targetUrl);
 
-                    if(showStubOnExecute)
-                        setTargetViewDrawable(getStubs().getLoadingDrawable(context));
-                    else setTargetViewDrawable(null);
+                    handleShowStubOnExecute();
 
                     ImageLoader.getInstance(context).submit(ImageRequest.this);
                 }
