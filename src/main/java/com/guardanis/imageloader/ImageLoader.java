@@ -51,7 +51,7 @@ public class ImageLoader implements ImageDownloadRequest.DownloadEventListener {
     }
 
     public void submit(ImageRequest request){
-        if(request instanceof SVGAssetRequest || isImageDownloaded(request))
+        if(request instanceof LocalImageRequest || isImageDownloaded(request))
             executorService.submit(request);
         else {
             if(delayedRequests.get(request.getTargetUrl()) == null)
