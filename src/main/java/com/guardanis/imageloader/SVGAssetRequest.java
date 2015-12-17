@@ -13,6 +13,7 @@ public class SVGAssetRequest<V extends View>  extends ImageRequest<V> {
 
     public SVGAssetRequest(Context context, String targetUrl) {
         super(context, targetUrl);
+        setShowStubOnExecute(false);
     }
 
     @Override

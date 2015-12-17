@@ -60,7 +60,7 @@ ext {
     artifact = 'imageloader'
 
     libraryDescription = 'Another lazy image loading library with AndroidSVG support built-in'
-    libraryVersion = '1.0.3'
+    libraryVersion = '1.0.4'
 
     developerId = 'mattsilber'
     developerName = 'Matt Silber'

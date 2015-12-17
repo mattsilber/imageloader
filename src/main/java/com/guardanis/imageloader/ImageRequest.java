@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -36,6 +37,7 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected boolean showStubOnExecute = true;
     protected boolean showStubOnError = false;
+    protected boolean disableExecutionStubIfDownloaded = true;
     protected StubHolder stubHolder;
 
     protected TransitionController transitionController = new DefaultTransitionController(this);
@@ -76,6 +78,11 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> setShowStubOnError(boolean showStubOnError) {
         this.showStubOnError = showStubOnError;
+        return this;
+    }
+
+    public ImageRequest<V> setDisableExecutionStubIfDownloaded(boolean disableExecutionStubIfDownloaded) {
+        this.disableExecutionStubIfDownloaded = disableExecutionStubIfDownloaded;
         return this;
     }
 
@@ -246,6 +253,9 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     private void handleShowStubOnExecute(){
+        if(disableExecutionStubIfDownloaded && ImageLoader.getInstance(context).isImageDownloaded(this))
+            return;
+
         final Drawable targetDrawable = showStubOnExecute
                 ? getStubs().getLoadingDrawable(context)
                 : ContextCompat.getDrawable(context, R.drawable.ail__default_fade_placeholder);

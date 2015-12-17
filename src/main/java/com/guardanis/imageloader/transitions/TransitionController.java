@@ -1,14 +1,16 @@
 package com.guardanis.imageloader.transitions;
 
 import android.annotation.SuppressLint;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.LayerDrawable;
-import android.graphics.drawable.TransitionDrawable;
 import android.support.v4.content.ContextCompat;
 import android.widget.ImageView;
 
 import com.guardanis.imageloader.ImageRequest;
 import com.guardanis.imageloader.R;
+import com.guardanis.imageloader.transitions.drawables.TransitionDrawable;
 
 public abstract class TransitionController {
 
@@ -29,11 +31,41 @@ public abstract class TransitionController {
                 ? request.getTargetView().getBackground()
                 : ((ImageView)request.getTargetView()).getDrawable();
 
-        if(current == null)
-            return ContextCompat.getDrawable(request.getContext(), R.drawable.ail__default_fade_placeholder);
-        else return current instanceof TransitionDrawable
-                ? ((TransitionDrawable)current).getDrawable(1)
+        return current == null
+                ? ContextCompat.getDrawable(request.getContext(), R.drawable.ail__default_fade_placeholder)
                 : current;
+    }
+
+    protected Drawable getCurrentTargetDrawableMutable(){
+        return getCurrentTargetDrawable()
+                .getConstantState()
+                .newDrawable()
+                .mutate();
+    }
+
+    protected Bitmap getTargetBitmap(Drawable drawable){
+        if(drawable instanceof BitmapDrawable)
+            return ((BitmapDrawable)drawable).getBitmap();
+        else {
+            Bitmap bitmap = null;
+            if(drawable.getIntrinsicWidth() < 1 || drawable.getIntrinsicHeight() < 1)
+                bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            else Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
+
+            return bitmap;
+        }
+    }
+
+    protected void setTransitionDrawable(final TransitionDrawable drawable){
+        if (request.isRequestForBackgroundImage())
+            setBackgroundDrawable(drawable);
+        else ((ImageView) request.getTargetView()).setImageDrawable(drawable);
+
+        drawable.start();
     }
 
     protected void setTargetViewDrawable(final Drawable drawable){
