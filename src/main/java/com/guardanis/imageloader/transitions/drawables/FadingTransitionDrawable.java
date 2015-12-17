@@ -52,7 +52,7 @@ public class FadingTransitionDrawable extends TransitionDrawable {
 
     @Override
     public int getOpacity(){
-        return PixelFormat.OPAQUE;
+        return PixelFormat.RGBA_8888;
     }
 
 }
