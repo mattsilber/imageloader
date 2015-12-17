@@ -20,7 +20,7 @@ import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ImageLoader implements ImageDownloadRequest.DownloadEventListener {
+public class ImageLoader implements ImageDownloader.DownloadEventListener {
 
     private static ImageLoader instance = null;
 
@@ -37,7 +37,7 @@ public class ImageLoader implements ImageDownloadRequest.DownloadEventListener {
     protected FileCache fileCache;
     protected Map<View, String> views = Collections.synchronizedMap(new WeakHashMap<View, String>());
 
-    protected Map<String, ImageDownloadRequest> downloadRequests = new HashMap<String, ImageDownloadRequest>();
+    protected Map<String, ImageDownloader> downloadRequests = new HashMap<String, ImageDownloader>();
     protected Map<String, List<ImageRequest>> delayedRequests = new HashMap<String, List<ImageRequest>>();
     protected ExecutorService executorService;
 
@@ -61,7 +61,7 @@ public class ImageLoader implements ImageDownloadRequest.DownloadEventListener {
                     .add(request);
 
             if(downloadRequests.get(request.getTargetUrl()) == null){
-                ImageDownloadRequest downloadRequest = new ImageDownloadRequest(handler, request, this);
+                ImageDownloader downloadRequest = new ImageDownloader(handler, request, this);
                 downloadRequests.put(request.getTargetUrl(), downloadRequest);
 
                 executorService.submit(downloadRequest);
@@ -70,7 +70,7 @@ public class ImageLoader implements ImageDownloadRequest.DownloadEventListener {
     }
 
     @Override
-    public synchronized void onDownloadCompleted(ImageDownloadRequest downloadRequest, String targetUrl) {
+    public synchronized void onDownloadCompleted(ImageDownloader downloadRequest, String targetUrl) {
         context.getSharedPreferences(PREFS, 0)
                 .edit()
                 .putBoolean(targetUrl, true)
@@ -87,7 +87,7 @@ public class ImageLoader implements ImageDownloadRequest.DownloadEventListener {
     }
 
     @Override
-    public synchronized void onDownloadFailed(ImageDownloadRequest downloadRequest, String targetUrl) {
+    public synchronized void onDownloadFailed(ImageDownloader downloadRequest, String targetUrl) {
         if(delayedRequests.get(targetUrl) != null){
             // For now, just execute pending requests, as they won't do anything but set appropriate stub
             for(ImageRequest request : delayedRequests.get(targetUrl))

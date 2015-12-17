@@ -5,20 +5,20 @@ import android.util.Log;
 
 import java.io.File;
 
-public class ImageDownloadRequest implements Runnable {
+public class ImageDownloader implements Runnable {
 
     public interface DownloadEventListener {
-        public void onDownloadCompleted(ImageDownloadRequest request, String targetUrl);
-        public void onDownloadFailed(ImageDownloadRequest request, String targetUrl);
+        public void onDownloadCompleted(ImageDownloader request, String targetUrl);
+        public void onDownloadFailed(ImageDownloader request, String targetUrl);
     }
 
-    private static final String TAG = "AIL__download_request";
+    private static final String TAG = "AIL";
 
     protected ImageRequest imageRequest;
     protected DownloadEventListener downloadEventListener;
     protected Handler handler;
 
-    public ImageDownloadRequest(Handler handler, ImageRequest imageRequest, DownloadEventListener downloadEventListener){
+    public ImageDownloader(Handler handler, ImageRequest imageRequest, DownloadEventListener downloadEventListener){
         this.handler = handler;
         this.imageRequest = imageRequest;
         this.downloadEventListener = downloadEventListener;
@@ -34,7 +34,7 @@ public class ImageDownloadRequest implements Runnable {
                 handler.post(new Runnable(){
                     public void run() {
                         Log.d(TAG, "Download success: " + imageRequest.getTargetUrl());
-                        downloadEventListener.onDownloadCompleted(ImageDownloadRequest.this, imageRequest.getTargetUrl());
+                        downloadEventListener.onDownloadCompleted(ImageDownloader.this, imageRequest.getTargetUrl());
                     }
                 });
                 return;
@@ -45,7 +45,7 @@ public class ImageDownloadRequest implements Runnable {
         handler.post(new Runnable(){
             public void run() {
                 Log.d(TAG, "Download failed: " + imageRequest.getTargetUrl());
-                downloadEventListener.onDownloadFailed(ImageDownloadRequest.this, imageRequest.getTargetUrl());
+                downloadEventListener.onDownloadFailed(ImageDownloader.this, imageRequest.getTargetUrl());
             }
         });
     }
