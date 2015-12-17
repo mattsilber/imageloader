@@ -10,7 +10,7 @@ Another lazy image loading library with AndroidSVG support built-in
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.0.3')
+        compile('com.guardanis:imageloader:1.0.5')
     }
 ```
 
@@ -101,5 +101,3 @@ By default, the ImageRequest will show the loading stub, but not the error stub,
 * Cache extra image adjustments by file size
 * Restart image downloads for certain failed images download errors
 
-### Known issue(s)
-* BitmapCircularCropFilter apparently doesn't want to work with the FadeTransitionController
