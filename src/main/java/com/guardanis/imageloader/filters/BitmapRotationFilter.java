@@ -3,6 +3,7 @@ package com.guardanis.imageloader.filters;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.util.Log;
 
 public class BitmapRotationFilter extends ImageFilter<Bitmap> {
 
@@ -15,9 +16,21 @@ public class BitmapRotationFilter extends ImageFilter<Bitmap> {
 
     @Override
     public Bitmap filter(Bitmap unedited) {
-        Matrix mtx = new Matrix();
-        mtx.postRotate(rotationDegrees);
+        if(rotationDegrees == 0)
+            return unedited;
 
-        return Bitmap.createBitmap(unedited, 0, 0, unedited.getWidth(), unedited.getHeight(), mtx, true);
+        Matrix mtx = new Matrix();
+        mtx.setRotate(rotationDegrees, unedited.getWidth() / 2, unedited.getHeight() / 2);
+
+        try{
+            return Bitmap.createBitmap(unedited, 0, 0, unedited.getWidth(), unedited.getHeight(), mtx, true);
+        }
+        catch(OutOfMemoryError e){ // Need to work on this one with large, non-downsampled, images... Fuck.
+            e.printStackTrace();
+
+            System.gc();
+        }
+
+        return unedited;
     }
 }

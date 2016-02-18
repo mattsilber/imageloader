@@ -10,7 +10,7 @@ Another lazy image loading library with AndroidSVG support built-in
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.0.5')
+        compile('com.guardanis:imageloader:1.0.6')
     }
 ```
 
@@ -91,13 +91,16 @@ or you can change it globally by overriding the default drawable files:
 
 By default, the ImageRequest will show the loading stub, but not the error stub, which needs to be manually enabled. I don't remember for the life of me why I did that, but I may consider changing that in the future...
 
-### Notes
+##### Notes
 * Prefetching images can be achieved by simply not setting a target View (e.g. don't call ImageRequest.setTargetView(myImageView). 
 * ImageRequest's for the same URL are safe to call at the same time. The ImageLoader will delay subsequent requests for the same URL until the download has finished.
 * Adjustments via ImageFilter are only saved when a target View is present
 
-### Things I plan on adding when I get the chance
+##### Things I plan on adding when I get the chance
 * Custom SVG Image Filters (e.g. replacing colors)
 * Cache extra image adjustments by file size
 * Restart image downloads for certain failed images download errors
+
+##### Known Issues
+* If trying to load a super large image (like a picture from the Camera) into an ImageView with layout_width as either fill_parent or wrap_cotent, it may run into an OutOfMemoryError with filters due to the barely-downsampled size of the image. To avoid this, either set the LayoutParams's width manually, or use the helper method: **ImageRequest.setRequiredImageWidth(int)**
 

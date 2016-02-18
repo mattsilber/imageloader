@@ -9,5 +9,4 @@ public interface StubHolder {
 
     public Drawable getErrorDrawable(Context context);
 
-
 }

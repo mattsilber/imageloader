@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -42,6 +41,8 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected TransitionController transitionController = new DefaultTransitionController(this);
 
+    protected int requiredImageWidth = -1;
+
     public ImageRequest(Context context) {
         this(context, "");
     }
@@ -61,6 +62,19 @@ public class ImageRequest<V extends View> implements Runnable {
         return this;
     }
 
+    /**
+     * Force request to load image at specific size
+     * @return
+     */
+    public ImageRequest<V> setRequiredImageWidth(int requiredImageWidth) {
+        this.requiredImageWidth = requiredImageWidth;
+        return this;
+    }
+
+    /**
+     * Force request to load image via setBackground
+     * @return
+     */
     public ImageRequest<V> setImageAsBackground() {
         this.setImageAsBackground = true;
         return this;
@@ -144,7 +158,7 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     protected void performFullImageRequest() {
-        int requiredImageWidth = targetView.getLayoutParams().width;
+        int requiredImageWidth = getRequiredImageWidth();
 
         File imageFile = getEditedRequestFile();
         if(!imageFile.exists()){
@@ -155,6 +169,12 @@ public class ImageRequest<V extends View> implements Runnable {
         }
         else
             onRequestSuccessful(ImageUtils.decodeFile(imageFile, requiredImageWidth));
+    }
+
+    protected int getRequiredImageWidth(){
+        return requiredImageWidth < 1
+                ? targetView.getLayoutParams().width
+                : requiredImageWidth;
     }
 
     protected void processImage(File imageFile, Bitmap bitmap) {
@@ -174,7 +194,7 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     protected void saveBitmap(File imageFile, Bitmap bitmap){
-        ImageUtils.saveBitmap(context, imageFile, bitmap);
+        ImageUtils.saveBitmapAsync(context, imageFile, bitmap);
     }
 
     protected void onRequestSuccessful(final Bitmap bitmap) {

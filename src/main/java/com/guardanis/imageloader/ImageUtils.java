@@ -1,6 +1,7 @@
 package com.guardanis.imageloader;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -9,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.caverock.androidsvg.SVG;
@@ -22,7 +24,9 @@ import java.util.Locale;
 
 public class ImageUtils {
 
-    private static final int MAX_REDUCTION_FACTOR = 8;
+    private static final int MAX_REDUCTION_FACTOR = 16;
+
+    private static final String TAG = "AIL";
 
     protected ImageUtils() { }
 
@@ -32,23 +36,38 @@ public class ImageUtils {
         os.close();
     }
 
+    @Deprecated
     public static void saveBitmap(Context context, String filePath, Bitmap bitmap) {
-        saveBitmap(context, new File(filePath), bitmap);
+        saveBitmapAsync(context, new File(filePath), bitmap);
     }
 
+    @Deprecated
     public static boolean saveBitmap(Context context, File imageFile, Bitmap bitmap) {
+        saveBitmapAsync(context, imageFile, bitmap);
+
+        return true;
+    }
+
+    public static void saveBitmapAsync(final Context context, final File imageFile, final Bitmap bitmap) {
         try{
-            if(!checkInternalStorageAvailability(context))
-                return false;
-            else if(!checkBuildImageFileDirectory(context, imageFile)) return false;
+            if(bitmap == null || !(checkInternalStorageAvailability(context) || checkBuildImageFileDirectory(context, imageFile)))
+                return;
 
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(imageFile));
+            new Thread(new Runnable(){
+                public void run(){
+                    try{
+                        File temp = new FileCache(context)
+                                .getFile(System.currentTimeMillis() + "_temp_" + imageFile.getAbsolutePath());
 
-            return true;
+                        bitmap.compress(Bitmap.CompressFormat.PNG, 100, new FileOutputStream(temp));
+
+                        temp.renameTo(imageFile);
+                    }
+                    catch(Exception e){ e.printStackTrace(); }
+                }
+            }).start();
         }
         catch(Exception e){ e.printStackTrace(); }
-
-        return false;
     }
 
     private static boolean checkInternalStorageAvailability(Context context) {
@@ -133,6 +152,7 @@ public class ImageUtils {
 
             return newBitmap;
         }
+
         return null;
     }
 
@@ -151,12 +171,46 @@ public class ImageUtils {
 
             Bitmap bitmap = BitmapFactory.decodeStream(stream, null, o);
             stream.close();
+
             return bitmap;
         }
         catch(OutOfMemoryError e){
             e.printStackTrace();
+
             System.gc();
-            return reductionFactor < MAX_REDUCTION_FACTOR ? decodeBitmapFile(file, requiredWidth, reductionFactor < 1 ? 2 : reductionFactor * 2) : null;
+
+            return reductionFactor < MAX_REDUCTION_FACTOR
+                    ? decodeBitmapFile(file, requiredWidth, reductionFactor < 1 ? 2 : reductionFactor * 2)
+                    : null;
+        }
+        catch(Exception e){ e.printStackTrace(); }
+
+        return null;
+    }
+
+    public static Bitmap decodeBitmapResource(Resources resources, int resId, int requiredWidth){
+        return decodeBitmapResource(resources, resId, requiredWidth, 1);
+    }
+
+    public static Bitmap decodeBitmapResource(Resources resources, int resId, int requiredWidth, int reductionFactor){
+        try{
+            final BitmapFactory.Options options = new BitmapFactory.Options();
+            options.inJustDecodeBounds = true;
+            BitmapFactory.decodeResource(resources, resId, options);
+
+            options.inSampleSize = calculateInSampleSize(options, requiredWidth, reductionFactor);
+
+            options.inJustDecodeBounds = false;
+            return BitmapFactory.decodeResource(resources, resId, options);
+        }
+        catch(OutOfMemoryError e){
+            e.printStackTrace();
+
+            System.gc();
+
+            return reductionFactor < MAX_REDUCTION_FACTOR
+                    ? decodeBitmapResource(resources, resId, requiredWidth, reductionFactor < 1 ? 2 : reductionFactor * 2)
+                    : null;
         }
         catch(Exception e){ e.printStackTrace(); }
 
@@ -166,16 +220,9 @@ public class ImageUtils {
     public static int calculateInSampleSize(BitmapFactory.Options options, int requiredWidth, int reductionFactor) {
         int inSampleSize = 1;
 
-        if(requiredWidth < 1)
-            inSampleSize = options.outWidth / requiredWidth;
-        else{
-            if(options.outWidth > requiredWidth){
-                final int halfWidth = options.outWidth / 2;
-
-                while((halfWidth / inSampleSize) > requiredWidth)
-                    inSampleSize *= 2;
-            }
-        }
+        if(1 < requiredWidth && requiredWidth < options.outWidth)
+            while((options.outWidth / inSampleSize) > requiredWidth)
+                inSampleSize *= 2;
 
         return inSampleSize * reductionFactor;
     }
@@ -187,12 +234,18 @@ public class ImageUtils {
     public static StateListDrawable buildStateListDrawable(Drawable dNormal, Drawable dPressed) {
         StateListDrawable states = new StateListDrawable();
         states.addState(new int[]{android.R.attr.state_pressed}, dPressed);
-        states.addState(new int[]{}, dNormal);
+        states.addState(new int[]{ }, dNormal);
+
         return states;
     }
 
     public static BitmapDrawable buildBitmapDrawable(Context context, SVG svg) {
         return new BitmapDrawable(context.getResources(), decodeBitmap(svg, (int) svg.getDocumentWidth()));
+    }
+
+    public static void log(Context context, String message){
+        if(context.getResources().getBoolean(R.bool.ail__debug_log_enabled))
+            Log.d(TAG, message);
     }
 
 }

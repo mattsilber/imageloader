@@ -25,7 +25,7 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     private static ImageLoader instance = null;
 
     public static synchronized ImageLoader getInstance(Context context) {
-        if(instance == null || instance.context != context.getApplicationContext())
+        if(instance == null)
             instance = new ImageLoader(context);
 
         return instance;
@@ -131,6 +131,7 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
         URL adjustedImageUrl = new URL(conn.getHeaderField("Location"));
         conn.disconnect();
         HttpURLConnection.setFollowRedirects(true);
+
         return adjustedImageUrl;
     }
 
@@ -139,6 +140,7 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
         conn.setConnectTimeout(30000);
         conn.setReadTimeout(30000);
         conn.setInstanceFollowRedirects(true);
+
         return conn;
     }
 
@@ -177,7 +179,8 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     }
 
     public boolean isImageDownloaded(ImageRequest request){
-        return request.getOriginalRequestFile().exists() && context.getSharedPreferences(PREFS, 0).getBoolean(request.getTargetUrl(), false);
+        return request.getOriginalRequestFile().exists()
+                && context.getSharedPreferences(PREFS, 0).getBoolean(request.getTargetUrl(), false);
     }
 
     private final StubHolder defaultStubHolder = new StubHolder(){

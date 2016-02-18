@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <bool name="ail__debug_log_enabled">false</bool>
+
+</resources>

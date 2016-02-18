@@ -12,8 +12,6 @@ public class ImageDownloader implements Runnable {
         public void onDownloadFailed(ImageDownloader request, String targetUrl);
     }
 
-    private static final String TAG = "AIL";
-
     protected ImageRequest imageRequest;
     protected DownloadEventListener downloadEventListener;
     protected Handler handler;
@@ -33,10 +31,12 @@ public class ImageDownloader implements Runnable {
             if(downloadedFile != null){
                 handler.post(new Runnable(){
                     public void run() {
-                        Log.d(TAG, "Download success: " + imageRequest.getTargetUrl());
+                        ImageUtils.log(imageRequest.getContext(), "Download success: " + imageRequest.getTargetUrl());
+
                         downloadEventListener.onDownloadCompleted(ImageDownloader.this, imageRequest.getTargetUrl());
                     }
                 });
+
                 return;
             }
         }
@@ -44,7 +44,8 @@ public class ImageDownloader implements Runnable {
 
         handler.post(new Runnable(){
             public void run() {
-                Log.d(TAG, "Download failed: " + imageRequest.getTargetUrl());
+                ImageUtils.log(imageRequest.getContext(), "Download failed: " + imageRequest.getTargetUrl());
+
                 downloadEventListener.onDownloadFailed(ImageDownloader.this, imageRequest.getTargetUrl());
             }
         });

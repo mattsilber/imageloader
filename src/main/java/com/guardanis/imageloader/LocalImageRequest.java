@@ -19,7 +19,7 @@ public abstract class LocalImageRequest<V extends View>  extends ImageRequest<V>
 
     @Override
     protected void performFullImageRequest() {
-        int requiredImageWidth = targetView.getLayoutParams().width;
+        int requiredImageWidth = getRequiredImageWidth();
 
         File imageFile = getEditedRequestFile();
         if(imageFile.exists())
