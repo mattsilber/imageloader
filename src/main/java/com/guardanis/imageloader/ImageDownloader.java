@@ -26,7 +26,7 @@ public class ImageDownloader implements Runnable {
     public void run() {
         try{
             File downloadedFile = ImageLoader.getInstance(imageRequest.getContext())
-                    .download(imageRequest.getTargetUrl(), imageRequest.getOriginalRequestFile());
+                    .download(imageRequest);
 
             if(downloadedFile != null){
                 handler.post(new Runnable(){

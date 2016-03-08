@@ -50,6 +50,9 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
         this.executorService = Executors.newFixedThreadPool(context.getResources().getInteger(R.integer.ail__thread_pool_size));
     }
 
+    /**
+     * Submit an ImageRequest to the ImageLoader's downloading service for managed downloads
+     */
     public void submit(ImageRequest request){
         if(request instanceof LocalImageRequest || isImageDownloaded(request))
             executorService.submit(request);
@@ -99,12 +102,39 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
         downloadRequests.remove(targetUrl);
     }
 
+    /**
+     * Perform the download for the supplied ImageRequest and return the File containing the result
+     */
+    public File download(ImageRequest request){
+        try{
+            HttpURLConnection conn = openImageDownloadConnection(getCorrectDownloadUrl(request.getTargetUrl()));
+            setHttpRequestProperties(request, conn);
+
+            return download(conn, request.getOriginalRequestFile());
+        }
+        catch(Throwable ex){ ex.printStackTrace(); }
+
+        return null;
+    }
+
+    @Deprecated
     public File download(String url, File file) {
-        HttpURLConnection conn = null;
+        try{
+            return download(openImageDownloadConnection(getCorrectDownloadUrl(url)), file);
+        }
+        catch(Throwable ex){ ex.printStackTrace(); }
+
+        return null;
+    }
+
+    /**
+     * Perform the download of the supplied HttpURLConnection into the File parameter
+     * supplied and return the File containing the result (same as param).
+     */
+    public File download(HttpURLConnection conn, File file){
         InputStream is = null;
 
         try{
-            conn = openImageDownloadConnection(getCorrectDownloadUrl(url));
             is = conn.getInputStream();
             ImageUtils.saveStream(file, is);
 
@@ -128,8 +158,10 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     protected URL getAdjustedFacebookImageUrl(URL imageUrl) throws Exception {
         HttpURLConnection.setFollowRedirects(false);
         HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
+
         URL adjustedImageUrl = new URL(conn.getHeaderField("Location"));
         conn.disconnect();
+
         HttpURLConnection.setFollowRedirects(true);
 
         return adjustedImageUrl;
@@ -142,6 +174,13 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
         conn.setInstanceFollowRedirects(true);
 
         return conn;
+    }
+
+    protected void setHttpRequestProperties(ImageRequest request, HttpURLConnection conn){
+        Map<String, String> requestParams = request.getHttpRequestParams();
+
+        for(String key : requestParams.keySet())
+            conn.setRequestProperty(key, requestParams.get(key));
     }
 
     public static void closeConnection(InputStream is) {

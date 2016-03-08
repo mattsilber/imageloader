@@ -19,7 +19,9 @@ import com.guardanis.imageloader.transitions.TransitionController;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ImageRequest<V extends View> implements Runnable {
 
@@ -43,6 +45,8 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected int requiredImageWidth = -1;
 
+    protected Map<String, String> httpRequestParams = new HashMap<String, String>();
+
     public ImageRequest(Context context) {
         this(context, "");
     }
@@ -63,8 +67,15 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     /**
+     * Add HttpUrlConnection Request Parameter key/value pair. Adding a key/value pair will override previous values for said key.
+     */
+    public ImageRequest<V> addHttpRequestParam(String key, String value) {
+        httpRequestParams.put(key, value);
+        return this;
+    }
+
+    /**
      * Force request to load image at specific size
-     * @return
      */
     public ImageRequest<V> setRequiredImageWidth(int requiredImageWidth) {
         this.requiredImageWidth = requiredImageWidth;
@@ -73,7 +84,6 @@ public class ImageRequest<V extends View> implements Runnable {
 
     /**
      * Force request to load image via setBackground
-     * @return
      */
     public ImageRequest<V> setImageAsBackground() {
         this.setImageAsBackground = true;
@@ -251,6 +261,10 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public V getTargetView(){
         return targetView;
+    }
+
+    public Map<String, String> getHttpRequestParams(){
+        return httpRequestParams;
     }
 
     /**
