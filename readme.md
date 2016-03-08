@@ -10,7 +10,7 @@ Another lazy image loading library with AndroidSVG support built-in
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.0.6')
+        compile('com.guardanis:imageloader:1.0.7')
     }
 ```
 
