@@ -10,7 +10,7 @@ Another lazy image loading library with AndroidSVG support built-in
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.0.7')
+        compile('com.guardanis:imageloader:1.0.8')
     }
 ```
 
@@ -35,7 +35,7 @@ Disclaimer: That picture ain't me.
 
 ### Custom Filters
 
-As mentioned above, this library comes with a few stock filters (such as blurring, overlaying colors, rotating, etc.). But, it also let's you add your own filters by working with the abstract ImageFilter class. Using the above example, we can easily add a custom filter via *addImageFilter(ImageFilter<Bitmap> filter)*:
+As mentioned above, this library comes with a few stock filters (such as blurring, overlaying colors, rotating, color replacement, etc.). But, it also let's you add your own filters by working with the abstract ImageFilter class. Using the above example, we can easily add a custom filter via *addImageFilter(ImageFilter<Bitmap> filter)*:
 
 ```
     new ImageRequest<ImageView>(context, "https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")

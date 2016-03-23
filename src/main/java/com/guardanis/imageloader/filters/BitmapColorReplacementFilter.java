@@ -2,9 +2,6 @@ package com.guardanis.imageloader.filters;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.Paint;
-import android.util.Log;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -49,16 +46,14 @@ public class BitmapColorReplacementFilter extends ImageFilter<Bitmap> {
 
     private int[] getReplacementPixels(Bitmap copy){
         int[] pixels = new int [copy.getHeight() * copy.getWidth()];
-        Log.d("imageloader", "searching replacements");
+
         copy.getPixels(pixels, 0, copy.getWidth(),
                 0, 0, copy.getWidth(), copy.getHeight());
 
         for(int i = 0; i < pixels.length; i++)
             for(Integer key : replacements.keySet())
-                if(pixels[i] == key){
+                if(pixels[i] == key)
                     pixels[i] = replacements.get(key);
-                    Log.d("imageloader", "Found " + key + " replacing with " + replacements.get(key));
-                }
 
         return pixels;
     }

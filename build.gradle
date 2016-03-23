@@ -59,8 +59,8 @@ ext {
     libraryName = 'imageloader'
     artifact = 'imageloader'
 
-    libraryDescription = 'Another lazy image loading library with AndroidSVG support built-in'
-    libraryVersion = '1.0.7'
+    libraryDescription = 'Another lazy image-loading library with AndroidSVG and Bitmap filtering support built-in'
+    libraryVersion = '1.0.8'
 
     developerId = 'mattsilber'
     developerName = 'Matt Silber'
