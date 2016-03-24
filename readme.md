@@ -10,7 +10,7 @@ Another lazy image-loading library with AndroidSVG and Bitmap filtering support 
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.0.8')
+        compile('com.guardanis:imageloader:1.0.9')
     }
 ```
 
