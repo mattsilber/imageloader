@@ -47,6 +47,8 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected Map<String, String> httpRequestParams = new HashMap<String, String>();
 
+    protected boolean useOldResourceStubs = false;
+
     public ImageRequest(Context context) {
         this(context, "");
     }
@@ -107,6 +109,14 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> setDisableExecutionStubIfDownloaded(boolean disableExecutionStubIfDownloaded) {
         this.disableExecutionStubIfDownloaded = disableExecutionStubIfDownloaded;
+        return this;
+    }
+
+    /**
+     * Use the old resource-based drawable stubs. Manually settings the stubs renders this useless.
+     */
+    public ImageRequest<V> setUseOldResourceStubs(boolean useOldResourceStubs) {
+        this.useOldResourceStubs = useOldResourceStubs;
         return this;
     }
 
@@ -278,7 +288,9 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected StubHolder getStubs(){
         if(stubHolder == null)
-            return ImageLoader.getInstance(context).getStubs();
+            return useOldResourceStubs
+                    ? ImageLoader.getInstance(context).getResourceBasedStubs()
+                    : ImageLoader.getInstance(context).getStubs();
         else return stubHolder;
     }
 

@@ -1,4 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <color name="ail__default_stub_loading_tint">#FAFAFA</color>
+
+    <color name="ail__default_stub_error_tint">#FAFAFA</color>
+
 </resources>

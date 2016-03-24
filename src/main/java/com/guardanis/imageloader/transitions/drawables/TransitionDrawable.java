@@ -5,6 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
+
+import com.guardanis.imageloader.stubs.AnimatedStubDrawable;
 
 public abstract class TransitionDrawable extends BitmapDrawable {
 
@@ -14,14 +17,20 @@ public abstract class TransitionDrawable extends BitmapDrawable {
 
     protected int duration;
     protected Drawable stubDrawable;
+    protected Drawable postTransitionDrawable;
 
     protected TransitionStage transitionStage = TransitionStage.AWAITING_START;
     protected long animationStart;
 
     public TransitionDrawable(Context context, Drawable from, Bitmap to, int duration) {
+        this(context, from, to, null, duration);
+    }
+
+    public TransitionDrawable(Context context, Drawable from, Bitmap to, Drawable postTransitionDrawable, int duration) {
         super(context.getResources(), to);
 
         this.stubDrawable = from;
+        this.postTransitionDrawable = postTransitionDrawable;
         this.duration = duration;
     }
 
@@ -40,7 +49,8 @@ public abstract class TransitionDrawable extends BitmapDrawable {
             if (1f <= normalized) {
                 transitionStage = TransitionStage.FINISHED;
                 stubDrawable = null;
-                super.draw(canvas);
+
+                handlePostTransitionDrawing(canvas);
             }
             else {
                 if (stubDrawable != null)
@@ -53,25 +63,39 @@ public abstract class TransitionDrawable extends BitmapDrawable {
             if(stubDrawable != null)
                 drawStub(canvas, 0);
         }
-        else super.draw(canvas);
+        else handlePostTransitionDrawing(canvas);
     }
 
-    private void drawStub(Canvas canvas, float normalizedPercentCompleted){
+    protected void drawStub(Canvas canvas, float normalizedPercentCompleted){
         canvas.save();
 
-        int halfXDistance = (Math.max(getBounds().right, stubDrawable.getBounds().right) - Math.min(getBounds().right, stubDrawable.getBounds().right)) / 2;
-        if(getBounds().right < stubDrawable.getBounds().right)
-            halfXDistance *= -1;
+        int[] translation = calculateStubTranslation(stubDrawable);
 
-        int halfYDistance = (Math.max(getBounds().bottom, stubDrawable.getBounds().bottom) - Math.min(getBounds().bottom, stubDrawable.getBounds().bottom)) / 2;
-        if(getBounds().bottom < stubDrawable.getBounds().bottom)
-            halfYDistance *= -1;
-
-        canvas.translate(halfXDistance, halfYDistance);
+        canvas.translate(translation[0], translation[1]);
 
         drawBackgroundTransition(canvas, normalizedPercentCompleted);
 
         canvas.restore();
+    }
+
+    protected void handlePostTransitionDrawing(Canvas canvas){
+        if(postTransitionDrawable != null && postTransitionDrawable instanceof AnimatedStubDrawable){
+            postTransitionDrawable.draw(canvas);
+            invalidateSelf();
+        }
+        else super.draw(canvas);
+    }
+
+    protected int[] calculateStubTranslation(Drawable drawable){
+        int halfXDistance = (Math.max(getBounds().right, drawable.getBounds().right) - Math.min(getBounds().right, drawable.getBounds().right)) / 2;
+        if(getBounds().right < drawable.getBounds().right)
+            halfXDistance *= -1;
+
+        int halfYDistance = (Math.max(getBounds().bottom, drawable.getBounds().bottom) - Math.min(getBounds().bottom, drawable.getBounds().bottom)) / 2;
+        if(getBounds().bottom < drawable.getBounds().bottom)
+            halfYDistance *= -1;
+
+        return new int[]{ halfXDistance, halfYDistance };
     }
 
     protected abstract void drawBackgroundTransition(Canvas canvas, float normalizedPercentCompleted);
@@ -79,6 +103,16 @@ public abstract class TransitionDrawable extends BitmapDrawable {
     protected abstract void drawForegroundTransition(Canvas canvas, float normalizedPercentCompleted);
 
     protected void drawSuper(Canvas canvas){
-        super.draw(canvas);
+        if(postTransitionDrawable != null && postTransitionDrawable instanceof AnimatedStubDrawable)
+            postTransitionDrawable.draw(canvas);
+        else super.draw(canvas);
+    }
+
+    @Override
+    public void setAlpha(int alpha){
+        super.setAlpha(alpha);
+
+        if(postTransitionDrawable != null && postTransitionDrawable instanceof AnimatedStubDrawable)
+            postTransitionDrawable.setAlpha(alpha);
     }
 }

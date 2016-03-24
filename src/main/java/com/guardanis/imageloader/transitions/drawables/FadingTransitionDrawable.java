@@ -18,9 +18,13 @@ public class FadingTransitionDrawable extends TransitionDrawable {
     protected int alpha = 0xFF;
     protected int stubStartingAlpha = 0xFF;
 
-    @SuppressLint("NewApi")
     public FadingTransitionDrawable(Context context, Drawable from, Bitmap to, int fadeDuration) {
-        super(context, from, to, fadeDuration);
+        this(context, from, to, null, fadeDuration);
+    }
+
+    @SuppressLint("NewApi")
+    public FadingTransitionDrawable(Context context, Drawable from, Bitmap to, Drawable postTransitionDrawable, int fadeDuration) {
+        super(context, from, to, postTransitionDrawable, fadeDuration);
 
         if(Build.VERSION_CODES.KITKAT <= Build.VERSION.SDK_INT && from != null)
             stubStartingAlpha = from.getAlpha();
@@ -42,6 +46,8 @@ public class FadingTransitionDrawable extends TransitionDrawable {
 
     @Override
     public void setAlpha(int alpha) {
+        super.setAlpha(alpha);
+
         this.alpha = alpha;
     }
 

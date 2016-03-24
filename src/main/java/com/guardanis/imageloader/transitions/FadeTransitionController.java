@@ -20,7 +20,8 @@ public class FadeTransitionController extends TransitionController {
             public void run() {
                 final FadingTransitionDrawable transition = new FadingTransitionDrawable(request.getContext(),
                         getCurrentTargetDrawableMutable(),
-                        getTargetBitmap(to),
+                        getTargetBitmap(to, request.getTargetView()),
+                        to,
                         fadeDuration);
 
                 setTransitionDrawable(transition);

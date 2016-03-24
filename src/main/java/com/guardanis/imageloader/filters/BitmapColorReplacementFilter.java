@@ -33,12 +33,11 @@ public class BitmapColorReplacementFilter extends ImageFilter<Bitmap> {
     @Override
     public Bitmap filter(Bitmap unedited) {
         if(unedited != null){
-            Bitmap copy = unedited.copy(unedited.getConfig(), true);
+            if(!unedited.isMutable())
+                unedited = mutate(unedited);
 
-            copy.setPixels(getReplacementPixels(copy), 0, copy.getWidth(),
-                    0, 0, copy.getWidth(), copy.getHeight());
-
-            return copy;
+            unedited.setPixels(getReplacementPixels(unedited), 0, unedited.getWidth(),
+                    0, 0, unedited.getWidth(), unedited.getHeight());
         }
 
         return unedited;

@@ -5,7 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.guardanis.imageloader.ImageRequest;
@@ -44,12 +46,23 @@ public abstract class TransitionController {
     }
 
     protected Bitmap getTargetBitmap(Drawable drawable){
+        return getTargetBitmap(drawable, null);
+    }
+
+    protected Bitmap getTargetBitmap(Drawable drawable, @Nullable View targetView){
         if(drawable instanceof BitmapDrawable)
-            return ((BitmapDrawable)drawable).getBitmap();
+            return ((BitmapDrawable) drawable).getBitmap();
         else {
             Bitmap bitmap = null;
-            if(drawable.getIntrinsicWidth() < 1 || drawable.getIntrinsicHeight() < 1)
-                bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+            if(drawable.getIntrinsicWidth() < 1 || drawable.getIntrinsicHeight() < 1){
+                if(!(targetView == null || targetView.getLayoutParams() == null || targetView.getLayoutParams().width < 1))
+                    bitmap = Bitmap.createBitmap(targetView.getLayoutParams().width, targetView.getLayoutParams().height, Bitmap.Config.ARGB_8888);
+                else if(drawable.getBounds().right - drawable.getBounds().left < 1)
+                    bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
+                else bitmap = Bitmap.createBitmap(drawable.getBounds().right - drawable.getBounds().left,
+                        drawable.getBounds().bottom - drawable.getBounds().top,
+                        Bitmap.Config.ARGB_8888);
+            }
             else Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
 
             Canvas canvas = new Canvas(bitmap);

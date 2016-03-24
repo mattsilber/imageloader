@@ -7,6 +7,8 @@ import android.os.Looper;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 
+import com.guardanis.imageloader.stubs.DefaultLoadingDrawable;
+
 import java.io.File;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -213,6 +215,12 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
         else return stubHolder;
     }
 
+    public StubHolder getResourceBasedStubs() {
+        if(stubHolder == null)
+            return defaultResourceStubHolder;
+        else return stubHolder;
+    }
+
     public void registerStubs(StubHolder stubHolder) {
         this.stubHolder = stubHolder;
     }
@@ -223,6 +231,19 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     }
 
     private final StubHolder defaultStubHolder = new StubHolder(){
+
+        @Override
+        public Drawable getLoadingDrawable(Context context) {
+            return new DefaultLoadingDrawable(context.getResources());
+        }
+
+        @Override
+        public Drawable getErrorDrawable(Context context) {
+            return ContextCompat.getDrawable(context, R.drawable.ail__image_loader_stub_error);
+        }
+    };
+
+    private final StubHolder defaultResourceStubHolder = new StubHolder(){
 
         @Override
         public Drawable getLoadingDrawable(Context context) {
