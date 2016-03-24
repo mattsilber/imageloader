@@ -1,6 +1,6 @@
 # imageloader
 
-Another lazy image loading library with AndroidSVG support built-in
+Another lazy image-loading library with AndroidSVG and Bitmap filtering support built-in
 
 # Installation
 
@@ -35,7 +35,7 @@ Disclaimer: That picture ain't me.
 
 ### Custom Filters
 
-As mentioned above, this library comes with a few stock filters (such as blurring, overlaying colors, rotating, color replacement, etc.). But, it also let's you add your own filters by working with the abstract ImageFilter class. Using the above example, we can easily add a custom filter via *addImageFilter(ImageFilter<Bitmap> filter)*:
+As mentioned above, this library comes with a few stock Bitmap filters (such as blurring, overlaying colors, rotating, color replacement, etc.). But, it also let's you add your own filters by working with the abstract ImageFilter class. Using the above example, we can easily add a custom filter via *addImageFilter(ImageFilter<Bitmap> filter)*:
 
 ```
     new ImageRequest<ImageView>(context, "https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
@@ -49,6 +49,13 @@ As mentioned above, this library comes with a few stock filters (such as blurrin
         .execute();
 ```
 
+##### Currently supported ImageFilter<Bitmap>
+* BitmapBlurFilter : addBlurFilter(), addBlurFilter(int) : Blur the Bitmap
+* BitmapCircularCropFilter : addCircularCropFilter() : Crop the Bitmap to the bounrdaries of a circle
+* BitmapColorOverlayFilter : addColorOverlayFilter(int) : Overlay the Bitmap with a color
+* BitmapColorReplacementFilter : addColorReplacementFilter(int, int), addColorReplacementFilter(Map<Int, Int>) : Replace any occurance of a color with it's mapped value
+* BitmapRotationFilter : addRotationFilter(int) : Rotate the Bitmap (degrees) (may change Bitmap size)
+
 ### AndroidSVG Assets
 
 For more information about AndroidSVG, click [here](https://github.com/BigBadaboom/androidsvg).
@@ -61,6 +68,19 @@ If you want to load SVG Images and perform adjustments on the underlying Bitmap,
         .setTargetView(myImageView)
         .execute();
 ```
+
+SVGs are also fully supported over the internet via an ImageRequest, as long as the SVG has an intrinsice width and height. See below for more details on that.
+
+##### SVG Requirements
+
+In order to load an SVG efficiently (as in, downsample it appropriately), we need to know it's intrinsic width and height in pixels. That means, if a width and/or a height attribute is missing from the SVG's declaration, it won't be able to render it. e.g.
+
+    x="0px" y="0px" **width="150px" height="150px"** viewBox="0 0 150 150"
+
+As long as the width/height are that of the viewBox, everything should be good to go, and all SVGs should scale up/down correctly (all of which the ImageRequest can handle by itself).
+
+In future versions, I hope to use the *viewBox* attribute when the width/heights are not explicitly applied, but I haven't had time to really test that theory yet.
+
 
 ### Stubs
 
@@ -84,10 +104,14 @@ The ImageRequest system allows you to specify both a loading and an error stub t
         .execute();
 ```
 
-or you can change it globally by overriding the default drawable files:
+As of version 1.0.8, the ImageRequest will use the DefaultLoadingDrawable for loading stubs, as opposed to the static resources image. If you'd like to configure the default tint for the loading drawable, override the color resource *R.color.ail__default_stub_loading_tint*. 
+
+If you want to revert back to the previous behavior of resources-only, you can override *R.bool.ail__use_old_resource_stubs* or call *ImageRequest.setUseOldResourceStubs(true)* and it will use the old default stub container (unless you manually override the stubs). If you choose to do this, just override the drawables:
 
     ail__image_loader_stub
     ail__image_loader_stub_error
+
+If you want to create your own animation drawables in code, you can simply supply an AnimatedStubDrawable (simple Drawable extention) with your StubHolder.
 
 By default, the ImageRequest will show the loading stub, but not the error stub, which needs to be manually enabled. I don't remember for the life of me why I did that, but I may consider changing that in the future...
 

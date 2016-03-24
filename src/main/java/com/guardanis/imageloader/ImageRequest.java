@@ -11,6 +11,7 @@ import android.widget.ImageView;
 import com.guardanis.imageloader.filters.BitmapBlurFilter;
 import com.guardanis.imageloader.filters.BitmapCircularCropFilter;
 import com.guardanis.imageloader.filters.BitmapColorOverlayFilter;
+import com.guardanis.imageloader.filters.BitmapColorReplacementFilter;
 import com.guardanis.imageloader.filters.BitmapRotationFilter;
 import com.guardanis.imageloader.filters.ImageFilter;
 import com.guardanis.imageloader.transitions.DefaultTransitionController;
@@ -56,6 +57,7 @@ public class ImageRequest<V extends View> implements Runnable {
     public ImageRequest(Context context, String targetUrl) {
         this.context = context;
         this.targetUrl = targetUrl;
+        this.useOldResourceStubs = context.getResources().getBoolean(R.bool.ail__use_old_resource_stubs);
     }
 
     public ImageRequest<V> setTargetUrl(String targetUrl) {
@@ -141,6 +143,16 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> addCircularCropFilter() {
         bitmapImageFilters.add(new BitmapCircularCropFilter(context));
+        return this;
+    }
+
+    public ImageRequest<V> addColorReplacementFilter(int replace, int with) {
+        bitmapImageFilters.add(new BitmapColorReplacementFilter(context, replace, with));
+        return this;
+    }
+
+    public ImageRequest<V> addColorReplacementFilter(Map<Integer, Integer> replacements) {
+        bitmapImageFilters.add(new BitmapColorReplacementFilter(context, replacements));
         return this;
     }
 

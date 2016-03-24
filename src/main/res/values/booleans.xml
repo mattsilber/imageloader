@@ -3,4 +3,6 @@
 
     <bool name="ail__debug_log_enabled">false</bool>
 
+    <bool name="ail__use_old_resource_stubs">false</bool>
+
 </resources>
