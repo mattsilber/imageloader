@@ -71,7 +71,7 @@ public class DefaultLoadingDrawable extends AnimatedStubDrawable {
     }
 
     protected void setupRect(Canvas canvas){
-        int desiredSize = Math.min(canvas.getClipBounds().width() / 7, canvas.getClipBounds().height() / 5) / 2;
+        int desiredSize = Math.min(canvas.getClipBounds().width() / 8, canvas.getClipBounds().height() / 5) / 2;
 
         int[] center = new int[]{ canvas.getClipBounds().width() / 2,
                 canvas.getClipBounds().height() / 2 };
