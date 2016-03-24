@@ -55,7 +55,7 @@ public abstract class TransitionController {
         else {
             Bitmap bitmap = null;
             if(drawable.getIntrinsicWidth() < 1 || drawable.getIntrinsicHeight() < 1){
-                if(!(targetView == null || targetView.getLayoutParams() == null || targetView.getLayoutParams().width < 1))
+                if(!(targetView == null || targetView.getLayoutParams() == null || targetView.getLayoutParams().width < 1 || targetView.getLayoutParams().height < 1))
                     bitmap = Bitmap.createBitmap(targetView.getLayoutParams().width, targetView.getLayoutParams().height, Bitmap.Config.ARGB_8888);
                 else if(drawable.getBounds().right - drawable.getBounds().left < 1)
                     bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
