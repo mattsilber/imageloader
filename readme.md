@@ -104,7 +104,7 @@ The ImageRequest system allows you to specify both a loading and an error stub t
         .execute();
 ```
 
-As of version 1.0.8, the ImageRequest will use the DefaultLoadingDrawable for loading stubs, as opposed to the static resources image. If you'd like to configure the default tint for the loading drawable, override the color resource *R.color.ail__default_stub_loading_tint*. 
+As of version 1.0.8, the ImageRequest will use the DefaultLoadingDrawable for loading stubs, as opposed to the static resources image. If you'd like to configure the default tint for the loading drawable, override the color resource *R.color.ail__default_stub_loading_tint*. The error stub is still the same *R.drawable.ail__image_loader_stub_error*. 
 
 If you want to revert back to the previous behavior of resources-only, you can override *R.bool.ail__use_old_resource_stubs* or call *ImageRequest.setUseOldResourceStubs(true)* and it will use the old default stub container (unless you manually override the stubs). If you choose to do this, just override the drawables:
 

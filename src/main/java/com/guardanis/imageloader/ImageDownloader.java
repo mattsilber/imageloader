@@ -1,7 +1,6 @@
 package com.guardanis.imageloader;
 
 import android.os.Handler;
-import android.util.Log;
 
 import java.io.File;
 

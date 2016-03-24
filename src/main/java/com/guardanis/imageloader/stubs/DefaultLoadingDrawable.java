@@ -1,16 +1,12 @@
 package com.guardanis.imageloader.stubs;
 
-import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Canvas;
 import android.graphics.ColorFilter;
-import android.graphics.LinearGradient;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
-import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 
 import com.guardanis.imageloader.R;
 

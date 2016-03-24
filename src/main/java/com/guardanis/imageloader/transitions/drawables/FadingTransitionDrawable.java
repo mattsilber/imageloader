@@ -8,7 +8,6 @@ import android.graphics.ColorFilter;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.util.Log;
 
 public class FadingTransitionDrawable extends TransitionDrawable {
 

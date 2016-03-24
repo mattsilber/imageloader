@@ -57,6 +57,8 @@ public class ImageRequest<V extends View> implements Runnable {
     public ImageRequest(Context context, String targetUrl) {
         this.context = context;
         this.targetUrl = targetUrl;
+        this.showStubOnExecute = context.getResources().getBoolean(R.bool.ail__show_stub_on_execute);
+        this.showStubOnError = context.getResources().getBoolean(R.bool.ail__show_stub_on_error);
         this.useOldResourceStubs = context.getResources().getBoolean(R.bool.ail__use_old_resource_stubs);
     }
 

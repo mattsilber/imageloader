@@ -26,7 +26,6 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import com.caverock.androidsvg.SVG;
-
 import com.guardanis.imageloader.ImageFileRequest;
 import com.guardanis.imageloader.ImageRequest;
 import com.guardanis.imageloader.ImageUtils;

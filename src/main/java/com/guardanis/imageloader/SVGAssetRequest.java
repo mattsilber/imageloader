@@ -4,8 +4,6 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.view.View;
 
-import java.io.File;
-
 public class SVGAssetRequest<V extends View>  extends LocalImageRequest<V> {
 
     public SVGAssetRequest(Context context) {

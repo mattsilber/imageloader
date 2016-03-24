@@ -5,9 +5,9 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 
 import com.guardanis.imageloader.stubs.AnimatedStubDrawable;
+import com.guardanis.imageloader.stubs.StubDrawable;
 
 public abstract class TransitionDrawable extends BitmapDrawable {
 
@@ -79,9 +79,11 @@ public abstract class TransitionDrawable extends BitmapDrawable {
     }
 
     protected void handlePostTransitionDrawing(Canvas canvas){
-        if(postTransitionDrawable != null && postTransitionDrawable instanceof AnimatedStubDrawable){
+        if(isTargetStubDrawable()){
             postTransitionDrawable.draw(canvas);
-            invalidateSelf();
+
+            if(postTransitionDrawable instanceof AnimatedStubDrawable)
+                invalidateSelf();
         }
         else super.draw(canvas);
     }
@@ -103,7 +105,7 @@ public abstract class TransitionDrawable extends BitmapDrawable {
     protected abstract void drawForegroundTransition(Canvas canvas, float normalizedPercentCompleted);
 
     protected void drawSuper(Canvas canvas){
-        if(postTransitionDrawable != null && postTransitionDrawable instanceof AnimatedStubDrawable)
+        if(isTargetStubDrawable())
             postTransitionDrawable.draw(canvas);
         else super.draw(canvas);
     }
@@ -112,7 +114,13 @@ public abstract class TransitionDrawable extends BitmapDrawable {
     public void setAlpha(int alpha){
         super.setAlpha(alpha);
 
-        if(postTransitionDrawable != null && postTransitionDrawable instanceof AnimatedStubDrawable)
+        if(isTargetStubDrawable())
             postTransitionDrawable.setAlpha(alpha);
+    }
+
+    protected boolean isTargetStubDrawable(){
+        return postTransitionDrawable != null
+                && (postTransitionDrawable instanceof AnimatedStubDrawable
+                    || postTransitionDrawable instanceof StubDrawable);
     }
 }

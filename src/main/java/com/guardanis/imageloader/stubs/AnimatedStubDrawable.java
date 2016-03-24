@@ -1,10 +1,8 @@
 package com.guardanis.imageloader.stubs;
 
-import android.graphics.drawable.Drawable;
+public abstract class AnimatedStubDrawable extends StubDrawable {
 
-public abstract class AnimatedStubDrawable extends Drawable {
-
-    // Base class for determining if a transition controller should continue invalidating
-    // after the transition has finished
+    // Base class for determining if a TransitionDrawable should call
+    // continue invalidating after transition has completed
 
 }

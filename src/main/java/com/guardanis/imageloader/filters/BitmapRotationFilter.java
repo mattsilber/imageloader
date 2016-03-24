@@ -3,7 +3,6 @@ package com.guardanis.imageloader.filters;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
-import android.util.Log;
 
 public class BitmapRotationFilter extends ImageFilter<Bitmap> {
 
