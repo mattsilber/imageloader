@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.widget.ImageView;
@@ -25,6 +26,14 @@ import java.util.List;
 import java.util.Map;
 
 public class ImageRequest<V extends View> implements Runnable {
+
+    public interface ImageSuccessCallback {
+        public void onImageReady(ImageRequest request, Bitmap result);
+    }
+
+    public interface ImageErrorCallback {
+        public void onImageLoadingFailure(ImageRequest request, @Nullable Throwable e);
+    }
 
     protected static final int DEFAULT_BLUR_RADIUS = 15;
     protected static final int DEFAULT_CROSS_FADE_DURATION = 300;
@@ -48,6 +57,9 @@ public class ImageRequest<V extends View> implements Runnable {
     protected TransitionController transitionController = new DefaultTransitionController(this);
 
     protected Map<String, String> httpRequestParams = new HashMap<String, String>();
+
+    protected ImageSuccessCallback successCallback;
+    protected ImageErrorCallback errorCallback;
 
     public ImageRequest(Context context) {
         this(context, "");
@@ -130,6 +142,24 @@ public class ImageRequest<V extends View> implements Runnable {
      */
     public ImageRequest<V> setMaxCacheDuration(long maxCacheDurationMs) {
         this.maxCacheDurationMs = maxCacheDurationMs;
+        return this;
+    }
+
+    /**
+     * Set a callback to be triggered on the main thread once the resulting image has been set
+     * into the target View. This will not be triggered if the View is null.
+     */
+    public ImageRequest<V> setSuccessCallback(ImageSuccessCallback successCallback) {
+        this.successCallback = successCallback;
+        return this;
+    }
+
+    /**
+     * Set a callback to be triggered in the event of a loading error. This will not
+     * be triggered if the target View is null.
+     */
+    public ImageRequest<V> setErrorCallback(ImageErrorCallback errorCallback) {
+        this.errorCallback = errorCallback;
         return this;
     }
 
@@ -246,6 +276,13 @@ public class ImageRequest<V extends View> implements Runnable {
 
         BitmapDrawable targetDrawable = new BitmapDrawable(targetView.getContext().getResources(), bitmap);
         transitionController.transitionTo(targetDrawable);
+
+        targetView.post(new Runnable(){
+            public void run(){
+                if(successCallback != null)
+                    successCallback.onImageReady(ImageRequest.this, bitmap);
+            }
+        });
     }
 
     protected void onRequestFailed() {
@@ -253,6 +290,13 @@ public class ImageRequest<V extends View> implements Runnable {
             return;
 
         handleShowStubOnError();
+
+        targetView.post(new Runnable(){
+            public void run(){
+                if(errorCallback != null)
+                    errorCallback.onImageLoadingFailure(ImageRequest.this, new RuntimeException("Image could not be loaded"));
+            }
+        });
     }
 
     protected void handleShowStubOnError(){
