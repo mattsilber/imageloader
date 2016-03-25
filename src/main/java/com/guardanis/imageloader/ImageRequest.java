@@ -140,7 +140,7 @@ public class ImageRequest<V extends View> implements Runnable {
      * Files requested beyond this limit will be deleted and re-downloaded.
      * Anything < 0 will never re-download (default behavior).
      */
-    public ImageRequest<V> setMaxCacheDuration(long maxCacheDurationMs) {
+    public ImageRequest<V> setMaxCacheDurationMs(long maxCacheDurationMs) {
         this.maxCacheDurationMs = maxCacheDurationMs;
         return this;
     }

@@ -10,7 +10,7 @@ Another lazy image-loading library with AndroidSVG and Bitmap filtering support 
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.0.9')
+        compile('com.guardanis:imageloader:1.0.10')
     }
 ```
 
@@ -119,6 +119,7 @@ By default, the ImageRequest will show the loading stub, but not the error stub,
 * Prefetching images can be achieved by simply not setting a target View (e.g. don't call ImageRequest.setTargetView(myImageView). 
 * ImageRequest's for the same URL are safe to call at the same time. The ImageLoader will delay subsequent requests for the same URL until the download has finished.
 * Adjustments via ImageFilter are only saved when a target View is present
+* Setting a maximum cachable duration for a target URL can be achieved by calling ImageRequest.setMaxCacheDurationMs(long); e.g. setMaxCacheDurationMs(TimeUnit.DAYS.toMillis(5));
 
 ##### Things I plan on adding when I get the chance
 * Custom SVG Image Filters (e.g. replacing colors)
