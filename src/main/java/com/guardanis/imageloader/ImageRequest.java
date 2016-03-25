@@ -34,21 +34,20 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected V targetView;
     protected boolean setImageAsBackground = false;
+    protected int requiredImageWidth = -1;
+    protected long maxCacheDurationMs = -1;
 
     protected List<ImageFilter<Bitmap>> bitmapImageFilters = new ArrayList<ImageFilter<Bitmap>>();
 
     protected boolean showStubOnExecute = true;
     protected boolean showStubOnError = false;
     protected boolean disableExecutionStubIfDownloaded = true;
+    protected boolean useOldResourceStubs = false;
     protected StubHolder stubHolder;
 
     protected TransitionController transitionController = new DefaultTransitionController(this);
 
-    protected int requiredImageWidth = -1;
-
     protected Map<String, String> httpRequestParams = new HashMap<String, String>();
-
-    protected boolean useOldResourceStubs = false;
 
     public ImageRequest(Context context) {
         this(context, "");
@@ -121,6 +120,16 @@ public class ImageRequest<V extends View> implements Runnable {
      */
     public ImageRequest<V> setUseOldResourceStubs(boolean useOldResourceStubs) {
         this.useOldResourceStubs = useOldResourceStubs;
+        return this;
+    }
+
+    /**
+     * Set the maximum allowed time a cached file from this request is valid for in milliseconds.
+     * Files requested beyond this limit will be deleted and re-downloaded.
+     * Anything < 0 will never re-download (default behavior).
+     */
+    public ImageRequest<V> setMaxCacheDuration(long maxCacheDurationMs) {
+        this.maxCacheDurationMs = maxCacheDurationMs;
         return this;
     }
 
@@ -291,6 +300,10 @@ public class ImageRequest<V extends View> implements Runnable {
         return httpRequestParams;
     }
 
+    public long getMaxCacheDurationMs(){
+        return maxCacheDurationMs;
+    }
+
     /**
      * @return the File associated with the target URL. File won't be null, but may not exist.
      */
@@ -313,7 +326,9 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     private void handleShowStubOnExecute(){
-        if(disableExecutionStubIfDownloaded && ImageLoader.getInstance(context).isImageDownloaded(this))
+        if(disableExecutionStubIfDownloaded
+                && ImageLoader.getInstance(context).isImageDownloaded(this)
+                && ImageLoader.getInstance(context).getFileCache().isCachedFileValid(targetUrl, maxCacheDurationMs))
             return;
 
         final Drawable targetDrawable = showStubOnExecute

@@ -56,21 +56,29 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
      * Submit an ImageRequest to the ImageLoader's downloading service for managed downloads
      */
     public void submit(ImageRequest request){
-        if(request instanceof LocalImageRequest || isImageDownloaded(request))
+        if(request instanceof LocalImageRequest
+                || (isImageDownloaded(request) && fileCache.isCachedFileValid(request.getTargetUrl(), request.getMaxCacheDurationMs())))
             executorService.submit(request);
-        else {
-            if(delayedRequests.get(request.getTargetUrl()) == null)
-                delayedRequests.put(request.getTargetUrl(), new ArrayList<ImageRequest>());
+        else submitDownloadRequest(request);
+    }
 
-            delayedRequests.get(request.getTargetUrl())
-                    .add(request);
+    protected void submitDownloadRequest(ImageRequest request){
+        if(delayedRequests.get(request.getTargetUrl()) == null)
+            delayedRequests.put(request.getTargetUrl(), new ArrayList<ImageRequest>());
 
-            if(downloadRequests.get(request.getTargetUrl()) == null){
-                ImageDownloader downloadRequest = new ImageDownloader(handler, request, this);
-                downloadRequests.put(request.getTargetUrl(), downloadRequest);
+        delayedRequests.get(request.getTargetUrl())
+                .add(request);
 
-                executorService.submit(downloadRequest);
-            }
+        context.getSharedPreferences(PREFS, 0)
+                .edit()
+                .putBoolean(request.getTargetUrl(), false)
+                .commit(); // Prevent deletions from messing up
+
+        if(downloadRequests.get(request.getTargetUrl()) == null){
+            ImageDownloader downloadRequest = new ImageDownloader(handler, request, this);
+            downloadRequests.put(request.getTargetUrl(), downloadRequest);
+
+            executorService.submit(downloadRequest);
         }
     }
 

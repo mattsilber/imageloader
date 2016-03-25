@@ -34,4 +34,18 @@ public class FileCache {
         new FileCache(context)
                 .clear();
     }
+
+    public boolean isCachedFileValid(String url, long maxCacheDurationMs){
+        return maxCacheDurationMs < 0
+                || System.currentTimeMillis() - getLastModifiedAt(url) < maxCacheDurationMs;
+    }
+
+    public long getLastModifiedAt(String url){
+        return getFile(url)
+                .lastModified();
+    }
+
+    public void delete(String url){
+        getFile(url).delete();
+    }
 }
