@@ -95,11 +95,15 @@ public class TransitionController {
     }
 
     protected void setTransitionDrawable(final TransitionDrawable drawable){
-        if (request.isRequestForBackgroundImage())
-            setBackgroundDrawable(drawable);
-        else ((ImageView) request.getTargetView()).setImageDrawable(drawable);
+        request.getTargetView().post(new Runnable(){
+            public void run(){
+                if (request.isRequestForBackgroundImage())
+                    setBackgroundDrawable(drawable);
+                else ((ImageView) request.getTargetView()).setImageDrawable(drawable);
 
-        drawable.start();
+                drawable.start();
+            }
+        });
     }
 
     protected void setTargetViewDrawable(final Drawable drawable){

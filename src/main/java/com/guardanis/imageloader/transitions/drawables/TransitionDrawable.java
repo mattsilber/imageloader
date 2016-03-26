@@ -157,4 +157,8 @@ public class TransitionDrawable extends BitmapDrawable {
         }
     }
 
+    public Drawable getTargetDrawable(){
+        return targetDrawable;
+    }
+
 }
