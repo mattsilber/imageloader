@@ -8,30 +8,38 @@ import android.graphics.drawable.Drawable;
 
 import com.guardanis.imageloader.stubs.AnimatedStubDrawable;
 import com.guardanis.imageloader.stubs.StubDrawable;
+import com.guardanis.imageloader.transitions.modules.TransitionModule;
 
-public abstract class TransitionDrawable extends BitmapDrawable {
+import java.util.HashMap;
+import java.util.Map;
+
+public class TransitionDrawable extends BitmapDrawable {
 
     protected enum TransitionStage {
         AWAITING_START, TRANSITIONING, FINISHED;
     }
 
-    protected int duration;
-    protected Drawable stubDrawable;
-    protected Drawable postTransitionDrawable;
+    protected Drawable oldDrawable;
+    protected Drawable targetDrawable;
+
+
+    protected Map<Class, TransitionModule> modules = new HashMap<Class, TransitionModule>();
 
     protected TransitionStage transitionStage = TransitionStage.AWAITING_START;
     protected long animationStart;
 
-    public TransitionDrawable(Context context, Drawable from, Bitmap to, int duration) {
-        this(context, from, to, null, duration);
+    public TransitionDrawable(Context context, Drawable from, Drawable to, Bitmap canvas) {
+        super(context.getResources(), canvas);
+
+        this.oldDrawable = from;
+        this.targetDrawable = to;
     }
 
-    public TransitionDrawable(Context context, Drawable from, Bitmap to, Drawable postTransitionDrawable, int duration) {
-        super(context.getResources(), to);
+    public TransitionDrawable registerModule(TransitionModule module){
+        if(module != null)
+            modules.put(module.getClass(), module);
 
-        this.stubDrawable = from;
-        this.postTransitionDrawable = postTransitionDrawable;
-        this.duration = duration;
+        return this;
     }
 
     public void start(){
@@ -44,48 +52,77 @@ public abstract class TransitionDrawable extends BitmapDrawable {
     @Override
     public void draw(Canvas canvas) {
         if(transitionStage == TransitionStage.TRANSITIONING){
-            float normalized = (System.currentTimeMillis() - animationStart) / (float)duration;
+            boolean unfinishedExists = false;
 
-            if (1f <= normalized) {
+            for(TransitionModule module : modules.values())
+                if(System.currentTimeMillis() < animationStart + module.getDuration())
+                    unfinishedExists = true;
+
+            if(unfinishedExists){
+                updateModulesAndDraw(canvas);
+
+                invalidateSelf();
+            }
+            else{
                 transitionStage = TransitionStage.FINISHED;
-                stubDrawable = null;
+                oldDrawable = null;
 
                 handlePostTransitionDrawing(canvas);
             }
-            else {
-                if (stubDrawable != null)
-                    drawStub(canvas, normalized);
-
-                drawForegroundTransition(canvas, normalized);
-            }
         }
         else if(transitionStage == TransitionStage.AWAITING_START){
-            if(stubDrawable != null)
-                drawStub(canvas, 0);
+            if(oldDrawable != null)
+                drawOldDrawable(canvas);
         }
         else handlePostTransitionDrawing(canvas);
     }
 
-    protected void drawStub(Canvas canvas, float normalizedPercentCompleted){
+    protected void updateModulesAndDraw(Canvas canvas){
         canvas.save();
 
-        int[] translation = calculateStubTranslation(stubDrawable);
+        for(TransitionModule module : modules.values())
+            module.updateOld(canvas, oldDrawable, animationStart);
+
+        if (oldDrawable != null)
+            drawOldDrawable(canvas);
+
+        canvas.restore();
+        safelyRevertOldDrawables();
+
+        canvas.save();
+
+        for(TransitionModule module : modules.values())
+            module.updateTarget(this, canvas, targetDrawable, animationStart);
+
+        drawTarget(canvas);
+
+        canvas.restore();
+        safelyRevertTargetDrawables();
+    }
+
+    protected void drawOldDrawable(Canvas canvas){
+        canvas.save();
+
+        int[] translation = calculateStubTranslation(oldDrawable);
 
         canvas.translate(translation[0], translation[1]);
 
-        drawBackgroundTransition(canvas, normalizedPercentCompleted);
+        oldDrawable.draw(canvas);
 
         canvas.restore();
     }
 
-    protected void handlePostTransitionDrawing(Canvas canvas){
-        if(isTargetStubDrawable()){
-            postTransitionDrawable.draw(canvas);
-
-            if(postTransitionDrawable instanceof AnimatedStubDrawable)
-                invalidateSelf();
-        }
+    protected void drawTarget(Canvas canvas){
+        if(targetDrawable instanceof StubDrawable)
+            targetDrawable.draw(canvas);
         else super.draw(canvas);
+    }
+
+    protected void handlePostTransitionDrawing(Canvas canvas){
+        updateModulesAndDraw(canvas);
+
+        if(targetDrawable instanceof AnimatedStubDrawable)
+            invalidateSelf();
     }
 
     protected int[] calculateStubTranslation(Drawable drawable){
@@ -100,27 +137,24 @@ public abstract class TransitionDrawable extends BitmapDrawable {
         return new int[]{ halfXDistance, halfYDistance };
     }
 
-    protected abstract void drawBackgroundTransition(Canvas canvas, float normalizedPercentCompleted);
-
-    protected abstract void drawForegroundTransition(Canvas canvas, float normalizedPercentCompleted);
-
-    protected void drawSuper(Canvas canvas){
-        if(isTargetStubDrawable())
-            postTransitionDrawable.draw(canvas);
-        else super.draw(canvas);
+    protected void safelyRevertOldDrawables(){
+        for(TransitionModule module : modules.values()){
+            try{
+                module.revertOnOldDraw(this, oldDrawable);
+            }
+            catch(NullPointerException e){ } // Likely old drawable is just null
+            catch(Throwable e){ e.printStackTrace(); }
+        }
     }
 
-    @Override
-    public void setAlpha(int alpha){
-        super.setAlpha(alpha);
-
-        if(isTargetStubDrawable())
-            postTransitionDrawable.setAlpha(alpha);
+    protected void safelyRevertTargetDrawables(){
+        for(TransitionModule module : modules.values()){
+            try{
+                module.revertOnTargetDraw(this, oldDrawable);
+            }
+            catch(NullPointerException e){ } // Likely old drawable is just null
+            catch(Throwable e){ e.printStackTrace(); }
+        }
     }
 
-    protected boolean isTargetStubDrawable(){
-        return postTransitionDrawable != null
-                && (postTransitionDrawable instanceof AnimatedStubDrawable
-                    || postTransitionDrawable instanceof StubDrawable);
-    }
 }

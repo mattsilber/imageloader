@@ -13,20 +13,45 @@ import android.widget.ImageView;
 import com.guardanis.imageloader.ImageRequest;
 import com.guardanis.imageloader.R;
 import com.guardanis.imageloader.transitions.drawables.TransitionDrawable;
+import com.guardanis.imageloader.transitions.modules.TransitionModule;
 
-public abstract class TransitionController {
+import java.util.HashMap;
+import java.util.Map;
+
+public class TransitionController {
 
     protected ImageRequest request;
+
+    protected Map<Class, TransitionModule> modules = new HashMap<Class, TransitionModule>();
 
     public TransitionController(ImageRequest request){
         this.request = request;
     }
 
-    public void transitionTo(Drawable to){
-        performTransition(to);
+    public void registerModule(TransitionModule module){
+        if(module != null)
+            modules.put(module.getClass(), module);
     }
 
-    protected abstract void performTransition(Drawable to);
+    public void unregisterModules(){
+        modules = new HashMap<Class, TransitionModule>();
+    }
+
+    public void transitionTo(Drawable to){
+        if(modules.size() < 1)
+            setTargetViewDrawable(to);
+        else{
+            TransitionDrawable drawable = new TransitionDrawable(request.getContext(),
+                    getCurrentTargetDrawableMutable(),
+                    to,
+                    getTargetBitmap(to, request.getTargetView()));
+
+            for(TransitionModule module : modules.values())
+                drawable.registerModule(module);
+
+            setTransitionDrawable(drawable);
+        }
+    }
 
     protected Drawable getCurrentTargetDrawable(){
         Drawable current = request.isRequestForBackgroundImage()
@@ -43,10 +68,6 @@ public abstract class TransitionController {
                 .getConstantState()
                 .newDrawable()
                 .mutate();
-    }
-
-    protected Bitmap getTargetBitmap(Drawable drawable){
-        return getTargetBitmap(drawable, null);
     }
 
     protected Bitmap getTargetBitmap(Drawable drawable, @Nullable View targetView){

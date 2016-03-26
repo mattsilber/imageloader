@@ -15,9 +15,10 @@ import com.guardanis.imageloader.filters.BitmapColorOverlayFilter;
 import com.guardanis.imageloader.filters.BitmapColorReplacementFilter;
 import com.guardanis.imageloader.filters.BitmapRotationFilter;
 import com.guardanis.imageloader.filters.ImageFilter;
-import com.guardanis.imageloader.transitions.DefaultTransitionController;
-import com.guardanis.imageloader.transitions.FadeTransitionController;
 import com.guardanis.imageloader.transitions.TransitionController;
+import com.guardanis.imageloader.transitions.modules.FadingTransitionModule;
+import com.guardanis.imageloader.transitions.modules.ScalingTransitionModule;
+import com.guardanis.imageloader.transitions.modules.TransitionModule;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -37,6 +38,7 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected static final int DEFAULT_BLUR_RADIUS = 15;
     protected static final int DEFAULT_CROSS_FADE_DURATION = 300;
+    protected static final int DEFAULT_SCALE_DURATION = 300;
 
     protected Context context;
     protected String targetUrl;
@@ -54,7 +56,7 @@ public class ImageRequest<V extends View> implements Runnable {
     protected boolean useOldResourceStubs = false;
     protected StubHolder stubHolder;
 
-    protected TransitionController transitionController = new DefaultTransitionController(this);
+    protected TransitionController transitionController = new TransitionController(this);
 
     protected Map<String, String> httpRequestParams = new HashMap<String, String>();
 
@@ -208,19 +210,28 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     public ImageRequest<V> setDefaultImageTransition(){
-        return setImageTransitionController(new DefaultTransitionController(this));
+        transitionController.unregisterModules();
+        return this;
     }
 
     public ImageRequest<V> setFadeTransition(){
         return setFadeTransition(DEFAULT_CROSS_FADE_DURATION);
     }
 
-    public ImageRequest<V> setFadeTransition(int fadeDuration){
-        return setImageTransitionController(new FadeTransitionController(this, fadeDuration));
+    public ImageRequest<V> setFadeTransition(long duration){
+        return addImageTransitionModule(new FadingTransitionModule(duration));
     }
 
-    public ImageRequest<V> setImageTransitionController(TransitionController controller){
-        this.transitionController = controller;
+    public ImageRequest<V> setScaleTransition(float from, float to){
+        return setScaleTransition(from, to, DEFAULT_SCALE_DURATION);
+    }
+
+    public ImageRequest<V> setScaleTransition(float from, float to, long duration){
+        return addImageTransitionModule(new ScalingTransitionModule(from, to, duration));
+    }
+
+    public ImageRequest<V> addImageTransitionModule(TransitionModule module){
+        this.transitionController.registerModule(module);
         return this;
     }
 
