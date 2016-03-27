@@ -19,6 +19,7 @@ import com.guardanis.imageloader.filters.BitmapRotationFilter;
 import com.guardanis.imageloader.filters.ImageFilter;
 import com.guardanis.imageloader.transitions.TransitionController;
 import com.guardanis.imageloader.transitions.modules.FadingTransitionModule;
+import com.guardanis.imageloader.transitions.modules.RotationTransitionModule;
 import com.guardanis.imageloader.transitions.modules.ScalingTransitionModule;
 import com.guardanis.imageloader.transitions.modules.TransitionModule;
 
@@ -41,6 +42,7 @@ public class ImageRequest<V extends View> implements Runnable {
     protected static final int DEFAULT_BLUR_RADIUS = 15;
     protected static final int DEFAULT_CROSS_FADE_DURATION = 300;
     protected static final int DEFAULT_SCALE_DURATION = 300;
+    protected static final int DEFAULT_ROTATION_DURATION = 300;
 
     protected Context context;
     protected String targetUrl;
@@ -235,6 +237,14 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> setScaleTransition(float from, float to, long duration){
         return addImageTransitionModule(new ScalingTransitionModule(from, to, duration));
+    }
+
+    public ImageRequest<V> setRotationTransition(int from, int to){
+        return setRotationTransition(from, to, DEFAULT_ROTATION_DURATION);
+    }
+
+    public ImageRequest<V> setRotationTransition(int from, int to, long duration){
+        return addImageTransitionModule(new RotationTransitionModule(from, to, duration));
     }
 
     public ImageRequest<V> addImageTransitionModule(TransitionModule module){
