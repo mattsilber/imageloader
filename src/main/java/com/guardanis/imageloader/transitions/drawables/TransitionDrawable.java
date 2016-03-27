@@ -81,7 +81,7 @@ public class TransitionDrawable extends BitmapDrawable {
         canvas.save();
 
         for(TransitionModule module : modules.values())
-            module.updateOld(canvas, oldDrawable, animationStart);
+            module.onPredrawOld(canvas, oldDrawable, animationStart);
 
         if (oldDrawable != null)
             drawOldDrawable(canvas);
@@ -92,7 +92,7 @@ public class TransitionDrawable extends BitmapDrawable {
         canvas.save();
 
         for(TransitionModule module : modules.values())
-            module.updateTarget(this, canvas, targetDrawable, animationStart);
+            module.onPredrawTarget(this, canvas, targetDrawable, animationStart);
 
         drawTarget(canvas);
 
@@ -140,7 +140,7 @@ public class TransitionDrawable extends BitmapDrawable {
     protected void safelyRevertOldDrawables(){
         for(TransitionModule module : modules.values()){
             try{
-                module.revertOnOldDraw(this, oldDrawable);
+                module.revertPostDrawOld(this, oldDrawable);
             }
             catch(NullPointerException e){ } // Likely old drawable is just null
             catch(Throwable e){ e.printStackTrace(); }
@@ -150,7 +150,7 @@ public class TransitionDrawable extends BitmapDrawable {
     protected void safelyRevertTargetDrawables(){
         for(TransitionModule module : modules.values()){
             try{
-                module.revertOnTargetDraw(this, oldDrawable);
+                module.revertPostDrawTarget(this, oldDrawable);
             }
             catch(NullPointerException e){ } // Likely old drawable is just null
             catch(Throwable e){ e.printStackTrace(); }

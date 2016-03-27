@@ -27,17 +27,17 @@ public class ScalingTransitionModule extends TransitionModule {
     }
 
     @Override
-    public void updateOld(Canvas canvas, @Nullable Drawable old, long startTime) {
+    public void onPredrawOld(Canvas canvas, @Nullable Drawable old, long startTime) {
 
     }
 
     @Override
-    public void revertOnOldDraw(TransitionDrawable transitionDrawable, @Nullable Drawable old) {
+    public void revertPostDrawOld(TransitionDrawable transitionDrawable, @Nullable Drawable old) {
 
     }
 
     @Override
-    public void updateTarget(TransitionDrawable transitionDrawable, Canvas canvas, Drawable target, long startTime) {
+    public void onPredrawTarget(TransitionDrawable transitionDrawable, Canvas canvas, Drawable target, long startTime) {
         if(target instanceof StubDrawable)
             return;
 
@@ -52,7 +52,7 @@ public class ScalingTransitionModule extends TransitionModule {
     }
 
     @Override
-    public void revertOnTargetDraw(TransitionDrawable transitionDrawable, Drawable target) {
+    public void revertPostDrawTarget(TransitionDrawable transitionDrawable, Drawable target) {
 
     }
 
