@@ -2,6 +2,8 @@
 
 Another lazy image-loading library with AndroidSVG and Bitmap filtering support built-in
 
+![imageloader Sample](https://github.com/mattsilber/imageloader/raw/master/imageloader.gif)
+
 # Installation
 
 ```
