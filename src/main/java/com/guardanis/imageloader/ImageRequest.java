@@ -2,6 +2,7 @@ package com.guardanis.imageloader;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.ColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
@@ -11,6 +12,7 @@ import android.widget.ImageView;
 
 import com.guardanis.imageloader.filters.BitmapBlurFilter;
 import com.guardanis.imageloader.filters.BitmapCircularCropFilter;
+import com.guardanis.imageloader.filters.BitmapColorFilter;
 import com.guardanis.imageloader.filters.BitmapColorOverlayFilter;
 import com.guardanis.imageloader.filters.BitmapColorReplacementFilter;
 import com.guardanis.imageloader.filters.BitmapRotationFilter;
@@ -196,6 +198,11 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> addColorReplacementFilter(Map<Integer, Integer> replacements) {
         bitmapImageFilters.add(new BitmapColorReplacementFilter(context, replacements));
+        return this;
+    }
+
+    public ImageRequest<V> addColorFilter(ColorFilter filter) {
+        bitmapImageFilters.add(new BitmapColorFilter(context, filter));
         return this;
     }
 
