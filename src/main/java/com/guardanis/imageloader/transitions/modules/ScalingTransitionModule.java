@@ -2,7 +2,6 @@ package com.guardanis.imageloader.transitions.modules;
 
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.support.annotation.Nullable;
 
 import com.guardanis.imageloader.stubs.StubDrawable;
