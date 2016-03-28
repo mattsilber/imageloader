@@ -18,17 +18,18 @@ public class BitmapCircularCropFilter extends ImageFilter<Bitmap> {
 
         Canvas canvas = new Canvas(cropped);
         canvas.clipPath(getCircularClippingPath(unedited));
-        canvas.drawBitmap(unedited, new Rect(0, 0, unedited.getWidth(), unedited.getHeight()), new Rect(0, 0, unedited.getWidth(), unedited.getHeight()), null);
+        canvas.drawBitmap(unedited, new Rect(0, 0, unedited.getWidth(), unedited.getHeight()),
+                new Rect(0, 0, unedited.getWidth(), unedited.getHeight()), null);
 
         return cropped;
     }
 
     private Path getCircularClippingPath(Bitmap bitmap) {
-        int targetRadius = (int) (Math.min(bitmap.getWidth(), bitmap.getHeight()) / 2f) - 1;
+        int targetRadius = (int) (Math.min(bitmap.getWidth(), bitmap.getHeight()) / 2) - 1;
 
         Path path = new Path();
-        path.addCircle((bitmap.getWidth() - 1) / 2f,
-                (bitmap.getHeight() - 1) / 2f,
+        path.addCircle(bitmap.getWidth() / 2f,
+                bitmap.getHeight() / 2f,
                 targetRadius,
                 Path.Direction.CCW);
 
