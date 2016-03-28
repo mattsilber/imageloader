@@ -44,8 +44,8 @@ public class ScalingTransitionModule extends TransitionModule {
 
         float scale = scaleFrom + (percentCompleted * difference);
 
-        canvas.translate((canvas.getWidth() - (scale * canvas.getWidth())) / 4,
-                (canvas.getHeight() - (scale * canvas.getHeight())) / 4);
+        canvas.translate((transitionDrawable.getBitmap().getWidth() - (scale * transitionDrawable.getBitmap().getWidth())) / 2,
+                (transitionDrawable.getBitmap().getHeight() - (scale * transitionDrawable.getBitmap().getHeight())) / 2);
 
         canvas.scale(scale, scale);
     }

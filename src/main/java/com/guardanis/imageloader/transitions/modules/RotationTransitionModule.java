@@ -43,8 +43,8 @@ public class RotationTransitionModule extends TransitionModule {
         float percentCompleted = calculatePercentCompleted(startTime);
 
         canvas.rotate(rotateFrom + (percentCompleted * difference),
-                transitionDrawable.getIntrinsicWidth() / 2,
-                transitionDrawable.getIntrinsicHeight() / 2);
+                transitionDrawable.getBitmap().getWidth() / 2,
+                transitionDrawable.getBitmap().getHeight() / 2);
     }
 
     @Override
