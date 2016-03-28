@@ -269,7 +269,7 @@ public class ImageRequest<V extends View> implements Runnable {
             else processImage(imageFile, ImageUtils.decodeFile(originalImageFile, requiredImageWidth));
         }
         else
-            onRequestSuccessful(ImageUtils.decodeFile(imageFile, requiredImageWidth));
+            onRequestCompleted(ImageUtils.decodeFile(imageFile, requiredImageWidth));
     }
 
     protected int getRequiredImageWidth(){
@@ -284,7 +284,7 @@ public class ImageRequest<V extends View> implements Runnable {
             saveBitmap(imageFile, bitmap);
         }
 
-        onRequestSuccessful(bitmap);
+        onRequestCompleted(bitmap);
     }
 
     protected Bitmap applyBitmapFilters(Bitmap bitmap){
@@ -298,8 +298,12 @@ public class ImageRequest<V extends View> implements Runnable {
         ImageUtils.saveBitmapAsync(context, imageFile, bitmap);
     }
 
-    protected void onRequestSuccessful(final Bitmap bitmap) {
-        if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(targetView, targetUrl))
+    protected void onRequestCompleted(@Nullable final Bitmap bitmap) {
+        if(bitmap == null){
+            onRequestFailed();
+            return;
+        }
+        else if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(targetView, targetUrl))
             return;
 
         BitmapDrawable targetDrawable = new BitmapDrawable(targetView.getContext().getResources(), bitmap);

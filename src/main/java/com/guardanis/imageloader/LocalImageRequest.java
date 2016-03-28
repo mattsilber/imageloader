@@ -23,7 +23,7 @@ public abstract class LocalImageRequest<V extends View>  extends ImageRequest<V>
 
         File imageFile = getEditedRequestFile();
         if(imageFile.exists())
-            onRequestSuccessful(ImageUtils.decodeFile(imageFile, requiredImageWidth));
+            onRequestCompleted(ImageUtils.decodeFile(imageFile, requiredImageWidth));
         else processImage(getEditedRequestFile(), decodeImageFile(requiredImageWidth));
     }
 
