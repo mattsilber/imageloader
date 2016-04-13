@@ -254,7 +254,7 @@ public class ImageRequest<V extends View> implements Runnable {
 
     @Override
     public void run() {
-        if(targetView != null)
+        if(targetView != null && ImageLoader.getInstance(context).isViewStillUsable(targetView, targetUrl))
             performFullImageRequest();
     }
 
