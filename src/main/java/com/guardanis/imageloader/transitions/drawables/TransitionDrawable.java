@@ -1,16 +1,29 @@
 package com.guardanis.imageloader.transitions.drawables;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.Matrix;
+import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.support.annotation.Nullable;
+import android.util.Log;
+import android.view.animation.Animation;
+import android.view.animation.AnimationSet;
+import android.view.animation.AnimationUtils;
+import android.view.animation.Transformation;
 
 import com.guardanis.imageloader.stubs.AnimatedStubDrawable;
 import com.guardanis.imageloader.stubs.StubDrawable;
 import com.guardanis.imageloader.transitions.modules.TransitionModule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TransitionDrawable extends BitmapDrawable {
@@ -21,7 +34,6 @@ public class TransitionDrawable extends BitmapDrawable {
 
     protected Drawable oldDrawable;
     protected Drawable targetDrawable;
-
 
     protected Map<Class, TransitionModule> modules = new HashMap<Class, TransitionModule>();
 
@@ -59,7 +71,7 @@ public class TransitionDrawable extends BitmapDrawable {
                     unfinishedExists = true;
 
             if(unfinishedExists){
-                updateModulesAndDraw(canvas);
+                updateModulesAndDraw(canvas, animationStart);
 
                 invalidateSelf();
             }
@@ -70,29 +82,28 @@ public class TransitionDrawable extends BitmapDrawable {
                 handlePostTransitionDrawing(canvas);
             }
         }
-        else if(transitionStage == TransitionStage.AWAITING_START){
-            if(oldDrawable != null)
-                drawOldDrawable(canvas);
-        }
+        else if(transitionStage == TransitionStage.AWAITING_START)
+            updateModulesAndDraw(canvas, System.currentTimeMillis());
         else handlePostTransitionDrawing(canvas);
     }
 
-    protected void updateModulesAndDraw(Canvas canvas){
-        canvas.save();
+    protected void updateModulesAndDraw(Canvas canvas, long startTime){
+        if (oldDrawable != null){
+            canvas.save();
 
-        for(TransitionModule module : modules.values())
-            module.onPredrawOld(canvas, oldDrawable, animationStart);
+            for(TransitionModule module : modules.values())
+                module.onPredrawOld(this, canvas, oldDrawable, startTime);
 
-        if (oldDrawable != null)
             drawOldDrawable(canvas);
 
-        canvas.restore();
-        safelyRevertOldDrawables();
+            canvas.restore();
+            safelyRevertOldDrawables();
+        }
 
         canvas.save();
 
         for(TransitionModule module : modules.values())
-            module.onPredrawTarget(this, canvas, targetDrawable, animationStart);
+            module.onPredrawTarget(this, canvas, targetDrawable, startTime);
 
         drawTarget(canvas);
 
@@ -119,7 +130,7 @@ public class TransitionDrawable extends BitmapDrawable {
     }
 
     protected void handlePostTransitionDrawing(Canvas canvas){
-        updateModulesAndDraw(canvas);
+        updateModulesAndDraw(canvas, animationStart);
 
         if(targetDrawable instanceof AnimatedStubDrawable)
             invalidateSelf();
@@ -150,9 +161,9 @@ public class TransitionDrawable extends BitmapDrawable {
     protected void safelyRevertTargetDrawables(){
         for(TransitionModule module : modules.values()){
             try{
-                module.revertPostDrawTarget(this, oldDrawable);
+                module.revertPostDrawTarget(this, targetDrawable);
             }
-            catch(NullPointerException e){ } // Likely old drawable is just null
+            catch(NullPointerException e){ e.printStackTrace(); }
             catch(Throwable e){ e.printStackTrace(); }
         }
     }

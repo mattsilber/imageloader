@@ -3,6 +3,7 @@ package com.guardanis.imageloader.transitions.modules;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import com.guardanis.imageloader.stubs.StubDrawable;
 import com.guardanis.imageloader.transitions.drawables.TransitionDrawable;
@@ -26,7 +27,7 @@ public class RotationTransitionModule extends TransitionModule {
     }
 
     @Override
-    public void onPredrawOld(Canvas canvas, @Nullable Drawable old, long startTime) {
+    public void onPredrawOld(TransitionDrawable transitionDrawable, Canvas canvas, @Nullable Drawable old, long startTime) {
 
     }
 
@@ -41,7 +42,7 @@ public class RotationTransitionModule extends TransitionModule {
             return;
 
         float percentCompleted = calculatePercentCompleted(startTime);
-
+Log.d("imageloader", "" + percentCompleted);
         canvas.rotate(rotateFrom + (percentCompleted * difference),
                 transitionDrawable.getBitmap().getWidth() / 2,
                 transitionDrawable.getBitmap().getHeight() / 2);

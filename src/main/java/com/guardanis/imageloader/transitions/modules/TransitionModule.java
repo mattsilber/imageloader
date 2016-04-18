@@ -16,7 +16,7 @@ public abstract class TransitionModule {
 
     public abstract void onStart(@Nullable Drawable old, Drawable target);
 
-    public abstract void onPredrawOld(Canvas canvas, @Nullable Drawable old, long startTime);
+    public abstract void onPredrawOld(TransitionDrawable transitionDrawable, Canvas canvas, @Nullable Drawable old, long startTime);
 
     public abstract void revertPostDrawOld(TransitionDrawable transitionDrawable, @Nullable Drawable old);
 

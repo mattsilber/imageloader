@@ -26,7 +26,7 @@ public class ScalingTransitionModule extends TransitionModule {
     }
 
     @Override
-    public void onPredrawOld(Canvas canvas, @Nullable Drawable old, long startTime) {
+    public void onPredrawOld(TransitionDrawable transitionDrawable, Canvas canvas, @Nullable Drawable old, long startTime) {
 
     }
 

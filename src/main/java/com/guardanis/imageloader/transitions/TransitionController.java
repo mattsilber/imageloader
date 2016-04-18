@@ -7,15 +7,20 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.View;
+import android.view.animation.Animation;
 import android.widget.ImageView;
 
 import com.guardanis.imageloader.ImageRequest;
 import com.guardanis.imageloader.R;
+import com.guardanis.imageloader.stubs.StubDrawable;
 import com.guardanis.imageloader.transitions.drawables.TransitionDrawable;
 import com.guardanis.imageloader.transitions.modules.TransitionModule;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class TransitionController {
@@ -41,10 +46,12 @@ public class TransitionController {
         if(modules.size() < 1)
             setTargetViewDrawable(to);
         else{
+            Bitmap targetBitmap = getTargetBitmap(to, request.getTargetView());
+
             TransitionDrawable drawable = new TransitionDrawable(request.getContext(),
-                    getCurrentTargetDrawableMutable(),
+                    getCurrentTargetDrawable(targetBitmap),
                     to,
-                    getTargetBitmap(to, request.getTargetView()));
+                    targetBitmap);
 
             for(TransitionModule module : modules.values())
                 drawable.registerModule(module);
@@ -53,21 +60,35 @@ public class TransitionController {
         }
     }
 
-    protected Drawable getCurrentTargetDrawable(){
+    protected Drawable getCurrentTargetDrawable(Bitmap targetBitmap){
         Drawable current = request.isRequestForBackgroundImage()
                 ? request.getTargetView().getBackground()
                 : ((ImageView)request.getTargetView()).getDrawable();
 
-        return current == null
-                ? ContextCompat.getDrawable(request.getContext(), R.drawable.ail__default_fade_placeholder)
-                : current;
-    }
+        if(current == null)
+            return ContextCompat.getDrawable(request.getContext(), R.drawable.ail__default_fade_placeholder);
+        else if(current instanceof TransitionDrawable && ((TransitionDrawable) current).getTargetDrawable() instanceof StubDrawable)
+            return ((TransitionDrawable) current).getTargetDrawable();
+        else{
+//            if(current instanceof TransitionDrawable)
+//                ((TransitionDrawable) current).setNormalDrawingEnabled(false);
 
-    protected Drawable getCurrentTargetDrawableMutable(){
-        return getCurrentTargetDrawable()
-                .getConstantState()
-                .newDrawable()
-                .mutate();
+//            BitmapDrawable adjusted = new BitmapDrawable(request.getContext().getResources(),
+//                    targetBitmap.copy(Bitmap.Config.ARGB_8888, true));
+//            Bitmap target = Bitmap.createBitmap(targetBitmap.getWidth(), targetBitmap.getHeight(), targetBitmap.getConfig());
+//
+//            Canvas canvas = new Canvas(target);
+//
+//            if(current instanceof TransitionDrawable)
+//                ((TransitionDrawable) current).drawCurrentState(canvas);
+//            else if(current instanceof BitmapDrawable)
+//                canvas.drawBitmap(((BitmapDrawable) current).getBitmap(), 0, 0, null);
+//            else current.draw(canvas);
+//
+//            return new BitmapDrawable(request.getContext().getResources(), target);
+
+            return current;
+        }
     }
 
     protected Bitmap getTargetBitmap(Drawable drawable, @Nullable View targetView){

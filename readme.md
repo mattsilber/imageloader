@@ -137,4 +137,5 @@ The currently included TransitionModules are the FadingTransitionModule and the 
 ##### Known Issues
 * If trying to load a super large image (like a picture from the Camera) into an ImageView with layout_width as either fill_parent or wrap_cotent, it may run into an OutOfMemoryError with filters due to the barely-downsampled size of the image. To avoid this, either set the LayoutParams's width manually, or use the helper method: **ImageRequest.setRequiredImageWidth(int)**
 * The RotationTransitionModule doesn't work for backgrounds (i.e. non-ImageView requests or ones with setAsbackground(true)). It's all weird and not pretty.
+* Apparently I'm an idiot, and exit-animations don't actually work due to a cyclical flaw in my original plan after switching from Bitmap-to-Bitmap transitioning... 
 
