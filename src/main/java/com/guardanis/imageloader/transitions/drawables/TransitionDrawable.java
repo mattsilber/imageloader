@@ -38,7 +38,7 @@ public class TransitionDrawable extends BitmapDrawable {
     protected Map<Class, TransitionModule> modules = new HashMap<Class, TransitionModule>();
 
     protected TransitionStage transitionStage = TransitionStage.AWAITING_START;
-    protected long animationStart;
+    protected long animationStart = System.currentTimeMillis();
 
     protected int overriddenMaxAlpha = 0xFF;
 
