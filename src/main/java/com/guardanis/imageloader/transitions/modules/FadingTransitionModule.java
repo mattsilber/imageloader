@@ -27,8 +27,15 @@ public class FadingTransitionModule extends TransitionModule {
 
     @Override
     public void onPredrawOld(TransitionDrawable transitionDrawable, Canvas canvas, @Nullable Drawable old, long startTime) {
-        if(old != null)
-            old.setAlpha((int) Math.max(MAX_ALPHA - (oldSDrawableStartingAlpha * calculatePercentCompleted(startTime) * TRANSITION_OUT_SPEED_MULTIPLIER), 0));
+        if(old != null){
+            int alpha = (int) Math.max(MAX_ALPHA - (oldSDrawableStartingAlpha * calculatePercentCompleted(startTime) * TRANSITION_OUT_SPEED_MULTIPLIER), 0);
+            int correctedAlpha = Math.min(alpha, transitionDrawable.getOverriddenMaxAlpha());
+
+            if(old instanceof TransitionDrawable)
+                ((TransitionDrawable) old).overrideMaxAlphaOut(correctedAlpha);
+
+            old.setAlpha(correctedAlpha);
+        }
     }
 
     @Override

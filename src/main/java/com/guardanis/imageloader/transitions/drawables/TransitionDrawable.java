@@ -40,6 +40,8 @@ public class TransitionDrawable extends BitmapDrawable {
     protected TransitionStage transitionStage = TransitionStage.AWAITING_START;
     protected long animationStart;
 
+    protected int overriddenMaxAlpha = 0xFF;
+
     public TransitionDrawable(Context context, Drawable from, Drawable to, Bitmap canvas) {
         super(context.getResources(), canvas);
 
@@ -83,11 +85,25 @@ public class TransitionDrawable extends BitmapDrawable {
             }
         }
         else if(transitionStage == TransitionStage.AWAITING_START)
-            updateModulesAndDraw(canvas, System.currentTimeMillis());
+            updateOldAndDraw(canvas, System.currentTimeMillis());
         else handlePostTransitionDrawing(canvas);
     }
 
     protected void updateModulesAndDraw(Canvas canvas, long startTime){
+        updateOldAndDraw(canvas, startTime);
+
+        canvas.save();
+
+        for(TransitionModule module : modules.values())
+            module.onPredrawTarget(this, canvas, targetDrawable, startTime);
+
+        drawTarget(canvas);
+
+        canvas.restore();
+        safelyRevertTargetDrawables();
+    }
+
+    protected void updateOldAndDraw(Canvas canvas, long startTime){
         if (oldDrawable != null){
             canvas.save();
 
@@ -99,16 +115,6 @@ public class TransitionDrawable extends BitmapDrawable {
             canvas.restore();
             safelyRevertOldDrawables();
         }
-
-        canvas.save();
-
-        for(TransitionModule module : modules.values())
-            module.onPredrawTarget(this, canvas, targetDrawable, startTime);
-
-        drawTarget(canvas);
-
-        canvas.restore();
-        safelyRevertTargetDrawables();
     }
 
     protected void drawOldDrawable(Canvas canvas){
@@ -166,6 +172,24 @@ public class TransitionDrawable extends BitmapDrawable {
             catch(NullPointerException e){ e.printStackTrace(); }
             catch(Throwable e){ e.printStackTrace(); }
         }
+    }
+
+    @Override
+    public void setAlpha(int alpha){
+        int correctedAlpha = Math.min(alpha, overriddenMaxAlpha);
+
+        super.setAlpha(correctedAlpha);
+    }
+
+    public void overrideMaxAlphaOut(int overriddenMaxAlpha){
+        this.overriddenMaxAlpha = Math.min(overriddenMaxAlpha, this.overriddenMaxAlpha);
+
+        if(oldDrawable != null && oldDrawable instanceof TransitionDrawable)
+            ((TransitionDrawable) oldDrawable).overrideMaxAlphaOut(this.overriddenMaxAlpha);
+    }
+
+    public int getOverriddenMaxAlpha(){
+        return overriddenMaxAlpha;
     }
 
     public Drawable getTargetDrawable(){

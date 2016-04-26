@@ -27,7 +27,17 @@ public class ScalingTransitionModule extends TransitionModule {
 
     @Override
     public void onPredrawOld(TransitionDrawable transitionDrawable, Canvas canvas, @Nullable Drawable old, long startTime) {
-
+//        if(old == null)
+//            return;
+//
+//        float percentCompleted = calculatePercentCompleted(startTime);
+//
+//        float scale = 1 - percentCompleted;
+//
+//        canvas.translate((transitionDrawable.getBitmap().getWidth() - (scale * transitionDrawable.getBitmap().getWidth())) / 2,
+//                (transitionDrawable.getBitmap().getHeight() - (scale * transitionDrawable.getBitmap().getHeight())) / 2);
+//
+//        canvas.scale(scale, scale);
     }
 
     @Override
