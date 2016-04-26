@@ -57,8 +57,8 @@ public class TransitionDrawable extends BitmapDrawable {
     }
 
     public void start(){
-        this.transitionStage = TransitionStage.TRANSITIONING;
         this.animationStart = System.currentTimeMillis();
+        this.transitionStage = TransitionStage.TRANSITIONING;
 
         invalidateSelf();
     }

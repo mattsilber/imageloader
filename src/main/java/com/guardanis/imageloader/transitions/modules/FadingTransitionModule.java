@@ -20,8 +20,8 @@ public class FadingTransitionModule extends TransitionModule {
     public FadingTransitionModule(long duration) {
         super(duration);
 
-        registerInterpolator(TransitionModule.INTERPOLATOR_OUT, new DecelerateInterpolator());
-        registerInterpolator(TransitionModule.INTERPOLATOR_IN, new AccelerateInterpolator());
+        registerInterpolator(TransitionModule.INTERPOLATOR_OUT, new AccelerateInterpolator());
+        registerInterpolator(TransitionModule.INTERPOLATOR_IN, new DecelerateInterpolator());
     }
 
     @Override
