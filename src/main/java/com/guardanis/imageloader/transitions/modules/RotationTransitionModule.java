@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.animation.AccelerateInterpolator;
 
 import com.guardanis.imageloader.stubs.StubDrawable;
 import com.guardanis.imageloader.transitions.drawables.TransitionDrawable;
@@ -19,6 +20,8 @@ public class RotationTransitionModule extends TransitionModule {
         this.rotateFrom = from;
         this.rotateTo = to;
         this.difference = to - from;
+
+        registerInterpolator(TransitionModule.INTERPOLATOR_IN, new AccelerateInterpolator());
     }
 
     @Override
@@ -41,8 +44,8 @@ public class RotationTransitionModule extends TransitionModule {
         if(target instanceof StubDrawable)
             return;
 
-        float percentCompleted = calculatePercentCompleted(startTime);
-Log.d("imageloader", "" + percentCompleted);
+        float percentCompleted = interpolate(TransitionModule.INTERPOLATOR_IN, startTime);
+
         canvas.rotate(rotateFrom + (percentCompleted * difference),
                 transitionDrawable.getBitmap().getWidth() / 2,
                 transitionDrawable.getBitmap().getHeight() / 2);

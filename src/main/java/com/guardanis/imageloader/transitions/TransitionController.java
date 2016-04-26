@@ -10,6 +10,7 @@ import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.guardanis.imageloader.ImageRequest;
@@ -36,6 +37,16 @@ public class TransitionController {
     public void registerModule(TransitionModule module){
         if(module != null)
             modules.put(module.getClass(), module);
+    }
+
+    /**
+     * @param c the class of the module (e.g. FadingTransitionModule)
+     * @param interpolatorId the int ID from TransitionModule keys or custom entries (e.g. TransitionModule.INTERPOLATOR_IN)
+     * @param interpolator the interpolator to substitute with
+     */
+    public void registerModuleInterpolator(Class c, int interpolatorId, Interpolator interpolator){
+        if(modules != null)
+            modules.get(c).registerInterpolator(interpolatorId, interpolator);
     }
 
     public void unregisterModules(){

@@ -9,6 +9,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.animation.Animation;
+import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.guardanis.imageloader.filters.BitmapBlurFilter;
@@ -250,6 +251,17 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> addImageTransitionModule(TransitionModule module){
         this.transitionController.registerModule(module);
+        return this;
+    }
+
+    /**
+     * Override an Interpolator for a previously added TransitionModule
+     * @param c the class of the module (e.g. FadingTransitionModule)
+     * @param interpolatorId the int ID from TransitionModule keys or custom entries (e.g. TransitionModule.INTERPOLATOR_IN)
+     * @param interpolator the interpolator to substitute with
+     */
+    public ImageRequest<V> registerImageTransitionInterpolator(Class c, int interpolatorId, Interpolator interpolator){
+        this.transitionController.registerModuleInterpolator(c, interpolatorId, interpolator);
         return this;
     }
 
