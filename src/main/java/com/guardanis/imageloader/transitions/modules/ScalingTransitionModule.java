@@ -3,7 +3,7 @@ package com.guardanis.imageloader.transitions.modules;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
-import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import com.guardanis.imageloader.stubs.StubDrawable;
 import com.guardanis.imageloader.transitions.drawables.TransitionDrawable;
@@ -20,7 +20,7 @@ public class ScalingTransitionModule extends TransitionModule {
         this.scaleTo = to;
         this.difference = to - from;
 
-        registerInterpolator(TransitionModule.INTERPOLATOR_IN, new AccelerateInterpolator());
+        registerInterpolator(TransitionModule.INTERPOLATOR_IN, new DecelerateInterpolator());
     }
 
     @Override

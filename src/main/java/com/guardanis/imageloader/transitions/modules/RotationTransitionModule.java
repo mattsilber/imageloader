@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 
 import com.guardanis.imageloader.stubs.StubDrawable;
 import com.guardanis.imageloader.transitions.drawables.TransitionDrawable;
@@ -21,7 +22,7 @@ public class RotationTransitionModule extends TransitionModule {
         this.rotateTo = to;
         this.difference = to - from;
 
-        registerInterpolator(TransitionModule.INTERPOLATOR_IN, new AccelerateInterpolator());
+        registerInterpolator(TransitionModule.INTERPOLATOR_IN, new DecelerateInterpolator());
     }
 
     @Override
