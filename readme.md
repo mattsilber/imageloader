@@ -12,7 +12,7 @@ Another lazy image-loading library with AndroidSVG and Bitmap filtering support 
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.2.0')
+        compile('com.guardanis:imageloader:1.2.1')
     }
 ```
 
@@ -128,6 +128,7 @@ The currently included TransitionModules are the FadingTransitionModule and the 
 * ImageRequest's for the same URL are safe to call at the same time. The ImageLoader will delay subsequent requests for the same URL until the download has finished.
 * Adjustments via ImageFilter are only saved when a target View is present
 * Setting a maximum cachable duration for a target URL can be achieved by calling ImageRequest.setMaxCacheDurationMs(long); e.g. setMaxCacheDurationMs(TimeUnit.DAYS.toMillis(5));
+* For lists, you probably don't want exit transitions as it can appear weird. To disable them, call ImageRequest.setExitTransitionsEnabled(false)
 
 ##### Things I plan on adding when I get the chance
 * Custom SVG Image Filters (e.g. replacing colors)

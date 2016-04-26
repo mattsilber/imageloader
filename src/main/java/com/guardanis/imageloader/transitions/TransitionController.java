@@ -60,7 +60,9 @@ public class TransitionController {
             Bitmap targetBitmap = getTargetBitmap(to, request.getTargetView());
 
             TransitionDrawable drawable = new TransitionDrawable(request.getContext(),
-                    getCurrentTargetDrawable(targetBitmap),
+                    request.isExitTransitionEnabled()
+                            ? getCurrentTargetDrawable(targetBitmap)
+                            : null,
                     to,
                     targetBitmap);
 

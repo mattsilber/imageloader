@@ -63,6 +63,7 @@ public class ImageRequest<V extends View> implements Runnable {
     protected StubHolder stubHolder;
 
     protected TransitionController transitionController = new TransitionController(this);
+    protected boolean exitTransitionsEnabled = true;
 
     protected Map<String, String> httpRequestParams = new HashMap<String, String>();
 
@@ -254,6 +255,11 @@ public class ImageRequest<V extends View> implements Runnable {
         return this;
     }
 
+    public ImageRequest<V> setExitTransitionsEnabled(boolean exitTransitionsEnabled){
+        this.exitTransitionsEnabled = exitTransitionsEnabled;
+        return this;
+    }
+
     /**
      * Override an Interpolator for a previously added TransitionModule
      * @param c the class of the module (e.g. FadingTransitionModule)
@@ -412,6 +418,10 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public String getTargetUrl(){
         return targetUrl;
+    }
+
+    public boolean isExitTransitionEnabled(){
+        return exitTransitionsEnabled;
     }
 
     private void handleShowStubOnExecute(){
