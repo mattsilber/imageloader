@@ -15,7 +15,7 @@ public class BitmapRotationFilter extends ImageFilter<Bitmap> {
 
     @Override
     public Bitmap filter(Bitmap unedited) {
-        if(rotationDegrees == 0)
+        if(rotationDegrees % 360 == 0)
             return unedited;
 
         Matrix mtx = new Matrix();
