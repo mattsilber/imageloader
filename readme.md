@@ -75,14 +75,15 @@ SVGs are also fully supported over the internet via an ImageRequest, as long as 
 
 ##### SVG Requirements
 
-In order to load an SVG efficiently (as in, downsample it appropriately), we need to know it's intrinsic width and height in pixels. That means, if a width and/or a height attribute is missing from the SVG's declaration, it won't be able to render it. e.g.
+In order to load an SVG efficiently (as in, downsample it appropriately), we need to know it's intrinsic width and height in pixels. That means, if a width/height or at least a viewBox (the fallback) attribute is missing from the SVG's declaration, it won't be able to render it. e.g.
 
-    x="0px" y="0px" **width="150px" height="150px"** viewBox="0 0 150 150"
+    x="0px" y="0px" **width="150px" height="150px"**
+or
+    x="0px" y="0px" **viewBox="0 0 150 150"**
 
-As long as the width/height are that of the viewBox, everything should be good to go, and all SVGs should scale up/down correctly (all of which the ImageRequest can handle by itself).
+As long as the width/height or viewBox are correctly set, everything should be good to go, and all SVGs should scale up/down correctly (all of which the ImageRequest can handle by itself).
 
-In future versions, I hope to use the *viewBox* attribute when the width/heights are not explicitly applied, but I haven't had time to really test that theory yet.
-
+Support for the viewBox fallback was added in the release of v1.2.2.
 
 ### Stubs
 
