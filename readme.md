@@ -12,7 +12,7 @@ Another lazy image-loading library with AndroidSVG and Bitmap filtering support 
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.2.1')
+        compile('com.guardanis:imageloader:1.2.2')
     }
 ```
 
@@ -137,7 +137,8 @@ The currently included TransitionModules are the FadingTransitionModule and the 
 
 ##### Known Issues
 * If trying to load a super large image (like a picture from the Camera) into an ImageView with layout_width as either fill_parent or wrap_cotent, it may run into an OutOfMemoryError with filters due to the barely-downsampled size of the image. To avoid this, either set the LayoutParams's width manually, or use the helper method: **ImageRequest.setRequiredImageWidth(int)**
-* Transitioning between images of different sizes / aspect ratios / scale types are at the moment a bit 'off'.
+* Transitioning between images of different sizes / aspect ratios / scale types are at the moment a bit 'off'. As in, there can be a flicker during the initial transition, which I'm still working on getting around (would be easy if just using Bitmaps...)
+* Loading many versions of the same SVG file too quickly can cause the SVGParser to throw an "Invalid Colour Keyword" error due to the version we're using not supporting asynchronous SVG parsing
 
 ####### RotationTransitionModule issues:
 * It doesn't work for none-square backgrounds (i.e. non-ImageView requests or ones with setAsbackground(true)). It's all weird and not pretty. Don't use it.
