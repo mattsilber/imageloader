@@ -438,7 +438,7 @@ public class ImageRequest<V extends View> implements Runnable {
         transitionController.transitionTo(targetDrawable);
     }
 
-    public void execute() {
+    public ImageRequest<V> execute() {
         if(targetView == null)
             ImageLoader.getInstance(context).submit(this);
         else {
@@ -453,12 +453,14 @@ public class ImageRequest<V extends View> implements Runnable {
                 }
             });
         }
+
+        return this;
     }
 
     /**
      * @param delay amount to delay the execution by
      */
-    public void execute(long delay){
+    public ImageRequest<V> execute(long delay){
         Runnable execution = new Runnable(){
             public void run(){
                 execute();
@@ -468,6 +470,8 @@ public class ImageRequest<V extends View> implements Runnable {
         if(targetView == null)
             new Handler().postDelayed(execution, delay);
         else targetView.postDelayed(execution, delay);
+
+        return this;
     }
 
 }
