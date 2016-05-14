@@ -139,12 +139,20 @@ public class ImageUtils {
     }
 
     public static Bitmap decodeBitmap(SVG svg, int requiredWidth) {
-        if(svg.getDocumentWidth() != -1){
-            if(requiredWidth < 1)
-                requiredWidth = (int) svg.getDocumentWidth();
+        float documentWidth = svg.getDocumentWidth();
+        float documentHeight = svg.getDocumentHeight();
 
-            float scaleFactor = (float) requiredWidth / svg.getDocumentWidth();
-            int adjustedHeight = (int) (scaleFactor * svg.getDocumentHeight());
+        if((documentWidth == -1 || documentHeight == -1) && (svg.getDocumentViewBox() != null && 0 < svg.getDocumentViewBox().width())){
+            documentWidth = svg.getDocumentViewBox().width();
+            documentHeight = svg.getDocumentViewBox().height();
+        }
+
+        if(documentWidth != -1){
+            if(requiredWidth < 1)
+                requiredWidth = (int) documentWidth;
+
+            float scaleFactor = (float) requiredWidth / documentWidth;
+            int adjustedHeight = (int) (scaleFactor * documentHeight);
 
             Bitmap newBitmap = Bitmap.createBitmap(requiredWidth, adjustedHeight, Bitmap.Config.ARGB_8888);
             Canvas canvas = new Canvas(newBitmap);
