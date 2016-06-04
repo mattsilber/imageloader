@@ -12,7 +12,7 @@ Another lazy image-loading library with AndroidSVG and Bitmap filtering support 
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.2.2')
+        compile('com.guardanis:imageloader:1.2.3')
     }
 ```
 
@@ -21,7 +21,7 @@ If you want to use a custom version of *com.caverock.androidsvg*, ensure that yo
 
 # Usage
 
-This was originally written several years ago as an included lazy loader for downloading/caching images, but then evolved to allow the chaining of adjustments on the underlying Bitmap (what I call an ImageFilter). Let's say, for instance, I want to download my Facebook profile picture, throw a blur on top, overlay a dark-transparent color, and then throw it into an ImageView, but fade in for a duration of 150ms. Well, you could actually do all of that pretty easily:
+This was originally written several years ago as an included lazy loader for downloading/caching images, but then evolved to allow the chaining of adjustments on the underlying Bitmap (what I call an ImageFilter). Let's say, for instance, I want to download your Facebook profile picture, throw a blur on top, overlay a dark-transparent color, and then throw it into an ImageView, but fade in for a duration of 150ms. Well, you could actually do all of that pretty easily:
 
 ```
     new ImageRequest<ImageView>(context)
@@ -32,8 +32,6 @@ This was originally written several years ago as an included lazy loader for dow
         .setFadeTransition(150)
         .execute();
 ```
-
-Disclaimer: That picture ain't me.
 
 ### Custom Filters
 
@@ -129,9 +127,9 @@ The currently included TransitionModules are the FadingTransitionModule and the 
 ##### Notes
 * Prefetching images can be achieved by simply not setting a target View (e.g. don't call ImageRequest.setTargetView(myImageView). 
 * ImageRequest's for the same URL are safe to call at the same time. The ImageLoader will delay subsequent requests for the same URL until the download has finished.
-* Adjustments via ImageFilter are only saved when a target View is present
+* Adjustments via ImageFilter are only saved, and success callbacks are only triggered, when a target View is present.
 * Setting a maximum cachable duration for a target URL can be achieved by calling ImageRequest.setMaxCacheDurationMs(long); e.g. setMaxCacheDurationMs(TimeUnit.DAYS.toMillis(5));
-* For lists, you probably don't want exit transitions as it can appear weird. To disable them, call ImageRequest.setExitTransitionsEnabled(false)
+* For lists, you probably don't want exit transitions as it can appear weird when scrolling quickly. To disable them, call ImageRequest.setExitTransitionsEnabled(false)
 
 ##### Things I plan on adding when I get the chance
 * Custom SVG Image Filters (e.g. replacing colors)
@@ -140,10 +138,9 @@ The currently included TransitionModules are the FadingTransitionModule and the 
 
 ##### Known Issues
 * If trying to load a super large image (like a picture from the Camera) into an ImageView with layout_width as either fill_parent or wrap_cotent, it may run into an OutOfMemoryError with filters due to the barely-downsampled size of the image. To avoid this, either set the LayoutParams's width manually, or use the helper method: **ImageRequest.setRequiredImageWidth(int)**
-* Transitioning between images of different sizes / aspect ratios / scale types are at the moment a bit 'off'. As in, there can be a flicker during the initial transition, which I'm still working on getting around (would be easy if just using Bitmaps...)
-* Loading many versions of the same SVG file too quickly can cause the SVGParser to throw an "Invalid Colour Keyword" error due to the version we're using not supporting asynchronous SVG parsing
+* Loading many versions of the same SVG file too quickly can cause the SVGParser to throw an "Invalid Colour Keyword" error due to the version we're using not supporting asynchronous SVG parsing.
+* Using the DefaultLoadingStub when the request is for View's background may cause a slight vertical rendering shift I don't yet understand.
 
 ####### RotationTransitionModule issues:
 * It doesn't work for none-square backgrounds (i.e. non-ImageView requests or ones with setAsbackground(true)). It's all weird and not pretty. Don't use it.
-* Using the default loading stubs with a non-0 starting rotation can possibly cause a flicker. I have yet to discover why.
 

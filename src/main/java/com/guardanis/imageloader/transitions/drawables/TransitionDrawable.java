@@ -1,29 +1,17 @@
 package com.guardanis.imageloader.transitions.drawables;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.support.annotation.Nullable;
-import android.util.Log;
-import android.view.animation.Animation;
-import android.view.animation.AnimationSet;
-import android.view.animation.AnimationUtils;
-import android.view.animation.Transformation;
 
 import com.guardanis.imageloader.stubs.AnimatedStubDrawable;
 import com.guardanis.imageloader.stubs.StubDrawable;
 import com.guardanis.imageloader.transitions.modules.TransitionModule;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class TransitionDrawable extends BitmapDrawable {

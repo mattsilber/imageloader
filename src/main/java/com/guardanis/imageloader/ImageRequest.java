@@ -9,7 +9,6 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
-import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 

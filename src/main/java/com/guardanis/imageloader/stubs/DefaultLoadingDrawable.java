@@ -7,7 +7,6 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 
 import com.guardanis.imageloader.R;
 
@@ -66,8 +65,6 @@ public class DefaultLoadingDrawable extends AnimatedStubDrawable {
         canvas.save();
 
         canvas.rotate(rotationDegrees, canvas.getWidth() / 2, canvas.getHeight() / 2);
-
-        Log.d("imageloader", drawableBounds.width() + " " + drawableBounds.height());
 
         canvas.drawArc(drawableBounds, 0, arcAngle, false, loadingPaint);
 

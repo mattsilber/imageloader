@@ -7,9 +7,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.View;
-import android.view.animation.Animation;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
@@ -19,9 +17,7 @@ import com.guardanis.imageloader.stubs.StubDrawable;
 import com.guardanis.imageloader.transitions.drawables.TransitionDrawable;
 import com.guardanis.imageloader.transitions.modules.TransitionModule;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class TransitionController {
