@@ -35,6 +35,9 @@ public class TransitionDrawable extends BitmapDrawable {
     protected Drawable oldDrawable;
     protected Drawable targetDrawable;
 
+    protected Matrix baseCanvasMatrix = new Matrix();
+    protected Matrix canvasMatrixOverride;
+
     protected Map<Class, TransitionModule> modules = new HashMap<Class, TransitionModule>();
 
     protected TransitionStage transitionStage = TransitionStage.AWAITING_START;
@@ -63,8 +66,15 @@ public class TransitionDrawable extends BitmapDrawable {
         invalidateSelf();
     }
 
+    public void overrideCanvasMatrix(Matrix canvasMatrixOverride){
+        this.canvasMatrixOverride = canvasMatrixOverride;
+    }
+
     @Override
     public void draw(Canvas canvas) {
+        if(canvasMatrixOverride != null)
+            canvas.setMatrix(canvasMatrixOverride);
+
         if(transitionStage == TransitionStage.TRANSITIONING){
             boolean unfinishedExists = false;
 
@@ -87,6 +97,8 @@ public class TransitionDrawable extends BitmapDrawable {
         else if(transitionStage == TransitionStage.AWAITING_START)
             updateOldAndDraw(canvas, System.currentTimeMillis());
         else handlePostTransitionDrawing(canvas);
+
+        canvas.getMatrix(baseCanvasMatrix);
     }
 
     protected void updateModulesAndDraw(Canvas canvas, long startTime){
@@ -194,6 +206,10 @@ public class TransitionDrawable extends BitmapDrawable {
 
     public Drawable getTargetDrawable(){
         return targetDrawable;
+    }
+
+    public Matrix getBaseCanvasMatrix(){
+        return baseCanvasMatrix;
     }
 
 }

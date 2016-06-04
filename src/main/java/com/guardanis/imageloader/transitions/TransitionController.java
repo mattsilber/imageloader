@@ -59,12 +59,21 @@ public class TransitionController {
         else{
             Bitmap targetBitmap = getTargetBitmap(to, request.getTargetView());
 
+            Drawable currentlyInView = request.isExitTransitionEnabled()
+                    ? getCurrentTargetDrawable(targetBitmap)
+                    : null;
+
             TransitionDrawable drawable = new TransitionDrawable(request.getContext(),
-                    request.isExitTransitionEnabled()
-                            ? getCurrentTargetDrawable(targetBitmap)
-                            : null,
+                    currentlyInView,
                     to,
                     targetBitmap);
+
+            if(currentlyInView != null){
+                if(!request.isRequestForBackgroundImage() && currentlyInView instanceof TransitionDrawable)
+                    ((TransitionDrawable) currentlyInView).overrideCanvasMatrix(((TransitionDrawable) currentlyInView).getBaseCanvasMatrix());
+                else if(currentlyInView instanceof StubDrawable)
+                    ((StubDrawable) currentlyInView).overrideCanvasMatrix(((StubDrawable) currentlyInView).getBaseCanvasMatrix());
+            }
 
             for(TransitionModule module : modules.values())
                 drawable.registerModule(module);

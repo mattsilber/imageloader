@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
+    <dimen name="ail__default_stub_loading_bounds">50dip</dimen>
+    <dimen name="ail__default_stub_loading_arc_min_size">10dip</dimen>
+    <dimen name="ail__default_stub_loading_arc_max_size">25dip</dimen>
     <dimen name="ail__default_stub_loading_stroke_width">3dip</dimen>
-    <dimen name="ail__default_stub_loading_size">50dip</dimen>
 
 </resources>

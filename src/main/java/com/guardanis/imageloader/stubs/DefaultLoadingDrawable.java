@@ -7,26 +7,29 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import com.guardanis.imageloader.R;
 
 public class DefaultLoadingDrawable extends AnimatedStubDrawable {
 
-    private static final int MIN_ARC = 5;
-    private static final int MAX_ARC = 360;
-    private static final float ARC_SPEED = 7.25f;
+    protected static final int MIN_ARC = 5;
+    protected static final int MAX_ARC = 360;
+    protected static final float ARC_SPEED = 7.25f;
 
-    private static final float ROTATION_SPEED = 2.85f;
+    protected static final float ROTATION_SPEED = 2.85f;
 
-    private LoadingDrawableState state;
+    protected LoadingDrawableState state;
 
-    private Paint loadingPaint = new Paint();
-    private float rotationDegrees = 0;
-    private float arcAngle = 270;
-    private RectF drawableBounds = new RectF();
-    private boolean arcModeLower = true;
+    protected Paint loadingPaint = new Paint();
+    protected float rotationDegrees = 0;
+    protected float arcAngle = 270;
+    protected RectF drawableBounds = new RectF();
+    protected boolean arcModeLower = true;
 
-    private int lastBoundedWidth = -1;
+    private int[] lastBounds = new int[]{ -1, -1 };
+
+    protected int[] sizeRange;
 
     public DefaultLoadingDrawable(Resources resources){
         this(resources, resources.getColor(R.color.ail__default_stub_loading_tint));
@@ -35,9 +38,12 @@ public class DefaultLoadingDrawable extends AnimatedStubDrawable {
     public DefaultLoadingDrawable(Resources resources, int color){
         this.state = new LoadingDrawableState(resources);
 
+        this.sizeRange = new int[]{ (int) resources.getDimension(R.dimen.ail__default_stub_loading_arc_min_size),
+                (int) resources.getDimension(R.dimen.ail__default_stub_loading_arc_max_size)};
+
         setBounds(0, 0,
-                (int) resources.getDimension(R.dimen.ail__default_stub_loading_size),
-                (int) resources.getDimension(R.dimen.ail__default_stub_loading_size));
+                (int) resources.getDimension(R.dimen.ail__default_stub_loading_bounds),
+                (int) resources.getDimension(R.dimen.ail__default_stub_loading_bounds));
 
         setupPaints(resources, color);
     }
@@ -51,33 +57,43 @@ public class DefaultLoadingDrawable extends AnimatedStubDrawable {
 
     @Override
     public void draw(Canvas canvas) {
-        if(lastBoundedWidth != canvas.getWidth())
+        if(!(lastBounds[0] == canvas.getWidth() && lastBounds[1] == canvas.getHeight()))
             setupRect(canvas);
+
+        if(canvasMatrixOverride != null)
+            canvas.setMatrix(canvasMatrixOverride);
 
         canvas.save();
 
         canvas.rotate(rotationDegrees, canvas.getWidth() / 2, canvas.getHeight() / 2);
 
+        Log.d("imageloader", drawableBounds.width() + " " + drawableBounds.height());
+
         canvas.drawArc(drawableBounds, 0, arcAngle, false, loadingPaint);
 
         canvas.restore();
+
+        canvas.getMatrix(baseCanvasMatrix);
 
         updatePositions();
         invalidateSelf();
     }
 
     protected void setupRect(Canvas canvas){
-        int desiredSize = Math.min(canvas.getClipBounds().width() / 8, canvas.getClipBounds().height() / 5) / 2;
+        int desiredSize = Math.min(canvas.getWidth() / 8, canvas.getHeight() / 5) / 2;
+        desiredSize = Math.min(desiredSize, sizeRange[1]);
+        desiredSize = Math.max(desiredSize, sizeRange[0]);
 
-        int[] center = new int[]{ canvas.getClipBounds().width() / 2,
-                canvas.getClipBounds().height() / 2 };
+        int[] center = new int[]{ canvas.getWidth() / 2,
+                canvas.getHeight() / 2 };
 
         drawableBounds.left = center[0] - desiredSize;
         drawableBounds.right = center[0] + desiredSize;
         drawableBounds.top = center[1] - desiredSize;
         drawableBounds.bottom = center[1] + desiredSize;
 
-        lastBoundedWidth = canvas.getWidth();
+        lastBounds = new int[]{ canvas.getWidth(),
+                canvas.getHeight() };
     }
 
     protected void updatePositions(){
