@@ -65,7 +65,7 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected TransitionController transitionController = new TransitionController(this);
     protected boolean exitTransitionsEnabled = true;
-    protected boolean transitionOnCompleteEnabled = true;
+    protected boolean transitionOnSuccessEnabled = true;
 
     protected Map<String, String> httpRequestParams = new HashMap<String, String>();
 
@@ -274,8 +274,8 @@ public class ImageRequest<V extends View> implements Runnable {
      * for cases where you want to handle the returned Bitmap before it's actually placed within the View.
      * See setSuccessCallback(ImageSuccessCallback) for more info
      */
-    public ImageRequest<V> setTransitionOnCompleteEnabled(boolean transitionOnCompleteEnabled){
-        this.transitionOnCompleteEnabled = transitionOnCompleteEnabled;
+    public ImageRequest<V> setTransitionOnSuccessEnabled(boolean transitionOnSuccessEnabled){
+        this.transitionOnSuccessEnabled = transitionOnSuccessEnabled;
         return this;
     }
 
@@ -344,7 +344,7 @@ public class ImageRequest<V extends View> implements Runnable {
         else if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(this))
             return;
 
-        if(transitionOnCompleteEnabled){
+        if(transitionOnSuccessEnabled){
             BitmapDrawable targetDrawable = new BitmapDrawable(targetView.getContext().getResources(), bitmap);
             transitionController.transitionTo(targetDrawable);
         }
