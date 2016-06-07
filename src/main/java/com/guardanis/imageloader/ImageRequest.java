@@ -13,6 +13,7 @@ import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
 import com.guardanis.imageloader.filters.BitmapBlurFilter;
+import com.guardanis.imageloader.filters.BitmapCenterCropFilter;
 import com.guardanis.imageloader.filters.BitmapCircularCropFilter;
 import com.guardanis.imageloader.filters.BitmapColorFilter;
 import com.guardanis.imageloader.filters.BitmapColorOverlayFilter;
@@ -208,6 +209,11 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> addColorFilter(ColorFilter filter) {
         bitmapImageFilters.add(new BitmapColorFilter(context, filter));
+        return this;
+    }
+
+    public ImageRequest<V> addCenterCropFilter(int width, int height) {
+        bitmapImageFilters.add(new BitmapCenterCropFilter(context, new int[]{ width, height }));
         return this;
     }
 

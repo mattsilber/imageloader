@@ -12,7 +12,7 @@ Another lazy image-loading library with AndroidSVG and Bitmap filtering support 
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.2.3')
+        compile('com.guardanis:imageloader:1.2.4')
     }
 ```
 
@@ -55,6 +55,8 @@ As mentioned above, this library comes with a few stock Bitmap filters (such as 
 * BitmapColorOverlayFilter : addColorOverlayFilter(int) : Overlay the Bitmap with a color
 * BitmapColorReplacementFilter : addColorReplacementFilter(int, int), addColorReplacementFilter(Map<Int, Int>) : Replace any occurance of a color with it's mapped value
 * BitmapRotationFilter : addRotationFilter(int) : Rotate the Bitmap (degrees) (may change Bitmap size)
+* BitmapColorFilter : addColorFilter(ColorFilter) : Apply a ColorFilter to the Bitmap
+* BitmapCenterCropFilter : addCenterCropFilter(int, int) : Perform a centerCrop-type filter on an image (useful for backgrounds)
 
 ### AndroidSVG Assets
 
