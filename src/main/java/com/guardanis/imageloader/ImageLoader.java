@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -21,6 +22,8 @@ import java.util.Map;
 import java.util.WeakHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ImageLoader implements ImageDownloader.DownloadEventListener {
 
@@ -159,13 +162,18 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     protected URL getCorrectDownloadUrl(String url) throws Exception {
         URL imageUrl = new URL(url);
 
-        if(url.contains("graph.facebook.com"))
-            imageUrl = getAdjustedFacebookImageUrl(imageUrl);
+        for(String regex : Arrays.asList(context.getResources().getStringArray(R.array.ail__known_location_redirects_regex))){
+            Matcher matcher = Pattern.compile(regex)
+                    .matcher(url);
+
+            if(matcher.find())
+                return getAdjustedLocationImageUrl(imageUrl);
+        }
 
         return imageUrl;
     }
 
-    protected URL getAdjustedFacebookImageUrl(URL imageUrl) throws Exception {
+    protected URL getAdjustedLocationImageUrl(URL imageUrl) throws Exception {
         HttpURLConnection.setFollowRedirects(false);
         HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
 

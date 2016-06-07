@@ -30,9 +30,11 @@ public class ImageDownloader implements Runnable {
             if(downloadedFile != null){
                 handler.post(new Runnable(){
                     public void run() {
-                        ImageUtils.log(imageRequest.getContext(), "Download success: " + imageRequest.getTargetUrl());
+                        ImageUtils.log(imageRequest.getContext(),
+                                "Download success: " + imageRequest.getTargetUrl());
 
-                        downloadEventListener.onDownloadCompleted(ImageDownloader.this, imageRequest.getTargetUrl());
+                        downloadEventListener.onDownloadCompleted(ImageDownloader.this,
+                                imageRequest.getTargetUrl());
                     }
                 });
 
@@ -43,9 +45,11 @@ public class ImageDownloader implements Runnable {
 
         handler.post(new Runnable(){
             public void run() {
-                ImageUtils.log(imageRequest.getContext(), "Download failed: " + imageRequest.getTargetUrl());
+                ImageUtils.log(imageRequest.getContext(),
+                        "Download failed: " + imageRequest.getTargetUrl());
 
-                downloadEventListener.onDownloadFailed(ImageDownloader.this, imageRequest.getTargetUrl());
+                downloadEventListener.onDownloadFailed(ImageDownloader.this,
+                        imageRequest.getTargetUrl());
             }
         });
     }

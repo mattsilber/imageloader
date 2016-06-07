@@ -2,4 +2,8 @@
 
     <string name="ail__image_resource_request_error_constructor">Only ImageResourceRequest(Context, int) is supported!</string>
 
+    <string-array name="ail__known_location_redirects_regex">
+        <item>^((http|https)\:\/\/)*graph.facebook.com</item>
+    </string-array>
+
 </resources>
