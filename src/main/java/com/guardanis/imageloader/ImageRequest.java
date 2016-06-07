@@ -71,6 +71,8 @@ public class ImageRequest<V extends View> implements Runnable {
     protected ImageSuccessCallback successCallback;
     protected ImageErrorCallback errorCallback;
 
+    protected long startedAtMs;
+
     public ImageRequest(Context context) {
         this(context, "");
     }
@@ -279,7 +281,7 @@ public class ImageRequest<V extends View> implements Runnable {
 
     @Override
     public void run() {
-        if(targetView != null && ImageLoader.getInstance(context).isViewStillUsable(targetView, targetUrl))
+        if(targetView != null && ImageLoader.getInstance(context).isViewStillUsable(this))
             performFullImageRequest();
     }
 
@@ -328,7 +330,7 @@ public class ImageRequest<V extends View> implements Runnable {
             onRequestFailed();
             return;
         }
-        else if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(targetView, targetUrl))
+        else if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(this))
             return;
 
         BitmapDrawable targetDrawable = new BitmapDrawable(targetView.getContext().getResources(), bitmap);
@@ -343,7 +345,7 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     protected void onRequestFailed() {
-        if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(targetView, targetUrl))
+        if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(this))
             return;
 
         handleShowStubOnError();
@@ -430,6 +432,10 @@ public class ImageRequest<V extends View> implements Runnable {
         return exitTransitionsEnabled;
     }
 
+    public long getStartedAtMs(){
+        return startedAtMs;
+    }
+
     private void handleShowStubOnExecute(){
         if(disableExecutionStubIfDownloaded
                 && ImageLoader.getInstance(context).isImageDownloaded(this)
@@ -444,17 +450,20 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     public ImageRequest<V> execute() {
+        startedAtMs = System.currentTimeMillis();
+
         if(targetView == null)
             ImageLoader.getInstance(context).submit(this);
         else {
             targetView.post(new Runnable(){
                 public void run(){
                     ImageLoader.getInstance(context)
-                            .addViewAndTargetUrl(targetView, targetUrl);
+                            .claimViewTarget(ImageRequest.this);
 
                     handleShowStubOnExecute();
 
-                    ImageLoader.getInstance(context).submit(ImageRequest.this);
+                    ImageLoader.getInstance(context)
+                            .submit(ImageRequest.this);
                 }
             });
         }

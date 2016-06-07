@@ -201,16 +201,24 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
         catch(Exception e){ }
     }
 
-    public void addViewAndTargetUrl(View view, String targetUrl) {
-        views.put(view, targetUrl);
+    public void claimViewTarget(ImageRequest request) {
+        claimViewTarget(request.getTargetView(), request.getTargetUrl(), request.getStartedAtMs());
     }
 
-    public boolean isViewStillUsable(View target, String expectedTag) {
-        return expectedTag.equals(views.get(target));
+    private void claimViewTarget(View view, String targetUrl, long startedAtMs) {
+        views.put(view, combineViewNameParams(targetUrl, startedAtMs));
     }
 
     public boolean isViewStillUsable(ImageRequest request) {
-        return isViewStillUsable(request.getTargetView(), request.getTargetUrl());
+        return isViewStillUsable(request.getTargetView(), request.getTargetUrl(), request.getStartedAtMs());
+    }
+
+    private boolean isViewStillUsable(View target, String targetUrl, long startedAtMs) {
+        return combineViewNameParams(targetUrl, startedAtMs).equals(views.get(target));
+    }
+
+    private String combineViewNameParams(String targetUrl, long startedAtMs){
+        return targetUrl + "_" + startedAtMs;
     }
 
     public FileCache getFileCache() {
