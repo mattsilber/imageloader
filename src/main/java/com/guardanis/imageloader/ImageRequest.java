@@ -65,6 +65,7 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected TransitionController transitionController = new TransitionController(this);
     protected boolean exitTransitionsEnabled = true;
+    protected boolean transitionOnCompleteEnabled = true;
 
     protected Map<String, String> httpRequestParams = new HashMap<String, String>();
 
@@ -269,6 +270,16 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     /**
+     * Set whether or not the loader should automatically transition the View to the request's completed image
+     * for cases where you want to handle the returned Bitmap before it's actually placed within the View.
+     * See setSuccessCallback(ImageSuccessCallback) for more info
+     */
+    public ImageRequest<V> setTransitionOnCompleteEnabled(boolean transitionOnCompleteEnabled){
+        this.transitionOnCompleteEnabled = transitionOnCompleteEnabled;
+        return this;
+    }
+
+    /**
      * Override an Interpolator for a previously added TransitionModule
      * @param c the class of the module (e.g. FadingTransitionModule)
      * @param interpolatorId the int ID from TransitionModule keys or custom entries (e.g. TransitionModule.INTERPOLATOR_IN)
@@ -333,8 +344,10 @@ public class ImageRequest<V extends View> implements Runnable {
         else if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(this))
             return;
 
-        BitmapDrawable targetDrawable = new BitmapDrawable(targetView.getContext().getResources(), bitmap);
-        transitionController.transitionTo(targetDrawable);
+        if(transitionOnCompleteEnabled){
+            BitmapDrawable targetDrawable = new BitmapDrawable(targetView.getContext().getResources(), bitmap);
+            transitionController.transitionTo(targetDrawable);
+        }
 
         targetView.post(new Runnable(){
             public void run(){

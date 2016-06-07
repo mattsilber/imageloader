@@ -87,26 +87,7 @@ public class TransitionController {
             return ContextCompat.getDrawable(request.getContext(), R.drawable.ail__default_fade_placeholder);
         else if(current instanceof TransitionDrawable && ((TransitionDrawable) current).getTargetDrawable() instanceof StubDrawable)
             return ((TransitionDrawable) current).getTargetDrawable();
-        else{
-//            if(current instanceof TransitionDrawable)
-//                ((TransitionDrawable) current).setNormalDrawingEnabled(false);
-
-//            BitmapDrawable adjusted = new BitmapDrawable(request.getContext().getResources(),
-//                    targetBitmap.copy(Bitmap.Config.ARGB_8888, true));
-//            Bitmap target = Bitmap.createBitmap(targetBitmap.getWidth(), targetBitmap.getHeight(), targetBitmap.getConfig());
-//
-//            Canvas canvas = new Canvas(target);
-//
-//            if(current instanceof TransitionDrawable)
-//                ((TransitionDrawable) current).drawCurrentState(canvas);
-//            else if(current instanceof BitmapDrawable)
-//                canvas.drawBitmap(((BitmapDrawable) current).getBitmap(), 0, 0, null);
-//            else current.draw(canvas);
-//
-//            return new BitmapDrawable(request.getContext().getResources(), target);
-
-            return current;
-        }
+        else return current;
     }
 
     protected Bitmap getTargetBitmap(Drawable drawable, @Nullable View targetView){

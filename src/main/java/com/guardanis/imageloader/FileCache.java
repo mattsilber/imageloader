@@ -1,6 +1,7 @@
 package com.guardanis.imageloader;
 
 import android.content.Context;
+import android.os.Environment;
 
 import java.io.File;
 
@@ -9,8 +10,8 @@ public class FileCache {
     private File cacheDir;
 
     public FileCache(Context context) {
-        if(android.os.Environment.getExternalStorageState().equals(android.os.Environment.MEDIA_MOUNTED))
-            cacheDir = new File(android.os.Environment.getExternalStorageDirectory(), context.getPackageName());
+        if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
+            cacheDir = new File(Environment.getExternalStorageDirectory(), context.getPackageName());
         else cacheDir = context.getCacheDir();
 
         if(!cacheDir.exists())
@@ -18,7 +19,9 @@ public class FileCache {
     }
 
     public File getFile(String url) {
-        String filename = String.valueOf(url.hashCode()) + (url.endsWith("svg") ? ".svg" : "");
+        String filename = String.valueOf(url.hashCode())
+                + (url.endsWith("svg") ? ".svg" : ""); // Since we're using file extensions and not descriptors for SVGs
+
         return new File(cacheDir, filename);
     }
 
