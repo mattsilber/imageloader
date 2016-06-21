@@ -17,6 +17,7 @@ import com.guardanis.imageloader.filters.BitmapCenterCropFilter;
 import com.guardanis.imageloader.filters.BitmapCircularCropFilter;
 import com.guardanis.imageloader.filters.BitmapColorFilter;
 import com.guardanis.imageloader.filters.BitmapColorOverlayFilter;
+import com.guardanis.imageloader.filters.BitmapColorOverrideFilter;
 import com.guardanis.imageloader.filters.BitmapColorReplacementFilter;
 import com.guardanis.imageloader.filters.BitmapRotationFilter;
 import com.guardanis.imageloader.filters.ImageFilter;
@@ -197,6 +198,16 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public ImageRequest<V> addCircularCropFilter() {
         bitmapImageFilters.add(new BitmapCircularCropFilter(context));
+        return this;
+    }
+
+    /**
+     * Replace all color values with the supplied color value while maintaining proper opacity at each pixel.
+     * Intended for single color-scaled images.
+     * @param replacementColor the 24-bit color value to replace with (0xAARRGGBB)
+     */
+    public ImageRequest<V> addColorOverrideFilter(int replacementColor){
+        bitmapImageFilters.add(new BitmapColorOverrideFilter(context, replacementColor));
         return this;
     }
 

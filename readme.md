@@ -53,6 +53,7 @@ As mentioned above, this library comes with a few stock Bitmap filters (such as 
 * BitmapBlurFilter : addBlurFilter(), addBlurFilter(int) : Blur the Bitmap
 * BitmapCircularCropFilter : addCircularCropFilter() : Crop the Bitmap to the bounrdaries of a circle
 * BitmapColorOverlayFilter : addColorOverlayFilter(int) : Overlay the Bitmap with a color
+* BitmapColorOverrideFilter : addColorOverrideFilter(int) : Replace all color values with the supplied color value while maintaining proper opacity at each pixel
 * BitmapColorReplacementFilter : addColorReplacementFilter(int, int), addColorReplacementFilter(Map<Int, Int>) : Replace any occurance of a color with it's mapped value
 * BitmapRotationFilter : addRotationFilter(int) : Rotate the Bitmap (degrees) (may change Bitmap size)
 * BitmapColorFilter : addColorFilter(ColorFilter) : Apply a ColorFilter to the Bitmap
