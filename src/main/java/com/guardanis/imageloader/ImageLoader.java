@@ -60,8 +60,11 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
      */
     public void submit(ImageRequest request){
         if(request instanceof LocalImageRequest
-                || (isImageDownloaded(request) && fileCache.isCachedFileValid(request.getTargetUrl(), request.getMaxCacheDurationMs())))
+                || (isImageDownloaded(request) && fileCache.isCachedFileValid(request.getTargetUrl(), request.getMaxCacheDurationMs()))){
+            ImageUtils.log(context, "Submitting");
             executorService.submit(request);
+            ImageUtils.log(context, "Submitted");
+        }
         else submitDownloadRequest(request);
     }
 
@@ -210,7 +213,9 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     }
 
     public void claimViewTarget(ImageRequest request) {
-        claimViewTarget(request.getTargetView(), request.getTargetUrl(), request.getStartedAtMs());
+        claimViewTarget(request.getTargetView(),
+                request.getTargetUrl(),
+                request.getStartedAtMs());
     }
 
     private void claimViewTarget(View view, String targetUrl, long startedAtMs) {
@@ -218,11 +223,14 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     }
 
     public boolean isViewStillUsable(ImageRequest request) {
-        return isViewStillUsable(request.getTargetView(), request.getTargetUrl(), request.getStartedAtMs());
+        return isViewStillUsable(request.getTargetView(),
+                request.getTargetUrl(),
+                request.getStartedAtMs());
     }
 
     private boolean isViewStillUsable(View target, String targetUrl, long startedAtMs) {
-        return combineViewNameParams(targetUrl, startedAtMs).equals(views.get(target));
+        return combineViewNameParams(targetUrl, startedAtMs)
+                .equals(views.get(target));
     }
 
     private String combineViewNameParams(String targetUrl, long startedAtMs){
@@ -271,12 +279,14 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
 
         @Override
         public Drawable getLoadingDrawable(Context context) {
-            return ContextCompat.getDrawable(context, R.drawable.ail__image_loader_stub);
+            return ContextCompat.getDrawable(context,
+                    R.drawable.ail__image_loader_stub);
         }
 
         @Override
         public Drawable getErrorDrawable(Context context) {
-            return ContextCompat.getDrawable(context, R.drawable.ail__image_loader_stub_error);
+            return ContextCompat.getDrawable(context,
+                    R.drawable.ail__image_loader_stub_error);
         }
     };
 }

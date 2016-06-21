@@ -6,6 +6,7 @@ import android.graphics.ColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
+import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -377,7 +378,8 @@ public class ImageRequest<V extends View> implements Runnable {
         targetView.post(new Runnable(){
             public void run(){
                 if(errorCallback != null)
-                    errorCallback.onImageLoadingFailure(ImageRequest.this, new RuntimeException("Image could not be loaded"));
+                    errorCallback.onImageLoadingFailure(ImageRequest.this,
+                            new RuntimeException("Image could not be loaded"));
             }
         });
     }
@@ -477,20 +479,21 @@ public class ImageRequest<V extends View> implements Runnable {
         startedAtMs = System.currentTimeMillis();
 
         if(targetView == null)
-            ImageLoader.getInstance(context).submit(this);
-        else {
-            targetView.post(new Runnable(){
-                public void run(){
-                    ImageLoader.getInstance(context)
-                            .claimViewTarget(ImageRequest.this);
+            ImageLoader.getInstance(context)
+                    .submit(this);
+        else
+            new Handler(Looper.getMainLooper())
+                    .post(new Runnable(){
+                        public void run(){
+                            ImageLoader.getInstance(context)
+                                    .claimViewTarget(ImageRequest.this);
 
-                    handleShowStubOnExecute();
+                            handleShowStubOnExecute();
 
-                    ImageLoader.getInstance(context)
-                            .submit(ImageRequest.this);
-                }
-            });
-        }
+                            ImageLoader.getInstance(context)
+                                    .submit(ImageRequest.this);
+                        }
+                    });
 
         return this;
     }
@@ -499,15 +502,12 @@ public class ImageRequest<V extends View> implements Runnable {
      * @param delay amount to delay the execution by
      */
     public ImageRequest<V> execute(long delay){
-        Runnable execution = new Runnable(){
-            public void run(){
-                execute();
-            }
-        };
-
-        if(targetView == null)
-            new Handler().postDelayed(execution, delay);
-        else targetView.postDelayed(execution, delay);
+        new Handler(Looper.getMainLooper())
+                .postDelayed(new Runnable(){
+                    public void run(){
+                        execute();
+                    }
+                }, delay);
 
         return this;
     }
