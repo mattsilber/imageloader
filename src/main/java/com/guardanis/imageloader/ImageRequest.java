@@ -74,6 +74,8 @@ public class ImageRequest<V extends View> implements Runnable {
     protected ImageSuccessCallback successCallback;
     protected ImageErrorCallback errorCallback;
 
+    protected boolean tagRequestPreventionEnabled = false;
+
     protected long startedAtMs;
 
     public ImageRequest(Context context) {
@@ -302,6 +304,15 @@ public class ImageRequest<V extends View> implements Runnable {
         return this;
     }
 
+    /**
+     * Enabling this will prevent subsequent requests for the same URL from running when the target is already set correctly.
+     * This uses the target View's tag holder. Don't use this with other requests that don't have this flag enabled.
+     */
+    public ImageRequest<V> setTagRequestPreventionEnabled(boolean tagRequestPreventionEnabled){
+        this.tagRequestPreventionEnabled = tagRequestPreventionEnabled;
+        return this;
+    }
+
     @Override
     public void run() {
         if(targetView != null && ImageLoader.getInstance(context).isViewStillUsable(this))
@@ -476,22 +487,40 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     public ImageRequest<V> execute() {
+        final String fullRequestFile = getFullRequestFileCacheName();
+
+        if(tagRequestPreventionEnabled
+                && !(targetView == null || targetView.getTag() == null)
+                && targetView.getTag().equals(fullRequestFile)){
+            ImageUtils.log(context, "Request already claimed. Ignoring [" + fullRequestFile + "]");
+
+            return this;
+        }
+
         startedAtMs = System.currentTimeMillis();
 
         if(targetView == null)
             ImageLoader.getInstance(context)
                     .submit(this);
         else
-            new Handler(Looper.getMainLooper())
+            ImageLoader.getInstance(context)
+                    .getHandler()
                     .post(new Runnable(){
                         public void run(){
+                            if(tagRequestPreventionEnabled)
+                                targetView.setTag(fullRequestFile);
+
                             ImageLoader.getInstance(context)
                                     .claimViewTarget(ImageRequest.this);
 
                             handleShowStubOnExecute();
 
-                            ImageLoader.getInstance(context)
-                                    .submit(ImageRequest.this);
+                            targetView.post(new Runnable() {
+                                public void run() {
+                                    ImageLoader.getInstance(context)
+                                            .submit(ImageRequest.this);
+                                }
+                            });
                         }
                     });
 
@@ -502,7 +531,8 @@ public class ImageRequest<V extends View> implements Runnable {
      * @param delay amount to delay the execution by
      */
     public ImageRequest<V> execute(long delay){
-        new Handler(Looper.getMainLooper())
+        ImageLoader.getInstance(context)
+                .getHandler()
                 .postDelayed(new Runnable(){
                     public void run(){
                         execute();

@@ -60,11 +60,8 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
      */
     public void submit(ImageRequest request){
         if(request instanceof LocalImageRequest
-                || (isImageDownloaded(request) && fileCache.isCachedFileValid(request.getTargetUrl(), request.getMaxCacheDurationMs()))){
-            ImageUtils.log(context, "Submitting");
+                || (isImageDownloaded(request) && fileCache.isCachedFileValid(request.getTargetUrl(), request.getMaxCacheDurationMs())))
             executorService.submit(request);
-            ImageUtils.log(context, "Submitted");
-        }
         else submitDownloadRequest(request);
     }
 
@@ -260,6 +257,10 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     public boolean isImageDownloaded(ImageRequest request){
         return request.getOriginalRequestFile().exists()
                 && context.getSharedPreferences(PREFS, 0).getBoolean(request.getTargetUrl(), false);
+    }
+
+    public Handler getHandler(){
+        return handler;
     }
 
     private final StubHolder defaultStubHolder = new StubHolder(){
