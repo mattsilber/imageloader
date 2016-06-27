@@ -12,7 +12,7 @@ Another lazy image-loading library with AndroidSVG and Bitmap filtering support 
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.2.7')
+        compile('com.guardanis:imageloader:1.2.8')
     }
 ```
 
@@ -126,6 +126,14 @@ By default, the ImageRequest will show the loading stub, but not the error stub,
 As of version 1.1.0, a single TransitionController is now the interface between a single TransitionDrawable and any TransitionModules it contains. The TransitionModules are the modular components used to actually perform adjustments to the underlying Canvas/Bitmap/Drawable at the appropriate times, and can be easily added to any request. The idea here is to (hopefully) allow multiple types of transitions to be run at the same time (e.g. scale and fade).
 
 The currently included TransitionModules are the FadingTransitionModule and the ScalingTransitionModule.
+
+### Caching
+
+By default, the system will try to save things in {External_Storage_Dir}/{some.package.name}, and fallback to the context.getCacheDir() when the media isn't mounted or WRITE_EXTERNAL_STORAGE permissions has been revoked. 
+
+If you would like to override that bahavior, setting **R.bool.ail__external_storage_enabled** to false will cause it to use the Cache directory by default. 
+
+If you would like to use **context.getFilesDir()** instead of the Cache, simply set **R.bool.ail__use_cache_dir** to false.
 
 ##### Notes
 * Prefetching images can be achieved by simply not setting a target View (e.g. don't call ImageRequest.setTargetView(myImageView). 

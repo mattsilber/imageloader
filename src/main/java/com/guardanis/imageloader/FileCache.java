@@ -1,24 +1,59 @@
 package com.guardanis.imageloader;
 
+import android.Manifest;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Environment;
+import android.support.v4.content.ContextCompat;
 
 import java.io.File;
 
 public class FileCache {
 
+    private Context context;
+
     private File cacheDir;
 
+    private boolean externalStorageEnabled;
+    private boolean targetStorageExternal = false;
+
     public FileCache(Context context) {
-        if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
-            cacheDir = new File(Environment.getExternalStorageDirectory(), context.getPackageName());
-        else cacheDir = context.getCacheDir();
+        this.context = context.getApplicationContext();
+
+        this.externalStorageEnabled = context.getResources()
+                .getBoolean(R.bool.ail__external_storage_enabled);
+    }
+
+    private void ensureCacheDirectoryValid(){
+        if(cacheDir == null
+                || (targetStorageExternal && ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED))
+            updateCacheDirectory();
+    }
+
+    private void updateCacheDirectory(){
+        if(externalStorageEnabled
+                && ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                && Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
+            cacheDir = new File(Environment.getExternalStorageDirectory(),
+                    context.getPackageName());
+
+            targetStorageExternal = true;
+        }
+        else {
+            cacheDir = context.getResources().getBoolean(R.bool.ail__use_cache_dir)
+                    ? context.getCacheDir()
+                    : context.getFilesDir();
+
+            targetStorageExternal = false;
+        }
 
         if(!cacheDir.exists())
             cacheDir.mkdirs();
     }
 
     public File getFile(String url) {
+        ensureCacheDirectoryValid();
+
         String filename = String.valueOf(url.hashCode())
                 + (url.endsWith("svg") ? ".svg" : ""); // Since we're using file extensions and not descriptors for SVGs
 
@@ -26,6 +61,8 @@ public class FileCache {
     }
 
     public void clear() {
+        ensureCacheDirectoryValid();
+
         File[] files = cacheDir.listFiles();
 
         if(files != null)
@@ -49,6 +86,7 @@ public class FileCache {
     }
 
     public void delete(String url){
-        getFile(url).delete();
+        getFile(url)
+                .delete();
     }
 }
