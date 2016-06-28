@@ -341,8 +341,17 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected void processImage(File imageFile, Bitmap bitmap) {
         if(0 < bitmapImageFilters.size() && bitmap != null){
-            bitmap = applyBitmapFilters(bitmap);
-            saveBitmap(imageFile, bitmap);
+            try{
+                bitmap = applyBitmapFilters(bitmap);
+
+                saveBitmap(imageFile, bitmap);
+            }
+            catch(Throwable e){
+                ImageUtils.log(context, e);
+
+                // Let it fail gracefully if our filters couldn't recover
+                bitmap = null;
+            }
         }
 
         onRequestCompleted(bitmap);

@@ -256,4 +256,9 @@ public class ImageUtils {
             Log.d(TAG, message);
     }
 
+    public static void log(Context context, Throwable e){
+        if(context.getResources().getBoolean(R.bool.ail__debug_log_enabled))
+            e.printStackTrace();
+    }
+
 }

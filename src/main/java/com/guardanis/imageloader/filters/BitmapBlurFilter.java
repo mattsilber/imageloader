@@ -7,6 +7,8 @@ import android.support.v8.renderscript.Element;
 import android.support.v8.renderscript.RenderScript;
 import android.support.v8.renderscript.ScriptIntrinsicBlur;
 
+import com.guardanis.imageloader.ImageUtils;
+
 public class BitmapBlurFilter extends ImageFilter<Bitmap> {
 
     private float blurRadius;
@@ -34,8 +36,8 @@ public class BitmapBlurFilter extends ImageFilter<Bitmap> {
             script.forEach(output);
             output.copyTo(unedited);
         }
-        catch(OutOfMemoryError e){ e.printStackTrace(); }
-        catch(Exception e){ e.printStackTrace(); }
+        catch(OutOfMemoryError e){ ImageUtils.log(context, e); }
+        catch(Exception e){ ImageUtils.log(context, e); }
 
         return unedited;
     }
