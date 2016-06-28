@@ -340,7 +340,7 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     protected void processImage(File imageFile, Bitmap bitmap) {
-        if(0 < bitmapImageFilters.size()){
+        if(0 < bitmapImageFilters.size() && bitmap != null){
             bitmap = applyBitmapFilters(bitmap);
             saveBitmap(imageFile, bitmap);
         }
