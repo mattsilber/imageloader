@@ -11,7 +11,7 @@ public class BitmapColorOverrideFilter extends ImageFilter<Bitmap> {
     private int replacementColor;
 
     /**
-     * @param replacementColor the 24-bit color value to replace with (0xAARRGGBB)
+     * @param replacementColor the color value to replace with; alpha is ignored
      */
     public BitmapColorOverrideFilter(Context context, int replacementColor) {
         super(context);
@@ -32,7 +32,7 @@ public class BitmapColorOverrideFilter extends ImageFilter<Bitmap> {
     }
 
     private int[] getReplacementPixels(Bitmap copy){
-        int[] pixels = new int [copy.getHeight() * copy.getWidth()];
+        int[] pixels = new int [copy.getWidth() * copy.getHeight()];
 
         copy.getPixels(pixels, 0, copy.getWidth(),
                 0, 0, copy.getWidth(), copy.getHeight());
