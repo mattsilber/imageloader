@@ -12,7 +12,7 @@ Another lazy image-loading library with AndroidSVG and Bitmap filtering support 
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.2.9')
+        compile('com.guardanis:imageloader:1.2.10')
     }
 ```
 
@@ -87,6 +87,30 @@ or
 As long as the width/height or viewBox are correctly set, everything should be good to go, and all SVGs should scale up/down correctly (all of which the ImageRequest can handle by itself).
 
 Support for the viewBox fallback was added in the release of v1.2.2.
+
+### Gif Support
+
+As of version 1.2.10, this library can now support animated gifs loaded both locally and over the network.
+
+For more information about the android-gif-drawable library created by koral--, click [here](https://github.com/koral--/android-gif-drawable).
+
+To load a gif, create a GifRequest the same way you would any other ImageRequest in this library.
+
+    new GifRequest(context)
+        .setTargetExternalUrl("http://site.com/my_svg.svg") // <-- load from web
+        .setTargetAssetUrl("my_svg.svg") // <-- Load from assets
+        .setTargetFileUrl("/sdcard/0/my_svg.svg") // <-- Load from storage
+        .setTargetView(myImageView)
+        .execute();
+
+##### Supported features
+* Transitions are fully supported even while the gifs are running
+* Gifs can currently be pulled via the web or locally via AssetManager or Files
+* All other features (other than those listed in the Unsupported section) should work as well.
+
+##### Unsupported and ToDo
+* ImageFilters cannot be applied to gifs
+* ImageSuccessCallback cannot be used with a GifRequest
 
 ### Stubs
 

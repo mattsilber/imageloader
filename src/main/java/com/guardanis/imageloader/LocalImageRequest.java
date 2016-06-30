@@ -29,4 +29,8 @@ public abstract class LocalImageRequest<V extends View>  extends ImageRequest<V>
 
     protected abstract Bitmap decodeImageFile(int requiredImageWidth);
 
+    @Override
+    public boolean isTargetLocal(){
+        return true;
+    }
 }

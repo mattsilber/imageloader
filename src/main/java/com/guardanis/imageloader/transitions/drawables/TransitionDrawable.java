@@ -14,6 +14,8 @@ import com.guardanis.imageloader.transitions.modules.TransitionModule;
 import java.util.HashMap;
 import java.util.Map;
 
+import pl.droidsonroids.gif.GifDrawable;
+
 public class TransitionDrawable extends BitmapDrawable {
 
     protected enum TransitionStage {
@@ -52,6 +54,9 @@ public class TransitionDrawable extends BitmapDrawable {
         this.transitionStage = TransitionStage.TRANSITIONING;
 
         invalidateSelf();
+
+        if(targetDrawable instanceof GifDrawable)
+            ((GifDrawable) targetDrawable).start();
     }
 
     public void overrideCanvasMatrix(Matrix canvasMatrixOverride){
@@ -130,7 +135,7 @@ public class TransitionDrawable extends BitmapDrawable {
     }
 
     protected void drawTarget(Canvas canvas){
-        if(targetDrawable instanceof StubDrawable)
+        if(targetDrawable instanceof StubDrawable || targetDrawable instanceof GifDrawable)
             targetDrawable.draw(canvas);
         else super.draw(canvas);
     }
@@ -138,7 +143,7 @@ public class TransitionDrawable extends BitmapDrawable {
     protected void handlePostTransitionDrawing(Canvas canvas){
         updateModulesAndDraw(canvas, animationStart);
 
-        if(targetDrawable instanceof AnimatedStubDrawable)
+        if(targetDrawable instanceof AnimatedStubDrawable || targetDrawable instanceof GifDrawable)
             invalidateSelf();
     }
 

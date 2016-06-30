@@ -185,23 +185,22 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     public ImageRequest<V> addBlurFilter(int blurRadius){
-        bitmapImageFilters.add(new BitmapBlurFilter(context, blurRadius));
-        return this;
+        return addImageFilter(new BitmapBlurFilter(context,
+                blurRadius));
     }
 
     public ImageRequest<V> addColorOverlayFilter(int colorOverlay) {
-        bitmapImageFilters.add(new BitmapColorOverlayFilter(context, colorOverlay));
-        return this;
+       return addImageFilter(new BitmapColorOverlayFilter(context,
+                colorOverlay));
     }
 
     public ImageRequest<V> addRotationFilter(int rotationDegrees) {
-        bitmapImageFilters.add(new BitmapRotationFilter(context, rotationDegrees));
-        return this;
+        return addImageFilter(new BitmapRotationFilter(context,
+                rotationDegrees));
     }
 
     public ImageRequest<V> addCircularCropFilter() {
-        bitmapImageFilters.add(new BitmapCircularCropFilter(context));
-        return this;
+        return addImageFilter(new BitmapCircularCropFilter(context));
     }
 
     /**
@@ -210,28 +209,29 @@ public class ImageRequest<V extends View> implements Runnable {
      * @param replacementColor the 24-bit color value to replace with (0xAARRGGBB)
      */
     public ImageRequest<V> addColorOverrideFilter(int replacementColor){
-        bitmapImageFilters.add(new BitmapColorOverrideFilter(context, replacementColor));
-        return this;
+        return addImageFilter(new BitmapColorOverrideFilter(context,
+                replacementColor));
     }
 
     public ImageRequest<V> addColorReplacementFilter(int replace, int with) {
-        bitmapImageFilters.add(new BitmapColorReplacementFilter(context, replace, with));
-        return this;
+        return addImageFilter(new BitmapColorReplacementFilter(context,
+                replace,
+                with));
     }
 
     public ImageRequest<V> addColorReplacementFilter(Map<Integer, Integer> replacements) {
-        bitmapImageFilters.add(new BitmapColorReplacementFilter(context, replacements));
-        return this;
+        return addImageFilter(new BitmapColorReplacementFilter(context,
+                replacements));
     }
 
     public ImageRequest<V> addColorFilter(ColorFilter filter) {
-        bitmapImageFilters.add(new BitmapColorFilter(context, filter));
-        return this;
+        return addImageFilter(new BitmapColorFilter(context,
+                filter));
     }
 
     public ImageRequest<V> addCenterCropFilter(int width, int height) {
-        bitmapImageFilters.add(new BitmapCenterCropFilter(context, new int[]{ width, height }));
-        return this;
+        return addImageFilter(new BitmapCenterCropFilter(context,
+                new int[]{ width, height }));
     }
 
     public ImageRequest<V> addImageFilter(ImageFilter<Bitmap> imageFilter){
@@ -480,6 +480,10 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public long getStartedAtMs(){
         return startedAtMs;
+    }
+
+    public boolean isTargetLocal(){
+        return false;
     }
 
     private void handleShowStubOnExecute(){
