@@ -1,6 +1,6 @@
 # imageloader
 
-Another lazy image-loading library with AndroidSVG and Bitmap filtering support built-in
+Another lazy image-loading library with AndroidSVG, Animated GIF, and Bitmap filtering support built-in
 
 ![imageloader Sample](https://github.com/mattsilber/imageloader/raw/master/imageloader.gif)
 
@@ -12,19 +12,16 @@ Another lazy image-loading library with AndroidSVG and Bitmap filtering support 
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.2.10')
+        compile('com.guardanis:imageloader:1.3.0')
     }
 ```
-
-If you want to use a custom version of *com.caverock.androidsvg*, ensure that you've set **transitive=false** as a property on the imageloader dependency you define in your *build.gradle* file.
-
 
 # Usage
 
 This was originally written several years ago as an included lazy loader for downloading/caching images, but then evolved to allow the chaining of adjustments on the underlying Bitmap (what I call an ImageFilter). Let's say, for instance, I want to download your Facebook profile picture, throw a blur on top, overlay a dark-transparent color, and then throw it into an ImageView, but fade in for a duration of 150ms. Well, you could actually do all of that pretty easily:
 
 ```
-    new ImageRequest<ImageView>(context)
+    new ImageRequest(context)
         .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
         .setTargetView(myImageView)
         .addBlurFilter()
@@ -38,8 +35,8 @@ This was originally written several years ago as an included lazy loader for dow
 As mentioned above, this library comes with a few stock Bitmap filters (such as blurring, overlaying colors, rotating, color replacement, etc.). But, it also let's you add your own filters by working with the abstract ImageFilter class. Using the above example, we can easily add a custom filter via *addImageFilter(ImageFilter<Bitmap> filter)*:
 
 ```
-    new ImageRequest<ImageView>(context, "https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
-        .setTargetView(myImageView)
+    new ImageRequest(context, myImageView)
+        .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
         .addImageFilter(new ImageFilter<Bitmap>(context){
             @Override
             public Bitmap filter(Bitmap unedited){
@@ -63,12 +60,12 @@ As mentioned above, this library comes with a few stock Bitmap filters (such as 
 
 For more information about AndroidSVG, click [here](https://github.com/BigBadaboom/androidsvg).
 
-If you want to load SVG Images and perform adjustments on the underlying Bitmap, you can create and execute an SVGAssetRequest, where the targetUrl is simply the file name of the SVG in your *assets* folder. e.g.
+If you want to load SVG Images and perform adjustments on the underlying Bitmap, you can create and execute an SVGAssetRequest, where the targetUrl is simply the file name of the SVG in your *assets* folder or the resource ID of the SVG in your /raw/ folder. e.g.
 
 ```
-    new SVGAssetRequest<ImageView>(context)
-        .setTargetUrl("my_svg_file.svg")
-        .setTargetView(myImageView)
+    new ImageRequest(context, myImageView)
+        .setTargetAsset("my_svg_file.svg") // From assets
+        .setTargetResource(R.raw.my_svg, ImageType.SVG) // From resources
         .execute();
 ```
 
@@ -96,29 +93,29 @@ For more information about the android-gif-drawable library created by koral--, 
 
 To load a gif, create a GifRequest the same way you would any other ImageRequest in this library.
 
-    new GifRequest(context)
-        .setTargetExternalUrl("http://site.com/my_svg.svg") // <-- load from web
-        .setTargetAssetUrl("my_svg.svg") // <-- Load from assets
-        .setTargetFileUrl("/sdcard/0/my_svg.svg") // <-- Load from storage
-        .setTargetView(myImageView)
+    new ImageRequest(context, myImageView)
+        .setTargetUrl("http://site.com/my_gif.gif") // <-- load from web
+        .setTargetAsset("my_gif.gif") // <-- Load from assets
+        .setTargetFile("/sdcard/0/my_gif.gif") // <-- Load from storage
+        .setTargetResource(R.raw.my_gif, ImageType.GIF) // <-- Load from resources
         .execute();
 
 ##### Supported features
 * Transitions are fully supported even while the gifs are running
-* Gifs can currently be pulled via the web or locally via AssetManager or Files
+* Gifs can currently be pulled via the web, assets, local storage, or raw resources
 * All other features (other than those listed in the Unsupported section) should work as well.
 
 ##### Unsupported and ToDo
 * ImageFilters cannot be applied to gifs
-* ImageSuccessCallback cannot be used with a GifRequest
+* Ability to not auto-start gifs (workaround: ImageSuccessCallback for the request and manually call stop() on the GifDrawable)
 
 ### Stubs
 
 The ImageRequest system allows you to specify both a loading and an error stub to an individual request by attaching a StubHandler:
 
 ```
-    new ImageRequest<ImageView>(context, "https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
-        .setTargetView(myImageView)
+    new ImageRequest<ImageView>(context, myImageView)
+        .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
         .setShowStubOnExecute(true)
         .setShowStubOnError(true)
         .overrideStubs(new SubHolder(){
@@ -176,6 +173,6 @@ If you would like to use **context.getFilesDir()** instead of the Cache, simply 
 * Loading many versions of the same SVG file too quickly can cause the SVGParser to throw an "Invalid Colour Keyword" error due to the version we're using not supporting asynchronous SVG parsing.
 * Using the DefaultLoadingStub when the request is for View's background may cause a slight vertical rendering shift I don't yet understand.
 
-####### RotationTransitionModule issues:
+###### RotationTransitionModule issues:
 * It doesn't work for none-square backgrounds (i.e. non-ImageView requests or ones with setAsbackground(true)). It's all weird and not pretty. Don't use it.
 
