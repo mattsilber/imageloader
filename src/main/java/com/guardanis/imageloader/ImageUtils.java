@@ -1,5 +1,6 @@
 package com.guardanis.imageloader;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -9,6 +10,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
+import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Toast;
@@ -20,9 +22,14 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
 import java.util.Locale;
 
 public class ImageUtils {
+
+    public enum ImageType {
+        BITMAP, SVG, GIF;
+    }
 
     private static final int MAX_REDUCTION_FACTOR = 16;
 
@@ -166,21 +173,12 @@ public class ImageUtils {
 
     private static Bitmap decodeBitmapFile(File file, int requiredWidth, int reductionFactor) {
         try{
-            BitmapFactory.Options o = new BitmapFactory.Options();
-            o.inJustDecodeBounds = true;
-            FileInputStream stream = new FileInputStream(file);
-            BitmapFactory.decodeStream(stream, null, o);
-            stream.close();
+            BitmapFactory.Options options = decodeOptions(new FileInputStream(file));
 
-            int inSampleSize = calculateInSampleSize(o, requiredWidth, reductionFactor);
-            o.inSampleSize = inSampleSize;
-            o.inJustDecodeBounds = false;
-            stream = new FileInputStream(file);
-
-            Bitmap bitmap = BitmapFactory.decodeStream(stream, null, o);
-            stream.close();
-
-            return bitmap;
+            return decodeBitmap(new FileInputStream(file),
+                    options,
+                    requiredWidth,
+                    reductionFactor);
         }
         catch(OutOfMemoryError e){
             e.printStackTrace();
@@ -194,6 +192,55 @@ public class ImageUtils {
         catch(Exception e){ e.printStackTrace(); }
 
         return null;
+    }
+
+    public static Bitmap decodeBitmapAsset(Context context, String asset, int requiredWidth) {
+        return decodeBitmapAsset(context, asset, requiredWidth, 1);
+    }
+
+    private static Bitmap decodeBitmapAsset(Context context, String asset, int requiredWidth, int reductionFactor) {
+        try{
+            BitmapFactory.Options options = decodeOptions(context.getAssets().open(asset));
+
+            return decodeBitmap(context.getAssets().open(asset),
+                    options,
+                    requiredWidth,
+                    reductionFactor);
+        }
+        catch(OutOfMemoryError e){
+            e.printStackTrace();
+
+            System.gc();
+
+            return reductionFactor < MAX_REDUCTION_FACTOR
+                    ? decodeBitmapAsset(context, asset, requiredWidth, reductionFactor < 1 ? 2 : reductionFactor * 2)
+                    : null;
+        }
+        catch(Exception e){ e.printStackTrace(); }
+
+        return null;
+    }
+
+    private static BitmapFactory.Options decodeOptions(InputStream stream) throws Exception {
+        BitmapFactory.Options o = new BitmapFactory.Options();
+        o.inJustDecodeBounds = true;
+        BitmapFactory.decodeStream(stream, null, o);
+        stream.close();
+
+        return o;
+    }
+
+    private static Bitmap decodeBitmap(InputStream stream, BitmapFactory.Options options, int requiredWidth, int reductionFactor) throws Exception {
+        int inSampleSize = calculateInSampleSize(options, requiredWidth, reductionFactor);
+
+        options.inSampleSize = inSampleSize;
+        options.inJustDecodeBounds = false;
+
+        Bitmap bitmap = BitmapFactory.decodeStream(stream, null, options);
+
+        stream.close();
+
+        return bitmap;
     }
 
     public static Bitmap decodeBitmapResource(Resources resources, int resId, int requiredWidth){
@@ -259,6 +306,31 @@ public class ImageUtils {
     public static void log(Context context, Throwable e){
         if(context.getResources().getBoolean(R.bool.ail__debug_log_enabled))
             e.printStackTrace();
+    }
+
+    public static ImageType getImageType(Context context, String url) {
+        url = url.toLowerCase(Locale.US);
+
+        if(url.endsWith(".svg"))
+            return ImageType.SVG;
+        else if(url.endsWith(".gif"))
+            return ImageType.GIF;
+
+        try{
+            Uri uri = Uri.parse(URLEncoder.encode(url, "UTF-8"));
+
+            if (uri.getScheme().equals(ContentResolver.SCHEME_CONTENT) || uri.getScheme().equals(ContentResolver.SCHEME_ANDROID_RESOURCE)) {
+                String mimeType = context.getContentResolver()
+                        .getType(uri);
+
+                return ImageType.valueOf(mimeType.toUpperCase(Locale.US));
+            }
+        }
+        catch(Exception e){ }
+
+        log(context, String.format("Mime type not found for: %1$s, Treating as a Bitmap", url));
+
+        return ImageType.BITMAP;
     }
 
 }

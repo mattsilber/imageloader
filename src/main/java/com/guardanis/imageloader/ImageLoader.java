@@ -59,8 +59,7 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
      * Submit an ImageRequest to the ImageLoader's downloading service for managed downloads
      */
     public void submit(ImageRequest request){
-        if(request instanceof LocalImageRequest
-                || request.isTargetLocal()
+        if(request.isTargetLocal()
                 || (isImageDownloaded(request) && fileCache.isCachedFileValid(request.getTargetUrl(), request.getMaxCacheDurationMs())))
             executorService.submit(request);
         else submitDownloadRequest(request);

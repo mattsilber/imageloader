@@ -26,7 +26,6 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 
 import com.caverock.androidsvg.SVG;
-import com.guardanis.imageloader.ImageFileRequest;
 import com.guardanis.imageloader.ImageRequest;
 import com.guardanis.imageloader.ImageUtils;
 import com.guardanis.imageloader.R;
@@ -96,7 +95,8 @@ public class SVGImageView extends ImageView {
      * Load an SVG image from an external URL.
      */
     public void setImageUrl(String url){
-        new ImageRequest<SVGImageView>(getContext(), url)
+        new ImageRequest<SVGImageView>(getContext())
+				.setTargetUrl(url)
                 .setTargetView(this)
                 .setFadeTransition()
                 .execute();
@@ -106,7 +106,8 @@ public class SVGImageView extends ImageView {
      * Load an SVG image from a file on the device.
      */
     public void setImageFile(String imageFile){
-        new ImageFileRequest<SVGImageView>(getContext(), imageFile)
+        new ImageRequest<SVGImageView>(getContext())
+				.setTargetFile(imageFile)
                 .setTargetView(this)
                 .setFadeTransition()
                 .execute();

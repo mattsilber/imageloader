@@ -7,6 +7,8 @@
     <bool name="ail__show_stub_on_error">false</bool>
     <bool name="ail__use_old_resource_stubs">false</bool>
 
+    <bool name="ail__local_execution_stubs">false</bool>
+
     <bool name="ail__external_storage_enabled">true</bool>
     <bool name="ail__use_cache_dir">true</bool>
 

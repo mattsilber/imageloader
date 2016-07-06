@@ -1,18 +1,19 @@
 package com.guardanis.imageloader;
 
+import android.content.ContentResolver;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ColorFilter;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Handler;
-import android.os.Looper;
+import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
 import android.view.animation.Interpolator;
 import android.widget.ImageView;
 
+import com.guardanis.imageloader.ImageUtils.ImageType;
 import com.guardanis.imageloader.filters.BitmapBlurFilter;
 import com.guardanis.imageloader.filters.BitmapCenterCropFilter;
 import com.guardanis.imageloader.filters.BitmapCircularCropFilter;
@@ -22,6 +23,11 @@ import com.guardanis.imageloader.filters.BitmapColorOverrideFilter;
 import com.guardanis.imageloader.filters.BitmapColorReplacementFilter;
 import com.guardanis.imageloader.filters.BitmapRotationFilter;
 import com.guardanis.imageloader.filters.ImageFilter;
+import com.guardanis.imageloader.processors.ExternalImageProcessor;
+import com.guardanis.imageloader.processors.ImageAssetProcessor;
+import com.guardanis.imageloader.processors.ImageFileProcessor;
+import com.guardanis.imageloader.processors.ImageProcessor;
+import com.guardanis.imageloader.processors.ImageResourceProcessor;
 import com.guardanis.imageloader.transitions.TransitionController;
 import com.guardanis.imageloader.transitions.modules.FadingTransitionModule;
 import com.guardanis.imageloader.transitions.modules.RotationTransitionModule;
@@ -37,11 +43,15 @@ import java.util.Map;
 public class ImageRequest<V extends View> implements Runnable {
 
     public interface ImageSuccessCallback {
-        public void onImageReady(ImageRequest request, Bitmap result);
+        public void onImageReady(ImageRequest request, Drawable result);
     }
 
     public interface ImageErrorCallback {
         public void onImageLoadingFailure(ImageRequest request, @Nullable Throwable e);
+    }
+
+    protected interface ImageDecoder<T> {
+        public Object decode(T targetValue, int requiredWidth) throws Exception;
     }
 
     protected static final int DEFAULT_BLUR_RADIUS = 15;
@@ -50,7 +60,13 @@ public class ImageRequest<V extends View> implements Runnable {
     protected static final int DEFAULT_ROTATION_DURATION = 300;
 
     protected Context context;
+
     protected String targetUrl;
+    protected int targetResourceId = -1;
+
+    protected ImageType targetImageType = ImageType.BITMAP;
+    protected ImageProcessor imageProcessor;
+    protected boolean loadingTargetLocally = false;
 
     protected V targetView;
     protected boolean setImageAsBackground = false;
@@ -72,6 +88,8 @@ public class ImageRequest<V extends View> implements Runnable {
     protected Map<String, String> httpRequestParams = new HashMap<String, String>();
 
     protected ImageSuccessCallback successCallback;
+    protected boolean triggerSuccessForValidViewsOnly = true;
+
     protected ImageErrorCallback errorCallback;
 
     protected boolean tagRequestPreventionEnabled = false;
@@ -79,19 +97,75 @@ public class ImageRequest<V extends View> implements Runnable {
     protected long startedAtMs;
 
     public ImageRequest(Context context) {
-        this(context, "");
-    }
-
-    public ImageRequest(Context context, String targetUrl) {
         this.context = context;
-        this.targetUrl = targetUrl;
         this.showStubOnExecute = context.getResources().getBoolean(R.bool.ail__show_stub_on_execute);
         this.showStubOnError = context.getResources().getBoolean(R.bool.ail__show_stub_on_error);
         this.useOldResourceStubs = context.getResources().getBoolean(R.bool.ail__use_old_resource_stubs);
     }
 
-    public ImageRequest<V> setTargetUrl(String targetUrl) {
+    public ImageRequest(Context context, V targetView) {
+        this(context);
+
+        this.targetView = targetView;
+    }
+
+    public ImageRequest<V> setTargetUrl(final String targetUrl) {
         this.targetUrl = targetUrl;
+        this.targetImageType = ImageUtils.getImageType(context, targetUrl);
+        this.loadingTargetLocally = false;
+
+        this.imageProcessor = new ExternalImageProcessor();
+
+        return this;
+    }
+
+    public ImageRequest<V> setTargetAsset(String targetAssetUrl){
+        this.targetUrl = targetAssetUrl;
+        this.targetImageType = ImageUtils.getImageType(context, targetUrl);
+        this.loadingTargetLocally = true;
+        this.showStubOnExecute = context.getResources()
+                .getBoolean(R.bool.ail__local_execution_stubs);
+
+        this.imageProcessor = new ImageAssetProcessor();
+
+        return this;
+    }
+
+    public ImageRequest<V> setTargetFile(String file){
+        return setTargetFile(new File(file));
+    }
+
+    public ImageRequest<V> setTargetFile(File file){
+        this.targetUrl = file.getAbsolutePath();
+        this.targetImageType = ImageUtils.getImageType(context, targetUrl);
+        this.loadingTargetLocally = true;
+        this.showStubOnExecute = context.getResources()
+                .getBoolean(R.bool.ail__local_execution_stubs);
+
+        this.imageProcessor = new ImageFileProcessor();
+
+        return this;
+    }
+
+    public ImageRequest<V> setTargetResource(int targetResourceId){
+        this.targetResourceId = targetResourceId;
+
+        Resources resources = context.getResources();
+
+        String uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://"
+                + resources.getResourcePackageName(targetResourceId)
+                + '/' + resources.getResourceTypeName(targetResourceId)
+                + '/' + resources.getResourceEntryName(targetResourceId))
+                .toString(); // Yeah, I know this doesn't actually work at the moment...
+
+        this.targetImageType = ImageUtils.getImageType(context, uri);
+
+        this.loadingTargetLocally = true;
+        this.showStubOnExecute = context.getResources()
+                .getBoolean(R.bool.ail__local_execution_stubs);
+
+        this.imageProcessor = new ImageResourceProcessor();
+
         return this;
     }
 
@@ -168,6 +242,15 @@ public class ImageRequest<V extends View> implements Runnable {
      */
     public ImageRequest<V> setSuccessCallback(ImageSuccessCallback successCallback) {
         this.successCallback = successCallback;
+        return this;
+    }
+
+    /**
+     * Set whether or not to trigger the success callback when the View is no longer valid for the request.
+     * The default behavior is true, to prevent invalid requests from triggering.
+     */
+    public ImageRequest<V> setTriggerSuccessForValidViewsOnly(boolean triggerSuccessForValidViewsOnly){
+        this.triggerSuccessForValidViewsOnly = triggerSuccessForValidViewsOnly;
         return this;
     }
 
@@ -315,22 +398,18 @@ public class ImageRequest<V extends View> implements Runnable {
 
     @Override
     public void run() {
-        if(targetView != null && ImageLoader.getInstance(context).isViewStillUsable(this))
-            performFullImageRequest();
-    }
+        if(targetView != null && ImageLoader.getInstance(context).isViewStillUsable(this)){
+            try{
+                Drawable processed = imageProcessor.process(this, bitmapImageFilters);
 
-    protected void performFullImageRequest() {
-        int requiredImageWidth = getRequiredImageWidth();
+                onRequestCompleted(processed);
+            }
+            catch(Throwable e){
+                ImageUtils.log(context, e);
 
-        File imageFile = getEditedRequestFile();
-        if(!imageFile.exists()){
-            File originalImageFile = getOriginalRequestFile();
-            if(!originalImageFile.exists())
                 onRequestFailed();
-            else processImage(imageFile, ImageUtils.decodeFile(originalImageFile, requiredImageWidth));
+            }
         }
-        else
-            onRequestCompleted(ImageUtils.decodeFile(imageFile, requiredImageWidth));
     }
 
     protected int getRequiredImageWidth(){
@@ -339,52 +418,25 @@ public class ImageRequest<V extends View> implements Runnable {
                 : requiredImageWidth;
     }
 
-    protected void processImage(File imageFile, Bitmap bitmap) {
-        if(0 < bitmapImageFilters.size() && bitmap != null){
-            try{
-                bitmap = applyBitmapFilters(bitmap);
-
-                saveBitmap(imageFile, bitmap);
-            }
-            catch(Throwable e){
-                ImageUtils.log(context, e);
-
-                // Let it fail gracefully if our filters couldn't recover
-                bitmap = null;
-            }
-        }
-
-        onRequestCompleted(bitmap);
-    }
-
-    protected Bitmap applyBitmapFilters(Bitmap bitmap){
-        for(ImageFilter<Bitmap> filter : bitmapImageFilters)
-            bitmap = filter.filter(bitmap);
-
-        return bitmap;
-    }
-
-    protected void saveBitmap(File imageFile, Bitmap bitmap){
-        ImageUtils.saveBitmapAsync(context, imageFile, bitmap);
-    }
-
-    protected void onRequestCompleted(@Nullable final Bitmap bitmap) {
-        if(bitmap == null){
+    protected void onRequestCompleted(@Nullable final Drawable targetDrawable){
+        if(targetDrawable == null){
             onRequestFailed();
             return;
         }
-        else if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(this))
+        else if(targetView == null)
             return;
 
-        if(transitionOnSuccessEnabled){
-            BitmapDrawable targetDrawable = new BitmapDrawable(targetView.getContext().getResources(), bitmap);
-            transitionController.transitionTo(targetDrawable);
+        if(ImageLoader.getInstance(context).isViewStillUsable(this)){
+            if(transitionOnSuccessEnabled)
+                transitionController.transitionTo(targetDrawable);
         }
+        else if(triggerSuccessForValidViewsOnly)
+            return;
 
-        targetView.post(new Runnable(){
+        post(new Runnable(){
             public void run(){
                 if(successCallback != null)
-                    successCallback.onImageReady(ImageRequest.this, bitmap);
+                    successCallback.onImageReady(ImageRequest.this, targetDrawable);
             }
         });
     }
@@ -395,7 +447,7 @@ public class ImageRequest<V extends View> implements Runnable {
 
         handleShowStubOnError();
 
-        targetView.post(new Runnable(){
+        post(new Runnable(){
             public void run(){
                 if(errorCallback != null)
                     errorCallback.onImageLoadingFailure(ImageRequest.this,
@@ -412,8 +464,8 @@ public class ImageRequest<V extends View> implements Runnable {
         transitionController.transitionTo(targetDrawable);
     }
 
-    protected String getFullRequestFileCacheName() {
-        String adjustedName = targetUrl;
+    protected String getEditedRequestFileCacheName() {
+        String adjustedName = getOriginalRequestFileCacheName();
 
         for(ImageFilter<Bitmap> filter : bitmapImageFilters)
             adjustedName += "_" + filter.getAdjustmentInfo();
@@ -421,12 +473,16 @@ public class ImageRequest<V extends View> implements Runnable {
         return adjustedName;
     }
 
-    protected File getEditedRequestFile() {
-        return ImageLoader.getInstance(context).getFileCache().getFile(getFullRequestFileCacheName());
+    public File getEditedRequestFile() {
+        return ImageLoader.getInstance(context)
+                .getFileCache()
+                .getFile(getEditedRequestFileCacheName());
     }
 
     protected String getOriginalRequestFileCacheName() {
-        return targetUrl;
+        return 0 < targetResourceId
+                ? String.valueOf(targetResourceId)
+                : targetUrl;
     }
 
     public Context getContext(){
@@ -474,6 +530,10 @@ public class ImageRequest<V extends View> implements Runnable {
         return targetUrl;
     }
 
+    public int getTargetResourceId(){
+        return targetResourceId;
+    }
+
     public boolean isExitTransitionEnabled(){
         return exitTransitionsEnabled;
     }
@@ -483,7 +543,28 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     public boolean isTargetLocal(){
-        return false;
+        return loadingTargetLocally;
+    }
+
+    public int getTargetImageWidth(){
+        return getRequiredImageWidth();
+    }
+
+    public ImageType getTargetImageType(){
+        return targetImageType;
+    }
+
+    protected void post(Runnable runnable){
+        if(targetView == null)
+            ImageLoader.getInstance(context)
+                .getHandler()
+                .post(runnable);
+        else targetView.post(runnable);
+    }
+
+    protected boolean isTargetDefined(){
+        return ((targetUrl != null && 0 < targetUrl.length()) || 0 < targetResourceId)
+                && imageProcessor != null;
     }
 
     private void handleShowStubOnExecute(){
@@ -500,7 +581,10 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     public ImageRequest<V> execute() {
-        final String fullRequestFile = getFullRequestFileCacheName();
+        if(!isTargetDefined())
+            throw new RuntimeException("No target URL or resource defined!");
+
+        final String fullRequestFile = getEditedRequestFileCacheName();
 
         if(tagRequestPreventionEnabled
                 && !(targetView == null || targetView.getTag() == null)
