@@ -134,7 +134,26 @@ public class ImageUtils {
 
     private static Bitmap decodeSvgFile(File file, int requiredWidth) {
         try{
-            FileInputStream stream = new FileInputStream(file);
+            return decodeSvg(new FileInputStream(file),
+                    requiredWidth);
+        }
+        catch(Throwable e){ e.printStackTrace(); }
+
+        return null;
+    }
+
+    public static Bitmap decodeSvgResource(Context context, int resourceId, int requiredWidth) {
+        try{
+            return decodeSvg(context.getResources().openRawResource(resourceId),
+                    requiredWidth);
+        }
+        catch(Throwable e){ e.printStackTrace(); }
+
+        return null;
+    }
+
+    private static Bitmap decodeSvg(InputStream stream, int requiredWidth) {
+        try{
             Bitmap bitmap = decodeBitmap(SVG.getFromInputStream(stream), requiredWidth);
 
             stream.close();

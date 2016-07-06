@@ -50,10 +50,6 @@ public class ImageRequest<V extends View> implements Runnable {
         public void onImageLoadingFailure(ImageRequest request, @Nullable Throwable e);
     }
 
-    protected interface ImageDecoder<T> {
-        public Object decode(T targetValue, int requiredWidth) throws Exception;
-    }
-
     protected static final int DEFAULT_BLUR_RADIUS = 15;
     protected static final int DEFAULT_CROSS_FADE_DURATION = 300;
     protected static final int DEFAULT_SCALE_DURATION = 300;
@@ -148,18 +144,13 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     public ImageRequest<V> setTargetResource(int targetResourceId){
+        // MIME types and extensions are unavailable
+        return setTargetResource(targetResourceId, ImageType.BITMAP);
+    }
+
+    public ImageRequest<V> setTargetResource(int targetResourceId, ImageType type){
         this.targetResourceId = targetResourceId;
-
-        Resources resources = context.getResources();
-
-        String uri = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://"
-                + resources.getResourcePackageName(targetResourceId)
-                + '/' + resources.getResourceTypeName(targetResourceId)
-                + '/' + resources.getResourceEntryName(targetResourceId))
-                .toString(); // Yeah, I know this doesn't actually work at the moment...
-
-        this.targetImageType = ImageUtils.getImageType(context, uri);
-
+        this.targetImageType = type;
         this.loadingTargetLocally = true;
         this.showStubOnExecute = context.getResources()
                 .getBoolean(R.bool.ail__local_execution_stubs);

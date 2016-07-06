@@ -21,7 +21,12 @@ public class ImageResourceProcessor extends ImageFileProcessor {
                 return new GifDrawable(request.getContext().getResources(),
                         request.getTargetResourceId());
             case SVG:
-                throw new UnsupportedOperationException("SVG from resources not yet supported");
+                return process(request.getContext(),
+                        ImageUtils.decodeSvgResource(request.getContext(),
+                                request.getTargetResourceId(),
+                                request.getTargetImageWidth()),
+                        request.getEditedRequestFile(),
+                        bitmapImageFilters);
             case BITMAP:
             default:
                 return processBitmapResource(request, bitmapImageFilters);
