@@ -81,7 +81,9 @@ public class ImageUtils {
         if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY) || Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
             return true;
         else{
-            Toast.makeText(context, "Can't save image while media is mounted!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Can't save image while media is mounted!", Toast.LENGTH_LONG)
+                    .show();
+
             return false;
         }
     }
@@ -90,16 +92,19 @@ public class ImageUtils {
         if(imageFile.exists() || imageFile.getParentFile().mkdirs() || imageFile.createNewFile())
             return true;
         else{
-            Toast.makeText(context, "Couldn't build image directory!", Toast.LENGTH_LONG).show();
+            Toast.makeText(context, "Couldn't build image directory!", Toast.LENGTH_LONG)
+                    .show();
+
             return false;
         }
     }
 
     public static void copyStream(InputStream is, OutputStream os) {
         final int buffer_size = 1024;
+
         try{
             byte[] bytes = new byte[buffer_size];
-            for(; ; ){
+            for(; ;){
                 int count = is.read(bytes, 0, buffer_size);
 
                 if(count == -1)
@@ -108,7 +113,7 @@ public class ImageUtils {
                 os.write(bytes, 0, count);
             }
         }
-        catch(Exception ex){}
+        catch(Exception ex){ }
     }
 
     public static Bitmap decodeFile(File file, int requiredWidth) {
@@ -154,7 +159,8 @@ public class ImageUtils {
 
     private static Bitmap decodeSvg(InputStream stream, int requiredWidth) {
         try{
-            Bitmap bitmap = decodeBitmap(SVG.getFromInputStream(stream), requiredWidth);
+            Bitmap bitmap = decodeBitmap(SVG.getFromInputStream(stream),
+                    requiredWidth);
 
             stream.close();
             return bitmap;
@@ -180,9 +186,14 @@ public class ImageUtils {
             float scaleFactor = (float) requiredWidth / documentWidth;
             int adjustedHeight = (int) (scaleFactor * documentHeight);
 
-            Bitmap newBitmap = Bitmap.createBitmap(requiredWidth, adjustedHeight, Bitmap.Config.ARGB_8888);
+            Bitmap newBitmap = Bitmap.createBitmap(requiredWidth,
+                    adjustedHeight,
+                    Bitmap.Config.ARGB_8888);
+
             Canvas canvas = new Canvas(newBitmap);
-            canvas.drawPicture(svg.renderToPicture(), new Rect(0, 0, requiredWidth, adjustedHeight));
+
+            canvas.drawPicture(svg.renderToPicture(),
+                    new Rect(0, 0, requiredWidth, adjustedHeight));
 
             return newBitmap;
         }
@@ -241,12 +252,14 @@ public class ImageUtils {
     }
 
     private static BitmapFactory.Options decodeOptions(InputStream stream) throws Exception {
-        BitmapFactory.Options o = new BitmapFactory.Options();
-        o.inJustDecodeBounds = true;
-        BitmapFactory.decodeStream(stream, null, o);
+        BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inJustDecodeBounds = true;
+
+        BitmapFactory.decodeStream(stream, null, options);
+
         stream.close();
 
-        return o;
+        return options;
     }
 
     private static Bitmap decodeBitmap(InputStream stream, BitmapFactory.Options options, int requiredWidth, int reductionFactor) throws Exception {
@@ -272,9 +285,12 @@ public class ImageUtils {
             options.inJustDecodeBounds = true;
             BitmapFactory.decodeResource(resources, resId, options);
 
-            options.inSampleSize = calculateInSampleSize(options, requiredWidth, reductionFactor);
+            options.inSampleSize = calculateInSampleSize(options,
+                    requiredWidth,
+                    reductionFactor);
 
             options.inJustDecodeBounds = false;
+
             return BitmapFactory.decodeResource(resources, resId, options);
         }
         catch(OutOfMemoryError e){
@@ -302,19 +318,21 @@ public class ImageUtils {
     }
 
     public static StateListDrawable buildStateListDrawable(Context context, SVG svgAssetNormal, SVG svgAssetPressed) {
-        return buildStateListDrawable(buildBitmapDrawable(context, svgAssetNormal), buildBitmapDrawable(context, svgAssetPressed));
+        return buildStateListDrawable(buildBitmapDrawable(context, svgAssetNormal),
+                buildBitmapDrawable(context, svgAssetPressed));
     }
 
     public static StateListDrawable buildStateListDrawable(Drawable dNormal, Drawable dPressed) {
         StateListDrawable states = new StateListDrawable();
-        states.addState(new int[]{android.R.attr.state_pressed}, dPressed);
+        states.addState(new int[]{ android.R.attr.state_pressed }, dPressed);
         states.addState(new int[]{ }, dNormal);
 
         return states;
     }
 
     public static BitmapDrawable buildBitmapDrawable(Context context, SVG svg) {
-        return new BitmapDrawable(context.getResources(), decodeBitmap(svg, (int) svg.getDocumentWidth()));
+        return new BitmapDrawable(context.getResources(),
+                decodeBitmap(svg, (int) svg.getDocumentWidth()));
     }
 
     public static void log(Context context, String message){

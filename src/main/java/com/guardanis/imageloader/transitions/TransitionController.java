@@ -95,18 +95,24 @@ public class TransitionController {
             return ((BitmapDrawable) drawable).getBitmap();
         else {
             Bitmap bitmap = null;
+
             if(drawable.getIntrinsicWidth() < 1 || drawable.getIntrinsicHeight() < 1){
                 if(!(targetView == null || targetView.getLayoutParams() == null || targetView.getLayoutParams().width < 1 || targetView.getLayoutParams().height < 1))
-                    bitmap = Bitmap.createBitmap(targetView.getLayoutParams().width, targetView.getLayoutParams().height, Bitmap.Config.ARGB_8888);
+                    bitmap = Bitmap.createBitmap(targetView.getLayoutParams().width,
+                            targetView.getLayoutParams().height,
+                            Bitmap.Config.ARGB_8888);
                 else if(drawable.getBounds().right - drawable.getBounds().left < 1)
                     bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
                 else bitmap = Bitmap.createBitmap(drawable.getBounds().right - drawable.getBounds().left,
                         drawable.getBounds().bottom - drawable.getBounds().top,
                         Bitmap.Config.ARGB_8888);
             }
-            else bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+            else bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+                    drawable.getIntrinsicHeight(),
+                    Bitmap.Config.ARGB_8888);
 
             Canvas canvas = new Canvas(bitmap);
+
             drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
             drawable.draw(canvas);
 
@@ -119,7 +125,8 @@ public class TransitionController {
             public void run(){
                 if (request.isRequestForBackgroundImage())
                     setBackgroundDrawable(drawable);
-                else ((ImageView) request.getTargetView()).setImageDrawable(drawable);
+                else ((ImageView) request.getTargetView())
+                        .setImageDrawable(drawable);
 
                 drawable.start(request.getContext());
             }
@@ -131,7 +138,8 @@ public class TransitionController {
             public void run(){
                 if(request.isRequestForBackgroundImage())
                     setBackgroundDrawable(drawable);
-                else ((ImageView) request.getTargetView()).setImageDrawable(drawable);
+                else ((ImageView) request.getTargetView())
+                        .setImageDrawable(drawable);
             }
         });
     }

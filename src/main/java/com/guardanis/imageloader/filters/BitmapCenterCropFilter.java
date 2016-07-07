@@ -26,7 +26,9 @@ public class BitmapCenterCropFilter extends ImageFilter<Bitmap> {
         int xTranslate = (int) -((scale * unedited.getWidth()) - desiredBounds[0]) / 2;
         int yTranslate = (int) -((scale * unedited.getHeight()) - desiredBounds[1]) / 2;
 
-        Bitmap adjusted = Bitmap.createBitmap(desiredBounds[0], desiredBounds[1], unedited.getConfig());
+        Bitmap adjusted = Bitmap.createBitmap(desiredBounds[0],
+                desiredBounds[1],
+                unedited.getConfig());
 
         Canvas canvas = new Canvas(adjusted);
         canvas.translate(xTranslate, yTranslate);

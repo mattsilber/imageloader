@@ -144,7 +144,7 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     public ImageRequest<V> setTargetResource(int targetResourceId){
-        // MIME types and extensions are unavailable
+        // MIME types and extensions are unavailable for resource files
         return setTargetResource(targetResourceId, ImageType.BITMAP);
     }
 

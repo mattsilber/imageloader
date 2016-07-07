@@ -27,13 +27,19 @@ public class BitmapBlurFilter extends ImageFilter<Bitmap> {
             if(!unedited.isMutable())
                 unedited = mutate(unedited);
 
-            final Allocation input = Allocation.createFromBitmap(renderScript, unedited, Allocation.MipmapControl.MIPMAP_NONE, Allocation.USAGE_SCRIPT);
+            final Allocation input = Allocation.createFromBitmap(renderScript,
+                    unedited,
+                    Allocation.MipmapControl.MIPMAP_NONE,
+                    Allocation.USAGE_SCRIPT);
+
             final Allocation output = Allocation.createTyped(renderScript, input.getType());
+
             final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
 
             script.setRadius(blurRadius);
             script.setInput(input);
             script.forEach(output);
+
             output.copyTo(unedited);
         }
         catch(OutOfMemoryError e){ ImageUtils.log(context, e); }
