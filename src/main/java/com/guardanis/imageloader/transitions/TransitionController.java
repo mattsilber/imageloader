@@ -121,7 +121,7 @@ public class TransitionController {
                     setBackgroundDrawable(drawable);
                 else ((ImageView) request.getTargetView()).setImageDrawable(drawable);
 
-                drawable.start();
+                drawable.start(request.getContext());
             }
         });
     }

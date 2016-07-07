@@ -7,6 +7,7 @@ import android.graphics.Matrix;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
+import com.guardanis.imageloader.R;
 import com.guardanis.imageloader.stubs.AnimatedStubDrawable;
 import com.guardanis.imageloader.stubs.StubDrawable;
 import com.guardanis.imageloader.transitions.modules.TransitionModule;
@@ -49,13 +50,13 @@ public class TransitionDrawable extends BitmapDrawable {
         return this;
     }
 
-    public void start(){
+    public void start(Context context){
         this.animationStart = System.currentTimeMillis();
         this.transitionStage = TransitionStage.TRANSITIONING;
 
         invalidateSelf();
 
-        if(targetDrawable instanceof GifDrawable)
+        if(targetDrawable instanceof GifDrawable && context.getResources().getBoolean(R.bool.ail__gif_auto_start_enabled))
             ((GifDrawable) targetDrawable).start();
     }
 

@@ -60,20 +60,20 @@ As mentioned above, this library comes with a few stock Bitmap filters (such as 
 
 For more information about AndroidSVG, click [here](https://github.com/BigBadaboom/androidsvg).
 
-If you want to load SVG Images and perform adjustments on the underlying Bitmap, you can create and execute an SVGAssetRequest, where the targetUrl is simply the file name of the SVG in your *assets* folder or the resource ID of the SVG in your /raw/ folder. e.g.
+If you want to load SVG Images and perform adjustments on the underlying Bitmap, you can create and execute a regular ImageRequest where the target can be an external URL, an asset, a File, or a resource in your /raw/ folder. e.g.
 
 ```
     new ImageRequest(context, myImageView)
         .setTargetAsset("my_svg_file.svg") // From assets
         .setTargetResource(R.raw.my_svg, ImageType.SVG) // From resources
+        .setTargetUrl("http://some.site/my_svg.svg")
+        .setTargetFile(new File("/sdcard/0/my_svg.svg"))
         .execute();
 ```
 
-SVGs are also fully supported over the internet via an ImageRequest, as long as the SVG has an intrinsice width and height. See below for more details on that.
-
 ##### SVG Requirements
 
-In order to load an SVG efficiently (as in, downsample it appropriately), we need to know it's intrinsic width and height in pixels. That means, if a width/height or at least a viewBox (the fallback) attribute is missing from the SVG's declaration, it won't be able to render it. e.g.
+In order to load an SVG efficiently (as in, down/up-sample it appropriately), we need to know it's intrinsic width and height in pixels. That means, if the width/height and viewBox (the fallback) attributes are both missing from the SVG's declaration, it won't be able to render it. e.g.
 
     x="0px" y="0px" **width="150px" height="150px"**
 
@@ -91,7 +91,7 @@ As of version 1.2.10, this library can now support animated gifs loaded both loc
 
 For more information about the android-gif-drawable library created by koral--, click [here](https://github.com/koral--/android-gif-drawable).
 
-To load a gif, create a GifRequest the same way you would any other ImageRequest in this library.
+To load a gif, create an ImageRequest the same way you would any other request in this library:
 
     new ImageRequest(context, myImageView)
         .setTargetUrl("http://site.com/my_gif.gif") // <-- load from web
@@ -100,14 +100,23 @@ To load a gif, create a GifRequest the same way you would any other ImageRequest
         .setTargetResource(R.raw.my_gif, ImageType.GIF) // <-- Load from resources
         .execute();
 
+By default, gifs will start running automatically. If you want to override that behavior globally, set *R.bool.ail__gif_auto_start_enabled* to false.
+
+You can also handle that manually on a per-case basis using the ImageSuccessCallback:
+
+    new ImageRequest(context)
+        .setSuccessCallback((r, d) -> {
+             if(d instanceof GifDrawable)
+                  ((GifDrawable) d).stop();
+        })
+
 ##### Supported features
-* Transitions are fully supported even while the gifs are running
+* Transitions at the canvas level are fully supported even while the gifs are running (minus alpha blending, that is)
 * Gifs can currently be pulled via the web, assets, local storage, or raw resources
 * All other features (other than those listed in the Unsupported section) should work as well.
 
 ##### Unsupported and ToDo
 * ImageFilters cannot be applied to gifs
-* Ability to not auto-start gifs (workaround: ImageSuccessCallback for the request and manually call stop() on the GifDrawable)
 
 ### Stubs
 
@@ -146,20 +155,20 @@ By default, the ImageRequest will show the loading stub, but not the error stub,
 
 As of version 1.1.0, a single TransitionController is now the interface between a single TransitionDrawable and any TransitionModules it contains. The TransitionModules are the modular components used to actually perform adjustments to the underlying Canvas/Bitmap/Drawable at the appropriate times, and can be easily added to any request. The idea here is to (hopefully) allow multiple types of transitions to be run at the same time (e.g. scale and fade).
 
-The currently included TransitionModules are the FadingTransitionModule and the ScalingTransitionModule.
+The currently included TransitionModules are the FadingTransitionModule, ScalingTransitionModule, and RotationTransitionModule.
 
 ### Caching
 
-By default, the system will try to save things in {External_Storage_Dir}/{some.package.name}, and fallback to the context.getCacheDir() when the media isn't mounted or WRITE_EXTERNAL_STORAGE permissions has been revoked. 
+By default, the system will try to save things in {External_Storage_Dir}/{some.package.name}, and fallback to the context.getCacheDir() when the media isn't mounted or WRITE_EXTERNAL_STORAGE permissions is not granted. 
 
 If you would like to override that bahavior, setting **R.bool.ail__external_storage_enabled** to false will cause it to use the Cache directory by default. 
 
 If you would like to use **context.getFilesDir()** instead of the Cache, simply set **R.bool.ail__use_cache_dir** to false.
 
 ##### Notes
-* Prefetching images can be achieved by simply not setting a target View (e.g. don't call ImageRequest.setTargetView(myImageView). 
+* Prefetching images can be achieved by simply not setting a target View (e.g. don't call ImageRequest.setTargetView(myImageView).
 * ImageRequest's for the same URL are safe to call at the same time. The ImageLoader will delay subsequent requests for the same URL until the download has finished.
-* Adjustments via ImageFilter are only saved, and success callbacks are only triggered, when a target View is present.
+* Adjustments via ImageFilter are only performed/saved, and success callbacks are only triggered, when a target View is present.
 * Setting a maximum cachable duration for a target URL can be achieved by calling ImageRequest.setMaxCacheDurationMs(long); e.g. setMaxCacheDurationMs(TimeUnit.DAYS.toMillis(5));
 * For lists, you probably don't want exit transitions as it can appear weird when scrolling quickly. To disable them, call ImageRequest.setExitTransitionsEnabled(false)
 
