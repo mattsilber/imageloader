@@ -1,5 +1,8 @@
 # imageloader
 
+[![Download](https://api.bintray.com/packages/mattsilber/maven/imageloader/images/download.svg) ](https://bintray.com/mattsilber/maven/imageloader/_latestVersion)
+[![Android Arsenal](https://img.shields.io/badge/Android%20Arsenal-imageloader-green.svg?style=true)](https://android-arsenal.com/details/1/4034)
+
 Another lazy image-loading library with AndroidSVG, Animated GIF, and Bitmap filtering support built-in
 
 ![imageloader Sample](https://github.com/mattsilber/imageloader/raw/master/imageloader.gif)
