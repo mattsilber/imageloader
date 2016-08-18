@@ -12,6 +12,10 @@
     <bool name="ail__external_storage_enabled">true</bool>
     <bool name="ail__use_cache_dir">true</bool>
 
+    <bool name="ail__lru_cache_enabled">true</bool>
+
+    <bool name="ail__tag_request_prevention_enabled">false</bool>
+
     <bool name="ail__gif_auto_start_enabled">true</bool>
 
 </resources>

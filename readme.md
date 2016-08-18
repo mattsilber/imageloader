@@ -15,7 +15,7 @@ Another lazy image-loading library with AndroidSVG, Animated GIF, and Bitmap fil
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.3.0')
+        compile('com.guardanis:imageloader:1.3.1')
     }
 ```
 
@@ -162,13 +162,21 @@ The currently included TransitionModules are the FadingTransitionModule, Scaling
 
 ### Caching
 
+##### File Caching
+
 By default, the system will try to save things in {External_Storage_Dir}/{some.package.name}, and fallback to the context.getCacheDir() when the media isn't mounted or WRITE_EXTERNAL_STORAGE permissions is not granted. 
 
 If you would like to override that bahavior, setting **R.bool.ail__external_storage_enabled** to false will cause it to use the Cache directory by default. 
 
 If you would like to use **context.getFilesDir()** instead of the Cache, simply set **R.bool.ail__use_cache_dir** to false.
 
-##### Notes
+##### Memory Caching
+
+As of version 1.3.1, the imageloader can now use an instance of android.support.v4.util.LruCache before attempting to read from the File cache. By default, the Lru cache will use up to 1/8 of the available virtual memory (taken from the support docs), but this value can be changed by overriding **R.integer.ail__lru_available_memory_reciprical**. 
+
+You can also enable/disable the cache per-request basis by calling **ImageRequest.setLruCacheEnabled(boolean)** or globally by overriding **R.bool.ail__lru_cache_enabled**.
+
+### Notes
 * Prefetching images can be achieved by simply not setting a target View (e.g. don't call ImageRequest.setTargetView(myImageView).
 * ImageRequest's for the same URL are safe to call at the same time. The ImageLoader will delay subsequent requests for the same URL until the download has finished.
 * Adjustments via ImageFilter are only performed/saved, and success callbacks are only triggered, when a target View is present.
@@ -177,14 +185,13 @@ If you would like to use **context.getFilesDir()** instead of the Cache, simply 
 
 ##### Things I plan on adding when I get the chance
 * Custom SVG Image Filters (e.g. replacing colors)
-* Cache extra image adjustments by file size
-* Restart image downloads for certain failed images download errors
+* Restart image downloads for certain failed image download errors
 
 ##### Known Issues
 * If trying to load a super large image (like a picture from the Camera) into an ImageView with layout_width as either fill_parent or wrap_cotent, it may run into an OutOfMemoryError with filters due to the barely-downsampled size of the image. To avoid this, either set the LayoutParams's width manually, or use the helper method: **ImageRequest.setRequiredImageWidth(int)**
 * Loading many versions of the same SVG file too quickly can cause the SVGParser to throw an "Invalid Colour Keyword" error due to the version we're using not supporting asynchronous SVG parsing.
 * Using the DefaultLoadingStub when the request is for View's background may cause a slight vertical rendering shift I don't yet understand.
 
-###### RotationTransitionModule issues:
+##### RotationTransitionModule issues:
 * It doesn't work for none-square backgrounds (i.e. non-ImageView requests or ones with setAsbackground(true)). It's all weird and not pretty. Don't use it.
 

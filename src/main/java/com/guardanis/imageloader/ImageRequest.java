@@ -1,12 +1,10 @@
 package com.guardanis.imageloader;
 
-import android.content.ContentResolver;
 import android.content.Context;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.ColorFilter;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -67,7 +65,9 @@ public class ImageRequest<V extends View> implements Runnable {
     protected V targetView;
     protected boolean setImageAsBackground = false;
     protected int requiredImageWidth = -1;
+
     protected long maxCacheDurationMs = -1;
+    private boolean lruCacheEnabled = true;
 
     protected List<ImageFilter<Bitmap>> bitmapImageFilters = new ArrayList<ImageFilter<Bitmap>>();
 
@@ -97,6 +97,8 @@ public class ImageRequest<V extends View> implements Runnable {
         this.showStubOnExecute = context.getResources().getBoolean(R.bool.ail__show_stub_on_execute);
         this.showStubOnError = context.getResources().getBoolean(R.bool.ail__show_stub_on_error);
         this.useOldResourceStubs = context.getResources().getBoolean(R.bool.ail__use_old_resource_stubs);
+        this.lruCacheEnabled = context.getResources().getBoolean(R.bool.ail__lru_cache_enabled);
+        this.tagRequestPreventionEnabled = context.getResources().getBoolean(R.bool.ail__tag_request_prevention_enabled);
     }
 
     public ImageRequest(Context context, V targetView) {
@@ -224,6 +226,14 @@ public class ImageRequest<V extends View> implements Runnable {
      */
     public ImageRequest<V> setMaxCacheDurationMs(long maxCacheDurationMs) {
         this.maxCacheDurationMs = maxCacheDurationMs;
+        return this;
+    }
+
+    /**
+     * Enable/disable use of LruCache for caching images in memory
+     */
+    public ImageRequest<V> setLruCacheEnabled(boolean lruCacheEnabled) {
+        this.lruCacheEnabled = lruCacheEnabled;
         return this;
     }
 
@@ -391,7 +401,23 @@ public class ImageRequest<V extends View> implements Runnable {
     public void run() {
         if(targetView != null && ImageLoader.getInstance(context).isViewStillUsable(this)){
             try{
-                Drawable processed = imageProcessor.process(this, bitmapImageFilters);
+                String cacheKey = getEditedRequestFileCacheName();
+
+                Drawable processed = null;
+
+                if(lruCacheEnabled)
+                    processed = MemoryCache.getInstance(context)
+                            .get(cacheKey);
+
+                if(processed == null){
+                    processed = imageProcessor.process(this, bitmapImageFilters);
+
+                    if(lruCacheEnabled
+                            && processed != null
+                            && processed instanceof BitmapDrawable)
+                        MemoryCache.getInstance(context)
+                                .put(cacheKey, (BitmapDrawable) processed);
+                }
 
                 onRequestCompleted(processed);
             }
@@ -461,7 +487,7 @@ public class ImageRequest<V extends View> implements Runnable {
         for(ImageFilter<Bitmap> filter : bitmapImageFilters)
             adjustedName += "_" + filter.getAdjustmentInfo();
 
-        return adjustedName;
+        return adjustedName + "_" + getRequiredImageWidth() + "px";
     }
 
     public File getEditedRequestFile() {
@@ -577,10 +603,8 @@ public class ImageRequest<V extends View> implements Runnable {
 
         final String fullRequestFile = getEditedRequestFileCacheName();
 
-        if(tagRequestPreventionEnabled
-                && !(targetView == null || targetView.getTag() == null)
-                && targetView.getTag().equals(fullRequestFile)){
-            ImageUtils.log(context, "Request already claimed. Ignoring [" + fullRequestFile + "]");
+        if(isTargetViewClaimedBy(fullRequestFile)){
+            ImageUtils.log(context, "View already claimed by duplicate request. Ignoring this one [" + fullRequestFile + "]");
 
             return this;
         }
@@ -613,6 +637,12 @@ public class ImageRequest<V extends View> implements Runnable {
                     });
 
         return this;
+    }
+
+    protected boolean isTargetViewClaimedBy(String fullRequestFile){
+        return tagRequestPreventionEnabled
+                && !(targetView == null || targetView.getTag() == null)
+                && targetView.getTag().equals(fullRequestFile);
     }
 
     /**

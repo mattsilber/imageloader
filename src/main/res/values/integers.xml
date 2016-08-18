@@ -3,4 +3,6 @@
 
     <integer name="ail__thread_pool_size">8</integer>
 
+    <integer name="ail__lru_available_memory_reciprical">8</integer>
+
 </resources>
