@@ -53,6 +53,8 @@ public class ImageRequest<V extends View> implements Runnable {
     protected static final int DEFAULT_SCALE_DURATION = 300;
     protected static final int DEFAULT_ROTATION_DURATION = 300;
 
+    protected static final int WIDTH_UNKNOWN = -1;
+
     protected Context context;
 
     protected String targetUrl;
@@ -64,7 +66,7 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected V targetView;
     protected boolean setImageAsBackground = false;
-    protected int requiredImageWidth = -1;
+    protected int requiredImageWidth = WIDTH_UNKNOWN;
 
     protected long maxCacheDurationMs = -1;
     private boolean lruCacheEnabled = true;
@@ -431,7 +433,9 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected int getRequiredImageWidth(){
         return requiredImageWidth < 1
-                ? targetView.getLayoutParams().width
+                ? (!(targetView == null || targetView.getLayoutParams() == null)
+                        ? targetView.getLayoutParams().width
+                        : WIDTH_UNKNOWN)
                 : requiredImageWidth;
     }
 
