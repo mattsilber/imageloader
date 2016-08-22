@@ -15,7 +15,7 @@ Another lazy image-loading library with AndroidSVG, Animated GIF, and Bitmap fil
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.3.1')
+        compile('com.guardanis:imageloader:1.3.2')
     }
 ```
 
