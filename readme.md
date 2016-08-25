@@ -15,7 +15,7 @@ Another lazy image-loading library with AndroidSVG, Animated GIF, and Bitmap fil
     }
 
     dependencies {
-        compile('com.guardanis:imageloader:1.3.2')
+        compile('com.guardanis:imageloader:1.3.3')
     }
 ```
 
@@ -24,13 +24,21 @@ Another lazy image-loading library with AndroidSVG, Animated GIF, and Bitmap fil
 This was originally written several years ago as an included lazy loader for downloading/caching images, but then evolved to allow the chaining of adjustments on the underlying Bitmap (what I call an ImageFilter). Let's say, for instance, I want to download your Facebook profile picture, throw a blur on top, overlay a dark-transparent color, and then throw it into an ImageView, but fade in for a duration of 150ms. Well, you could actually do all of that pretty easily:
 
 ```
-    new ImageRequest(context)
+    ImageRequest.create(findViewbyId(R.id.some_image_view))
         .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
-        .setTargetView(myImageView)
         .addBlurFilter()
         .addColorOverlayFilter(activity.getResources().getColor(R.color.menu_header_user_image_parent_blurred_overlay))
         .setFadeTransition(150)
         .execute();
+```
+
+You can also create a new ImageRequest the old way using `new ImageRequest(context)` and assign the target View later with `ImageRequest.setTargetView(View)`. e.g.
+
+```java
+new ImageRequest(context)
+    .setTargetView(findViewById(R.id.some_image_view))
+    ...
+    .execute();
 ```
 
 ### Custom Filters
@@ -38,7 +46,7 @@ This was originally written several years ago as an included lazy loader for dow
 As mentioned above, this library comes with a few stock Bitmap filters (such as blurring, overlaying colors, rotating, color replacement, etc.). But, it also let's you add your own filters by working with the abstract ImageFilter class. Using the above example, we can easily add a custom filter via *addImageFilter(ImageFilter<Bitmap> filter)*:
 
 ```
-    new ImageRequest(context, myImageView)
+    ImageRequest.create(myImageView)
         .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
         .addImageFilter(new ImageFilter<Bitmap>(context){
             @Override
@@ -66,7 +74,7 @@ For more information about AndroidSVG, click [here](https://github.com/BigBadabo
 If you want to load SVG Images and perform adjustments on the underlying Bitmap, you can create and execute a regular ImageRequest where the target can be an external URL, an asset, a File, or a resource in your /raw/ folder. e.g.
 
 ```
-    new ImageRequest(context, myImageView)
+    ImageRequest.create(myImageView)
         .setTargetAsset("my_svg_file.svg") // From assets
         .setTargetResource(R.raw.my_svg, ImageType.SVG) // From resources
         .setTargetUrl("http://some.site/my_svg.svg")
@@ -96,7 +104,7 @@ For more information about the android-gif-drawable library created by koral--, 
 
 To load a gif, create an ImageRequest the same way you would any other request in this library:
 
-    new ImageRequest(context, myImageView)
+    ImageRequest.create(myImageView)
         .setTargetUrl("http://site.com/my_gif.gif") // <-- load from web
         .setTargetAsset("my_gif.gif") // <-- Load from assets
         .setTargetFile("/sdcard/0/my_gif.gif") // <-- Load from storage
@@ -126,7 +134,7 @@ You can also handle that manually on a per-case basis using the ImageSuccessCall
 The ImageRequest system allows you to specify both a loading and an error stub to an individual request by attaching a StubHandler:
 
 ```
-    new ImageRequest<ImageView>(context, myImageView)
+    ImageRequest.create(myImageView)
         .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
         .setShowStubOnExecute(true)
         .setShowStubOnError(true)
@@ -158,7 +166,7 @@ By default, the ImageRequest will show the loading stub, but not the error stub,
 
 As of version 1.1.0, a single TransitionController is now the interface between a single TransitionDrawable and any TransitionModules it contains. The TransitionModules are the modular components used to actually perform adjustments to the underlying Canvas/Bitmap/Drawable at the appropriate times, and can be easily added to any request. The idea here is to (hopefully) allow multiple types of transitions to be run at the same time (e.g. scale and fade).
 
-The currently included TransitionModules are the FadingTransitionModule, ScalingTransitionModule, and RotationTransitionModule.
+The currently included TransitionModules are the FadingTransitionModule, ScalingTransitionModule, TranslateTransitionModule, and RotationTransitionModule.
 
 ### Caching
 
@@ -176,8 +184,18 @@ As of version 1.3.1, the imageloader can now use an instance of android.support.
 
 You can also enable/disable the cache per-request basis by calling **ImageRequest.setLruCacheEnabled(boolean)** or globally by overriding **R.bool.ail__lru_cache_enabled**.
 
+### Prefetching Images
+
+Prefetching images can be achieved by simply not setting a target View (i.e. don't call ImageRequest.setTargetView(myImageView) or use the static create helper method. 
+
+```java
+new ImageRequest(context)
+    .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
+    .execute();
+```
+Unfortunately, though, there is no callback for completion without having a target View set.
+
 ### Notes
-* Prefetching images can be achieved by simply not setting a target View (e.g. don't call ImageRequest.setTargetView(myImageView).
 * ImageRequest's for the same URL are safe to call at the same time. The ImageLoader will delay subsequent requests for the same URL until the download has finished.
 * Adjustments via ImageFilter are only performed/saved, and success callbacks are only triggered, when a target View is present.
 * Setting a maximum cachable duration for a target URL can be achieved by calling ImageRequest.setMaxCacheDurationMs(long); e.g. setMaxCacheDurationMs(TimeUnit.DAYS.toMillis(5));

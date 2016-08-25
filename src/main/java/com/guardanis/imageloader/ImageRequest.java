@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.view.View;
@@ -31,6 +32,7 @@ import com.guardanis.imageloader.transitions.modules.FadingTransitionModule;
 import com.guardanis.imageloader.transitions.modules.RotationTransitionModule;
 import com.guardanis.imageloader.transitions.modules.ScalingTransitionModule;
 import com.guardanis.imageloader.transitions.modules.TransitionModule;
+import com.guardanis.imageloader.transitions.modules.TranslateTransitionModule;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -359,6 +361,25 @@ public class ImageRequest<V extends View> implements Runnable {
         return addImageTransitionModule(new RotationTransitionModule(from, to, duration));
     }
 
+    /**
+     * Translate to 'normal' position from supplied parameters.
+     */
+    public ImageRequest<V> setTranslateTransition(float fromX, float fromY, long duration){
+        return setTranslateTransition(new float[]{ fromX, fromY },
+                new float[]{ 0, 0 },
+                duration);
+    }
+
+    public ImageRequest<V> setTranslateTransition(float fromX, float fromY, float toX, float toY, long duration){
+        return setTranslateTransition(new float[]{ fromX, fromY },
+                new float[]{ toX, toY },
+                duration);
+    }
+
+    public ImageRequest<V> setTranslateTransition(float[] from, float[] to, long duration){
+        return addImageTransitionModule(new TranslateTransitionModule(from, to, duration));
+    }
+
     public ImageRequest<V> addImageTransitionModule(TransitionModule module){
         this.transitionController.registerModule(module);
         return this;
@@ -662,6 +683,10 @@ public class ImageRequest<V extends View> implements Runnable {
                 }, delay);
 
         return this;
+    }
+
+    public static <V extends View> ImageRequest<V> create(@NonNull V targetView){
+        return new ImageRequest<V>(targetView.getContext(), targetView);
     }
 
 }
