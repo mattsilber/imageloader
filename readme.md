@@ -9,27 +9,27 @@ Another lazy image-loading library with AndroidSVG, Animated GIF, and Bitmap fil
 
 # Installation
 
-```
-    repositories {
-        jcenter()
-    }
+```groovy
+repositories {
+    jcenter()
+}
 
-    dependencies {
-        compile('com.guardanis:imageloader:1.3.3')
-    }
+dependencies {
+    compile('com.guardanis:imageloader:1.3.3')
+}
 ```
 
 # Usage
 
 This was originally written several years ago as an included lazy loader for downloading/caching images, but then evolved to allow the chaining of adjustments on the underlying Bitmap (what I call an ImageFilter). Let's say, for instance, I want to download your Facebook profile picture, throw a blur on top, overlay a dark-transparent color, and then throw it into an ImageView, but fade in for a duration of 150ms. Well, you could actually do all of that pretty easily:
 
-```
-    ImageRequest.create(findViewbyId(R.id.some_image_view))
-        .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
-        .addBlurFilter()
-        .addColorOverlayFilter(activity.getResources().getColor(R.color.menu_header_user_image_parent_blurred_overlay))
-        .setFadeTransition(150)
-        .execute();
+```java
+ImageRequest.create(findViewbyId(R.id.some_image_view))
+    .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
+    .addBlurFilter()
+    .addColorOverlayFilter(activity.getResources().getColor(R.color.menu_header_user_image_parent_blurred_overlay))
+    .setFadeTransition(150)
+    .execute();
 ```
 
 You can also create a new ImageRequest the old way using `new ImageRequest(context)` and assign the target View later with `ImageRequest.setTargetView(View)`. e.g.
@@ -45,16 +45,16 @@ new ImageRequest(context)
 
 As mentioned above, this library comes with a few stock Bitmap filters (such as blurring, overlaying colors, rotating, color replacement, etc.). But, it also let's you add your own filters by working with the abstract ImageFilter class. Using the above example, we can easily add a custom filter via *addImageFilter(ImageFilter<Bitmap> filter)*:
 
-```
-    ImageRequest.create(myImageView)
-        .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
-        .addImageFilter(new ImageFilter<Bitmap>(context){
-            @Override
-            public Bitmap filter(Bitmap unedited){
-                return unedited;
-            }
-        })
-        .execute();
+```java
+ImageRequest.create(myImageView)
+    .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
+    .addImageFilter(new ImageFilter<Bitmap>(context){
+        @Override
+        public Bitmap filter(Bitmap unedited){
+            return unedited;
+        }
+    })
+    .execute();
 ```
 
 ##### Currently supported ImageFilter<Bitmap>
@@ -73,13 +73,13 @@ For more information about AndroidSVG, click [here](https://github.com/BigBadabo
 
 If you want to load SVG Images and perform adjustments on the underlying Bitmap, you can create and execute a regular ImageRequest where the target can be an external URL, an asset, a File, or a resource in your /raw/ folder. e.g.
 
-```
-    ImageRequest.create(myImageView)
-        .setTargetAsset("my_svg_file.svg") // From assets
-        .setTargetResource(R.raw.my_svg, ImageType.SVG) // From resources
-        .setTargetUrl("http://some.site/my_svg.svg")
-        .setTargetFile(new File("/sdcard/0/my_svg.svg"))
-        .execute();
+```java
+ImageRequest.create(myImageView)
+    .setTargetAsset("my_svg_file.svg") // From assets
+    .setTargetResource(R.raw.my_svg, ImageType.SVG) // From resources
+    .setTargetUrl("http://some.site/my_svg.svg")
+    .setTargetFile(new File("/sdcard/0/my_svg.svg"))
+    .execute();
 ```
 
 ##### SVG Requirements
@@ -104,22 +104,26 @@ For more information about the android-gif-drawable library created by koral--, 
 
 To load a gif, create an ImageRequest the same way you would any other request in this library:
 
-    ImageRequest.create(myImageView)
-        .setTargetUrl("http://site.com/my_gif.gif") // <-- load from web
-        .setTargetAsset("my_gif.gif") // <-- Load from assets
-        .setTargetFile("/sdcard/0/my_gif.gif") // <-- Load from storage
-        .setTargetResource(R.raw.my_gif, ImageType.GIF) // <-- Load from resources
-        .execute();
+```java
+ImageRequest.create(myImageView)
+    .setTargetUrl("http://site.com/my_gif.gif") // <-- load from web
+    .setTargetAsset("my_gif.gif") // <-- Load from assets
+    .setTargetFile("/sdcard/0/my_gif.gif") // <-- Load from storage
+    .setTargetResource(R.raw.my_gif, ImageType.GIF) // <-- Load from resources
+    .execute();
+```
 
 By default, gifs will start running automatically. If you want to override that behavior globally, set *R.bool.ail__gif_auto_start_enabled* to false.
 
 You can also handle that manually on a per-case basis using the ImageSuccessCallback:
 
-    new ImageRequest(context)
-        .setSuccessCallback((r, d) -> {
-             if(d instanceof GifDrawable)
-                  ((GifDrawable) d).stop();
-        })
+```java
+new ImageRequest(context)
+    .setSuccessCallback((r, d) -> {
+         if(d instanceof GifDrawable)
+              ((GifDrawable) d).stop();
+    })
+```
 
 ##### Supported features
 * Transitions at the canvas level are fully supported even while the gifs are running (minus alpha blending, that is)
@@ -133,22 +137,22 @@ You can also handle that manually on a per-case basis using the ImageSuccessCall
 
 The ImageRequest system allows you to specify both a loading and an error stub to an individual request by attaching a StubHandler:
 
-```
-    ImageRequest.create(myImageView)
-        .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
-        .setShowStubOnExecute(true)
-        .setShowStubOnError(true)
-        .overrideStubs(new SubHolder(){
-            @Override
-            public Drawable getLoadingDrawable(Context context){
-                return ContextCompat.getDrawable(context, R.drawable.some_drawable);
-            }
-            @Override
-            public Drawable getErrorDrawable(Context context){
-                return ContextCompat.getDrawable(context, R.drawable.some_drawable);
-            }
-        })
-        .execute();
+```java
+ImageRequest.create(myImageView)
+    .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
+    .setShowStubOnExecute(true)
+    .setShowStubOnError(true)
+    .overrideStubs(new SubHolder(){
+        @Override
+        public Drawable getLoadingDrawable(Context context){
+            return ContextCompat.getDrawable(context, R.drawable.some_drawable);
+        }
+        @Override
+        public Drawable getErrorDrawable(Context context){
+            return ContextCompat.getDrawable(context, R.drawable.some_drawable);
+        }
+    })
+    .execute();
 ```
 
 As of version 1.0.8, the ImageRequest will use the DefaultLoadingDrawable for loading stubs, as opposed to the static resources image. If you'd like to configure the default tint for the loading drawable, override the color resource *R.color.ail__default_stub_loading_tint*. The error stub is still the same *R.drawable.ail__image_loader_stub_error*. 
