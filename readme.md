@@ -15,20 +15,25 @@ repositories {
 }
 
 dependencies {
-    compile('com.guardanis:imageloader:1.3.3')
+    compile('com.guardanis:imageloader:1.3.4')
 }
 ```
 
 # Usage
 
-This was originally written several years ago as an included lazy loader for downloading/caching images, but then evolved to allow the chaining of adjustments on the underlying Bitmap (what I call an ImageFilter). Let's say, for instance, I want to download your Facebook profile picture, throw a blur on top, overlay a dark-transparent color, and then throw it into an ImageView, but fade in for a duration of 150ms. Well, you could actually do all of that pretty easily:
+This was originally written several years ago as an included lazy loader for downloading/caching images, but then evolved to allow the chaining of adjustments on the underlying Bitmap (what I call an ImageFilter). Let's say, for instance, I want to download your Facebook profile picture, throw a blur on top, overlay a dark-transparent color, and then throw it into an ImageView, but fade in for a duration of 150ms and scale in with a bounce. Well, you could actually do all of that pretty easily:
 
 ```java
 ImageRequest.create(findViewbyId(R.id.some_image_view))
     .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
     .addBlurFilter()
-    .addColorOverlayFilter(activity.getResources().getColor(R.color.menu_header_user_image_parent_blurred_overlay))
+    .addColorOverlayFilter(activity.getResources()
+            .getColor(R.color.my_awesome_overlay_color))
     .setFadeTransition(150)
+    .setScaleTransition(0f, 1f, 750)
+    .registerImageTransitionInterpolator(ScalingTransitionModule.class,
+            TransitionModule.INTERPOLATOR_IN,
+            new BounceInterpolator())
     .execute();
 ```
 
@@ -168,9 +173,35 @@ By default, the ImageRequest will show the loading stub, but not the error stub,
 
 ### Transitions
 
-As of version 1.1.0, a single TransitionController is now the interface between a single TransitionDrawable and any TransitionModules it contains. The TransitionModules are the modular components used to actually perform adjustments to the underlying Canvas/Bitmap/Drawable at the appropriate times, and can be easily added to any request. The idea here is to (hopefully) allow multiple types of transitions to be run at the same time (e.g. scale and fade).
+As of version 1.1.0, a single `TransitionController` is now the interface between a single `TransitionDrawable` and any `TransitionModules` it contains. The TransitionModules are the modular components used to actually perform adjustments to the underlying Canvas/Bitmap/Drawable at the appropriate times, and can be easily added to any request. The idea here is to (hopefully) allow multiple types of transitions to be run at the same time (e.g. scale and fade).
 
-The currently included TransitionModules are the FadingTransitionModule, ScalingTransitionModule, TranslateTransitionModule, and RotationTransitionModule.
+##### TransitionModules
+
+There are several TransitionModules already build in:
+
+* FadingTransitionModule 
+* ScalingTransitionModule
+* TranslateTransitionModule
+* RotationTransitionModule
+
+##### Interpolators
+
+Each TransitionModule contains two Interpolators for animating, denoted by the keys of TransitionModule.INTERPOLATOR_IN and TransitionModule.INTERPOLATOR_OUT, respectively.
+
+To change an Interpolator for a specific TransitionModule, you can use the `ImageRequest.registerImageTransitionInterpolator(Class, int, Interpolator)` helper method or register it directly on the module itself.
+
+The `Class` object here would be the TransitionModule you're using (see TransitionModules section above).
+
+Here's an example changing the ScalingTransitionModule's entrance Interpolator to bounce:
+
+```java
+ImageRequest.create(findViewbyId(R.id.some_image_view))
+    .setScaleTransition(0f, 1f, 750)
+    .registerImageTransitionInterpolator(ScalingTransitionModule.class,
+            TransitionModule.INTERPOLATOR_IN,
+            new BounceInterpolator())
+    .execute();
+```
 
 ### Caching
 
