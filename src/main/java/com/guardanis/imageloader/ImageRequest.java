@@ -252,7 +252,8 @@ public class ImageRequest<V extends View> implements Runnable {
 
     /**
      * Set whether or not to trigger the success callback when the View is no longer valid for the request.
-     * The default behavior is true, to prevent invalid requests from triggering.
+     * The default behavior is true, to prevent invalid requests from triggering. Only valid when a
+     * target View is present.
      */
     public ImageRequest<V> setTriggerSuccessForValidViewsOnly(boolean triggerSuccessForValidViewsOnly){
         this.triggerSuccessForValidViewsOnly = triggerSuccessForValidViewsOnly;
@@ -422,7 +423,13 @@ public class ImageRequest<V extends View> implements Runnable {
 
     @Override
     public void run() {
-        if(targetView != null && ImageLoader.getInstance(context).isViewStillUsable(this)){
+        boolean processableWithView = targetView != null
+                && ImageLoader.getInstance(context).isViewStillUsable(this);
+
+        boolean processableWithoutView = targetView == null
+                && 0 < getRequiredImageWidth();
+
+        if(processableWithView || processableWithoutView){
             try{
                 String cacheKey = getEditedRequestFileCacheName();
 
@@ -465,15 +472,15 @@ public class ImageRequest<V extends View> implements Runnable {
             onRequestFailed();
             return;
         }
-        else if(targetView == null)
-            return;
 
-        if(ImageLoader.getInstance(context).isViewStillUsable(this)){
-            if(transitionOnSuccessEnabled)
-                transitionController.transitionTo(targetDrawable);
+        if(targetView != null){
+            if(ImageLoader.getInstance(context).isViewStillUsable(this)){
+                if(transitionOnSuccessEnabled)
+                    transitionController.transitionTo(targetDrawable);
+            }
+            else if(triggerSuccessForValidViewsOnly)
+                return;
         }
-        else if(triggerSuccessForValidViewsOnly)
-            return;
 
         post(new Runnable(){
             public void run(){
@@ -484,18 +491,17 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     protected void onRequestFailed() {
-        if(targetView == null || !ImageLoader.getInstance(context).isViewStillUsable(this))
-            return;
+        if(targetView != null && ImageLoader.getInstance(context).isViewStillUsable(this))
+            handleShowStubOnError();
 
-        handleShowStubOnError();
-
-        post(new Runnable(){
-            public void run(){
-                if(errorCallback != null)
-                    errorCallback.onImageLoadingFailure(ImageRequest.this,
-                            new RuntimeException("Image could not be loaded"));
-            }
-        });
+        if(targetView == null || ImageLoader.getInstance(context).isViewStillUsable(this))
+            post(new Runnable(){
+                public void run(){
+                    if(errorCallback != null)
+                        errorCallback.onImageLoadingFailure(ImageRequest.this,
+                                new RuntimeException("Image could not be loaded"));
+                }
+            });
     }
 
     protected void handleShowStubOnError(){
@@ -687,6 +693,12 @@ public class ImageRequest<V extends View> implements Runnable {
 
     public static <V extends View> ImageRequest<V> create(@NonNull V targetView){
         return new ImageRequest<V>(targetView.getContext(), targetView);
+    }
+
+    public static ImageRequest prefetch(Context context, String url){
+        return new ImageRequest(context)
+                .setTargetUrl(url)
+                .execute();
     }
 
 }

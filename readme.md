@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.guardanis:imageloader:1.3.4')
+    compile('com.guardanis:imageloader:1.3.5')
 }
 ```
 
@@ -221,18 +221,26 @@ You can also enable/disable the cache per-request basis by calling **ImageReques
 
 ### Prefetching Images
 
-Prefetching images can be achieved by simply not setting a target View (i.e. don't call ImageRequest.setTargetView(myImageView) or use the static create helper method. 
+Prefetching images can be achieved by simply not setting a target View (i.e. don't call ImageRequest.setTargetView(myImageView) or use the static create `prefetch(Context, String)` method. 
 
+```java
+ImageRequest.prefetch(context,
+    "https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg");
+```
+or 
 ```java
 new ImageRequest(context)
     .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
     .execute();
 ```
-Unfortunately, though, there is no callback for completion without having a target View set.
+
+As of v1.3.5, a callback for completion or failure can be triggered for prefetching images, provided that either a target View or a required width are explicitly set (`ImageRequest.setRequiredImageWidth(int)`) for the request.
+
+Without a View or an explicit width, none of the ImageFilters can be applied and no completion callbacks will be triggered.
 
 ### Notes
 * ImageRequest's for the same URL are safe to call at the same time. The ImageLoader will delay subsequent requests for the same URL until the download has finished.
-* Adjustments via ImageFilter are only performed/saved, and success callbacks are only triggered, when a target View is present.
+* Adjustments via ImageFilter are only performed/saved, and success callbacks are only triggered, when a target View is present or an explicit width has been set via `ImageRequest.setRequiredImageWidth(int)`.
 * Setting a maximum cachable duration for a target URL can be achieved by calling ImageRequest.setMaxCacheDurationMs(long); e.g. setMaxCacheDurationMs(TimeUnit.DAYS.toMillis(5));
 * For lists, you probably don't want exit transitions as it can appear weird when scrolling quickly. To disable them, call ImageRequest.setExitTransitionsEnabled(false)
 
