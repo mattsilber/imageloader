@@ -19,7 +19,6 @@ import com.guardanis.imageloader.filters.BitmapCircularCropFilter;
 import com.guardanis.imageloader.filters.BitmapColorFilter;
 import com.guardanis.imageloader.filters.BitmapColorOverlayFilter;
 import com.guardanis.imageloader.filters.BitmapColorOverrideFilter;
-import com.guardanis.imageloader.filters.BitmapColorReplacementFilter;
 import com.guardanis.imageloader.filters.BitmapRotationFilter;
 import com.guardanis.imageloader.filters.ImageFilter;
 import com.guardanis.imageloader.processors.ExternalImageProcessor;
@@ -27,6 +26,7 @@ import com.guardanis.imageloader.processors.ImageAssetProcessor;
 import com.guardanis.imageloader.processors.ImageFileProcessor;
 import com.guardanis.imageloader.processors.ImageProcessor;
 import com.guardanis.imageloader.processors.ImageResourceProcessor;
+import com.guardanis.imageloader.stubs.loaders.StubBuilder;
 import com.guardanis.imageloader.transitions.TransitionController;
 import com.guardanis.imageloader.transitions.modules.FadingTransitionModule;
 import com.guardanis.imageloader.transitions.modules.RotationTransitionModule;
@@ -78,8 +78,8 @@ public class ImageRequest<V extends View> implements Runnable {
     protected boolean showStubOnExecute = true;
     protected boolean showStubOnError = false;
     protected boolean disableExecutionStubIfDownloaded = true;
-    protected boolean useOldResourceStubs = false;
-    protected StubHolder stubHolder;
+    protected StubBuilder loadingStubBuilder;
+    protected StubBuilder errorStubBuilder;
 
     protected TransitionController transitionController = new TransitionController(this);
     protected boolean exitTransitionsEnabled = true;
@@ -100,7 +100,6 @@ public class ImageRequest<V extends View> implements Runnable {
         this.context = context;
         this.showStubOnExecute = context.getResources().getBoolean(R.bool.ail__show_stub_on_execute);
         this.showStubOnError = context.getResources().getBoolean(R.bool.ail__show_stub_on_error);
-        this.useOldResourceStubs = context.getResources().getBoolean(R.bool.ail__use_old_resource_stubs);
         this.lruCacheEnabled = context.getResources().getBoolean(R.bool.ail__lru_cache_enabled);
         this.tagRequestPreventionEnabled = context.getResources().getBoolean(R.bool.ail__tag_request_prevention_enabled);
     }
@@ -216,14 +215,6 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     /**
-     * Use the old resource-based drawable stubs. Manually settings the stubs renders this useless.
-     */
-    public ImageRequest<V> setUseOldResourceStubs(boolean useOldResourceStubs) {
-        this.useOldResourceStubs = useOldResourceStubs;
-        return this;
-    }
-
-    /**
      * Set the maximum allowed time a cached file from this request is valid for in milliseconds.
      * Files requested beyond this limit will be deleted and re-downloaded.
      * Anything < 0 will never re-download (default behavior).
@@ -302,17 +293,6 @@ public class ImageRequest<V extends View> implements Runnable {
                 replacementColor));
     }
 
-    public ImageRequest<V> addColorReplacementFilter(int replace, int with) {
-        return addImageFilter(new BitmapColorReplacementFilter(context,
-                replace,
-                with));
-    }
-
-    public ImageRequest<V> addColorReplacementFilter(Map<Integer, Integer> replacements) {
-        return addImageFilter(new BitmapColorReplacementFilter(context,
-                replacements));
-    }
-
     public ImageRequest<V> addColorFilter(ColorFilter filter) {
         return addImageFilter(new BitmapColorFilter(context,
                 filter));
@@ -328,8 +308,20 @@ public class ImageRequest<V extends View> implements Runnable {
         return this;
     }
 
-    public ImageRequest<V> overrideStubs(StubHolder stubHolder){
-        this.stubHolder = stubHolder;
+    @Deprecated
+    public ImageRequest<V> overrideStubs(final StubHolder stubHolder){
+        this.loadingStubBuilder = new StubBuilder() {
+            public Drawable build(Context context) {
+                return stubHolder.getLoadingDrawable(context);
+            }
+        };
+
+        this.errorStubBuilder = new StubBuilder() {
+            public Drawable build(Context context) {
+                return stubHolder.getErrorDrawable(context);
+            }
+        };
+
         return this;
     }
 
@@ -460,11 +452,12 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     protected int getRequiredImageWidth(){
-        return requiredImageWidth < 1
-                ? (!(targetView == null || targetView.getLayoutParams() == null)
-                        ? targetView.getLayoutParams().width
-                        : WIDTH_UNKNOWN)
-                : requiredImageWidth;
+        if(0 < requiredImageWidth)
+            return requiredImageWidth;
+
+        return !(targetView == null || targetView.getLayoutParams() == null)
+                ? targetView.getLayoutParams().width
+                : WIDTH_UNKNOWN;
     }
 
     protected void onRequestCompleted(@Nullable final Drawable targetDrawable){
@@ -506,8 +499,8 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected void handleShowStubOnError(){
         final Drawable targetDrawable = showStubOnError
-                ? getStubs().getErrorDrawable(context)
-                : ContextCompat.getDrawable(context, R.drawable.ail__default_fade_placeholder);
+                ? getErrorStubBuilder().build(context)
+                : ContextCompat.getDrawable(context, R.drawable.ail__default_image_placeholder);
 
         transitionController.transitionTo(targetDrawable);
     }
@@ -566,12 +559,16 @@ public class ImageRequest<V extends View> implements Runnable {
                 .getFile(getOriginalRequestFileCacheName());
     }
 
-    protected StubHolder getStubs(){
-        if(stubHolder == null)
-            return useOldResourceStubs
-                    ? ImageLoader.getInstance(context).getResourceBasedStubs()
-                    : ImageLoader.getInstance(context).getStubs();
-        else return stubHolder;
+    protected StubBuilder getLoadingStubBuilder(){
+        return loadingStubBuilder == null
+                ? ImageLoader.getInstance(context).getLoadingStubBuilder()
+                : loadingStubBuilder;
+    }
+
+    protected StubBuilder getErrorStubBuilder(){
+        return errorStubBuilder == null
+                ? ImageLoader.getInstance(context).getErrorStubBuilder()
+                : errorStubBuilder;
     }
 
     public String getTargetUrl(){
@@ -622,8 +619,8 @@ public class ImageRequest<V extends View> implements Runnable {
             return;
 
         final Drawable targetDrawable = showStubOnExecute
-                ? getStubs().getLoadingDrawable(context)
-                : ContextCompat.getDrawable(context, R.drawable.ail__default_fade_placeholder);
+                ? getLoadingStubBuilder().build(context)
+                : ContextCompat.getDrawable(context, R.drawable.ail__default_image_placeholder);
 
         transitionController.transitionTo(targetDrawable);
     }

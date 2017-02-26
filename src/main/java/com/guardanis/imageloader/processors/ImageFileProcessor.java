@@ -41,7 +41,8 @@ public class ImageFileProcessor extends ImageProcessor {
                         editedImageFile,
                         bitmapImageFilters);
         }
-        else return decodeBitmapDrawable(request.getContext(),
+        else
+            return decodeBitmapDrawable(request.getContext(),
                 editedImageFile,
                 requiredImageWidth);
 

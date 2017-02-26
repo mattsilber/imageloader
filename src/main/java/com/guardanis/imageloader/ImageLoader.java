@@ -8,6 +8,10 @@ import android.support.v4.content.ContextCompat;
 import android.view.View;
 
 import com.guardanis.imageloader.stubs.DefaultLoadingDrawable;
+import com.guardanis.imageloader.stubs.loaders.DefaultErrorStubBuilder;
+import com.guardanis.imageloader.stubs.loaders.DefaultLoadingStubBuilder;
+import com.guardanis.imageloader.stubs.loaders.EmptyStubBuilder;
+import com.guardanis.imageloader.stubs.loaders.StubBuilder;
 
 import java.io.File;
 import java.io.InputStream;
@@ -37,6 +41,8 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     }
 
     private static final String PREFS = "ImageLoaderPrefs";
+    private static final String PREF__STUB_LOADER = "stub__loader";
+    private static final String PREF__STUB_ERROR = "stub__error";
 
     protected Context context;
     protected FileCache fileCache;
@@ -46,13 +52,84 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     protected Map<String, List<ImageRequest>> delayedRequests = new HashMap<String, List<ImageRequest>>();
     protected ExecutorService executorService;
 
-    private StubHolder stubHolder;
+    private StubBuilder loadingStubBuilder;
+    private StubBuilder errorStubBuilder;
+
     private final Handler handler = new Handler(Looper.getMainLooper());
 
     protected ImageLoader(Context context) {
         this.context = context.getApplicationContext();
         this.fileCache = new FileCache(context);
-        this.executorService = Executors.newFixedThreadPool(context.getResources().getInteger(R.integer.ail__thread_pool_size));
+
+        this.executorService = Executors.newFixedThreadPool(context.getResources()
+                .getInteger(R.integer.ail__thread_pool_size));
+
+        this.loadingStubBuilder = loadStubBuilderClass(PREF__STUB_LOADER,
+                DefaultLoadingStubBuilder.class);
+
+        this.errorStubBuilder = loadStubBuilderClass(PREF__STUB_ERROR,
+                DefaultErrorStubBuilder.class);
+    }
+
+    private <T extends StubBuilder> StubBuilder loadStubBuilderClass(String key, Class<T> defaultClass){
+        try{
+            return (StubBuilder) Class.forName(context.getSharedPreferences(PREFS, 0)
+                    .getString(key, defaultClass.getName()))
+                    .newInstance();
+        }
+        catch(Throwable e){
+            ImageUtils.log(context, e.getMessage());
+
+            return new EmptyStubBuilder();
+        }
+    }
+
+    /**
+     * Register a default loading StubBuilder class. Class must contain an empty constructor.
+     */
+    public <T extends StubBuilder> ImageLoader registerLoadingStub(Class<T> stubBuilderClass){
+        try{
+            StubBuilder builder = (StubBuilder) Class.forName(stubBuilderClass.getName())
+                    .newInstance();
+
+            this.loadingStubBuilder = builder;
+        }
+        catch(Throwable e){
+            ImageUtils.log(context, e.getMessage());
+
+            throw new RuntimeException(e);
+        }
+
+        context.getSharedPreferences(PREFS, 0)
+                .edit()
+                .putString(PREF__STUB_LOADER, stubBuilderClass.getName())
+                .commit();
+
+        return this;
+    }
+
+    /**
+     * Register a default error StubBuilder class. Class must contain an empty constructor.
+     */
+    public <T extends StubBuilder> ImageLoader registerErrorStub(Class<T> stubBuilderClass){
+        try{
+            StubBuilder builder = (StubBuilder) Class.forName(stubBuilderClass.getName())
+                    .newInstance();
+
+            this.errorStubBuilder = builder;
+        }
+        catch(Throwable e){
+            ImageUtils.log(context, e.getMessage());
+
+            throw new RuntimeException(e);
+        }
+
+        context.getSharedPreferences(PREFS, 0)
+                .edit()
+                .putString(PREF__STUB_ERROR, stubBuilderClass.getName())
+                .commit();
+
+        return this;
     }
 
     /**
@@ -162,7 +239,8 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     protected URL getCorrectDownloadUrl(String url) throws Exception {
         URL imageUrl = new URL(url);
 
-        for(String regex : Arrays.asList(context.getResources().getStringArray(R.array.ail__known_location_redirects_regex))){
+        for(String regex : Arrays.asList(context.getResources()
+                .getStringArray(R.array.ail__known_location_redirects_regex))){
             Matcher matcher = Pattern.compile(regex)
                     .matcher(url);
 
@@ -230,7 +308,7 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
                 .equals(views.get(target));
     }
 
-    private String combineViewNameParams(String targetUrl, long startedAtMs){
+    private String combineViewNameParams(String targetUrl, long startedAtMs) {
         return targetUrl + "_" + startedAtMs;
     }
 
@@ -238,56 +316,21 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
         return fileCache;
     }
 
-    public StubHolder getStubs() {
-        if(stubHolder == null)
-            return defaultStubHolder;
-        else return stubHolder;
-    }
-
-    public StubHolder getResourceBasedStubs() {
-        if(stubHolder == null)
-            return defaultResourceStubHolder;
-        else return stubHolder;
-    }
-
-    public void registerStubs(StubHolder stubHolder) {
-        this.stubHolder = stubHolder;
-    }
-
-    public boolean isImageDownloaded(ImageRequest request){
+    public boolean isImageDownloaded(ImageRequest request) {
         return request.getOriginalRequestFile().exists()
                 && context.getSharedPreferences(PREFS, 0).getBoolean(request.getTargetUrl(), false);
     }
 
-    public Handler getHandler(){
+    public Handler getHandler() {
         return handler;
     }
 
-    private final StubHolder defaultStubHolder = new StubHolder(){
+    public StubBuilder getLoadingStubBuilder() {
+        return loadingStubBuilder;
+    }
 
-        @Override
-        public Drawable getLoadingDrawable(Context context) {
-            return new DefaultLoadingDrawable(context.getResources());
-        }
+    public StubBuilder getErrorStubBuilder() {
+        return errorStubBuilder;
+    }
 
-        @Override
-        public Drawable getErrorDrawable(Context context) {
-            return ContextCompat.getDrawable(context, R.drawable.ail__image_loader_stub_error);
-        }
-    };
-
-    private final StubHolder defaultResourceStubHolder = new StubHolder(){
-
-        @Override
-        public Drawable getLoadingDrawable(Context context) {
-            return ContextCompat.getDrawable(context,
-                    R.drawable.ail__image_loader_stub);
-        }
-
-        @Override
-        public Drawable getErrorDrawable(Context context) {
-            return ContextCompat.getDrawable(context,
-                    R.drawable.ail__image_loader_stub_error);
-        }
-    };
 }

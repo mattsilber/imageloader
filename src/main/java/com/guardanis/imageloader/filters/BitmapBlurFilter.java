@@ -32,9 +32,11 @@ public class BitmapBlurFilter extends ImageFilter<Bitmap> {
                     Allocation.MipmapControl.MIPMAP_NONE,
                     Allocation.USAGE_SCRIPT);
 
-            final Allocation output = Allocation.createTyped(renderScript, input.getType());
+            final Allocation output = Allocation.createTyped(renderScript,
+                    input.getType());
 
-            final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(renderScript, Element.U8_4(renderScript));
+            final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(renderScript,
+                    Element.U8_4(renderScript));
 
             script.setRadius(blurRadius);
             script.setInput(input);

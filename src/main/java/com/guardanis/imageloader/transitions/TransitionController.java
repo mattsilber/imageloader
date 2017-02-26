@@ -84,7 +84,7 @@ public class TransitionController {
                 : ((ImageView)request.getTargetView()).getDrawable();
 
         if(current == null)
-            return ContextCompat.getDrawable(request.getContext(), R.drawable.ail__default_fade_placeholder);
+            return ContextCompat.getDrawable(request.getContext(), R.drawable.ail__default_image_placeholder);
         else if(current instanceof TransitionDrawable && ((TransitionDrawable) current).getTargetDrawable() instanceof StubDrawable)
             return ((TransitionDrawable) current).getTargetDrawable();
         else return current;

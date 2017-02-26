@@ -12,13 +12,23 @@ import com.guardanis.imageloader.transitions.drawables.TransitionDrawable;
 
 public class FadingTransitionModule extends TransitionModule {
 
-    protected final int MAX_ALPHA = 0xFF;
-    protected final int TRANSITION_OUT_SPEED_MULTIPLIER = 2;
+    protected static final int TRANSITION_OUT_SPEED_MULTIPLIER = 2;
+
+    protected int startAlpha;
+    protected int endAlpha;
 
     protected int oldSDrawableStartingAlpha = 0xFF;
+    protected int targetSDrawableStartingAlpha = 0xFF;
 
     public FadingTransitionModule(long duration) {
+        this(0x00, 0xFF, duration);
+    }
+
+    public FadingTransitionModule(int startAlpha, int endAlpha, long duration) {
         super(duration);
+
+        this.startAlpha = startAlpha;
+        this.endAlpha = endAlpha;
 
         registerInterpolator(TransitionModule.INTERPOLATOR_OUT, new AccelerateInterpolator());
         registerInterpolator(TransitionModule.INTERPOLATOR_IN, new DecelerateInterpolator());
@@ -26,14 +36,16 @@ public class FadingTransitionModule extends TransitionModule {
 
     @Override
     public void onStart(@Nullable Drawable old, Drawable target) {
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT)
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT){
             oldSDrawableStartingAlpha = old.getAlpha();
+            targetSDrawableStartingAlpha = target.getAlpha();
+        }
     }
 
     @Override
     public void onPredrawOld(TransitionDrawable transitionDrawable, Canvas canvas, @Nullable Drawable old, long startTime) {
         if(old != null){
-            int alpha = (int) Math.max(MAX_ALPHA - (oldSDrawableStartingAlpha * interpolate(TransitionModule.INTERPOLATOR_OUT, startTime) * TRANSITION_OUT_SPEED_MULTIPLIER), 0);
+            int alpha = (int) Math.max(endAlpha - (oldSDrawableStartingAlpha * interpolate(TransitionModule.INTERPOLATOR_OUT, startTime) * TRANSITION_OUT_SPEED_MULTIPLIER), 0);
             int correctedAlpha = Math.min(alpha, transitionDrawable.getOverriddenMaxAlpha());
 
             if(old instanceof TransitionDrawable)
@@ -46,21 +58,25 @@ public class FadingTransitionModule extends TransitionModule {
     @Override
     public void revertPostDrawOld(TransitionDrawable transitionDrawable, @Nullable Drawable old) {
         if(old != null)
-            old.setAlpha(MAX_ALPHA);
+            old.setAlpha(oldSDrawableStartingAlpha);
     }
 
     @Override
     public void onPredrawTarget(TransitionDrawable transitionDrawable, Canvas canvas, Drawable target, long startTime) {
+        int alpha = (int) (startAlpha + ((endAlpha - startAlpha) * interpolate(TransitionModule.INTERPOLATOR_IN, startTime)));
+
         if(target instanceof StubDrawable)
-            target.setAlpha((int) (MAX_ALPHA * interpolate(TransitionModule.INTERPOLATOR_IN, startTime)));
-        else transitionDrawable.setAlpha((int) (MAX_ALPHA * interpolate(TransitionModule.INTERPOLATOR_IN, startTime)));
+            target.setAlpha(alpha);
+        else
+            transitionDrawable.setAlpha(alpha);
     }
 
     @Override
     public void revertPostDrawTarget(TransitionDrawable transitionDrawable, Drawable target) {
         if(target instanceof StubDrawable)
-            target.setAlpha(MAX_ALPHA);
-        else transitionDrawable.setAlpha(MAX_ALPHA);
+            target.setAlpha(targetSDrawableStartingAlpha);
+        else
+            transitionDrawable.setAlpha(targetSDrawableStartingAlpha);
     }
 
 }

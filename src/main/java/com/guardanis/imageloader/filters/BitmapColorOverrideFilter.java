@@ -11,7 +11,9 @@ public class BitmapColorOverrideFilter extends ImageFilter<Bitmap> {
     private int replacementColor;
 
     /**
-     * @param replacementColor the color value to replace with; alpha is ignored
+     * Replace all color values with the supplied color value while maintaining proper opacity at each pixel.
+     * Intended for single color-scaled images.
+     * @param replacementColor the 24-bit color value to replace with (0xAARRGGBB). Note: alpha will be ignored
      */
     public BitmapColorOverrideFilter(Context context, int replacementColor) {
         super(context);

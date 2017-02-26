@@ -43,21 +43,9 @@ public class ImageUtils {
         os.close();
     }
 
-    @Deprecated
-    public static void saveBitmap(Context context, String filePath, Bitmap bitmap) {
-        saveBitmapAsync(context, new File(filePath), bitmap);
-    }
-
-    @Deprecated
-    public static boolean saveBitmap(Context context, File imageFile, Bitmap bitmap) {
-        saveBitmapAsync(context, imageFile, bitmap);
-
-        return true;
-    }
-
     public static void saveBitmapAsync(final Context context, final File imageFile, final Bitmap bitmap) {
         try{
-            if(bitmap == null || !(checkInternalStorageAvailability(context) || checkBuildImageFileDirectory(context, imageFile)))
+            if(bitmap == null || !(isInternalStorageMounted(context) || safelyCreateImageFile(context, imageFile)))
                 return;
 
             new Thread(new Runnable(){
@@ -77,26 +65,15 @@ public class ImageUtils {
         catch(Exception e){ e.printStackTrace(); }
     }
 
-    private static boolean checkInternalStorageAvailability(Context context) {
-        if(Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY) || Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED))
-            return true;
-        else{
-            Toast.makeText(context, "Can't save image while media is mounted!", Toast.LENGTH_LONG)
-                    .show();
-
-            return false;
-        }
+    private static boolean isInternalStorageMounted(Context context) {
+        return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY)
+                || Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
     }
 
-    private static boolean checkBuildImageFileDirectory(Context context, File imageFile) throws Exception {
-        if(imageFile.exists() || imageFile.getParentFile().mkdirs() || imageFile.createNewFile())
-            return true;
-        else{
-            Toast.makeText(context, "Couldn't build image directory!", Toast.LENGTH_LONG)
-                    .show();
-
-            return false;
-        }
+    private static boolean safelyCreateImageFile(Context context, File imageFile) throws Exception {
+        return imageFile.exists()
+                || imageFile.getParentFile().mkdirs()
+                || imageFile.createNewFile();
     }
 
     public static void copyStream(InputStream is, OutputStream os) {

@@ -112,7 +112,7 @@ public class DefaultLoadingDrawable extends AnimatedStubDrawable {
 
     @Override
     public int getOpacity() {
-        return PixelFormat.RGBA_8888;
+        return PixelFormat.TRANSPARENT;
     }
 
     @Override
@@ -131,7 +131,7 @@ public class DefaultLoadingDrawable extends AnimatedStubDrawable {
         return state;
     }
 
-    final static class LoadingDrawableState extends Drawable.ConstantState{
+    final static class LoadingDrawableState extends Drawable.ConstantState {
 
         private Resources resources;
         private int changingConfigurations;

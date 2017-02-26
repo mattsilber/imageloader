@@ -5,7 +5,6 @@
 
     <bool name="ail__show_stub_on_execute">true</bool>
     <bool name="ail__show_stub_on_error">false</bool>
-    <bool name="ail__use_old_resource_stubs">false</bool>
 
     <bool name="ail__local_execution_stubs">false</bool>
 

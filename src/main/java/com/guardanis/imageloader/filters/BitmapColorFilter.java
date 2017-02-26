@@ -18,7 +18,9 @@ public class BitmapColorFilter extends ImageFilter<Bitmap> {
     @Override
     public Bitmap filter(Bitmap unedited) {
         if(unedited != null){
-            Bitmap adjusted = Bitmap.createBitmap(unedited.getWidth(), unedited.getHeight(), Bitmap.Config.ARGB_8888);
+            Bitmap adjusted = Bitmap.createBitmap(unedited.getWidth(),
+                    unedited.getHeight(),
+                    Bitmap.Config.ARGB_8888);
 
             Paint paint = new Paint();
             paint.setColorFilter(filter);
