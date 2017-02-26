@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.guardanis:imageloader:1.3.5')
+    compile('com.guardanis:imageloader:1.4.0')
 }
 ```
 
@@ -67,7 +67,6 @@ ImageRequest.create(myImageView)
 * BitmapCircularCropFilter : addCircularCropFilter() : Crop the Bitmap to the bounrdaries of a circle
 * BitmapColorOverlayFilter : addColorOverlayFilter(int) : Overlay the Bitmap with a color
 * BitmapColorOverrideFilter : addColorOverrideFilter(int) : Replace all color values with the supplied color value while maintaining proper opacity at each pixel
-* BitmapColorReplacementFilter : addColorReplacementFilter(int, int), addColorReplacementFilter(Map<Int, Int>) : Replace any occurance of a color with it's mapped value
 * BitmapRotationFilter : addRotationFilter(int) : Rotate the Bitmap (degrees) (may change Bitmap size)
 * BitmapColorFilter : addColorFilter(ColorFilter) : Apply a ColorFilter to the Bitmap
 * BitmapCenterCropFilter : addCenterCropFilter(int, int) : Perform a centerCrop-type filter on an image (useful for backgrounds)
@@ -140,34 +139,33 @@ new ImageRequest(context)
 
 ### Stubs
 
-The ImageRequest system allows you to specify both a loading and an error stub to an individual request by attaching a StubHandler:
+The ImageRequest system allows you to specify both a loading and an error stub to an individual request, or by overriding the global defaults.
 
 ```java
 ImageRequest.create(myImageView)
     .setTargetUrl("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
     .setShowStubOnExecute(true)
     .setShowStubOnError(true)
-    .overrideStubs(new SubHolder(){
-        @Override
-        public Drawable getLoadingDrawable(Context context){
-            return ContextCompat.getDrawable(context, R.drawable.some_drawable);
-        }
-        @Override
-        public Drawable getErrorDrawable(Context context){
-            return ContextCompat.getDrawable(context, R.drawable.some_drawable);
-        }
-    })
+    .setLoadingStub(context -> new DefaultLoadingStubDrawable(context))
+    .setErrorStub(context -> ContextCompat.getDrawable(context, R.drawable.some_drawable))
     .execute();
 ```
 
-As of version 1.0.8, the ImageRequest will use the DefaultLoadingDrawable for loading stubs, as opposed to the static resources image. If you'd like to configure the default tint for the loading drawable, override the color resource *R.color.ail__default_stub_loading_tint*. The error stub is still the same *R.drawable.ail__image_loader_stub_error*. 
+To override the default error image (which is a transparent rectangle...), just override the drawable resource:
 
-If you want to revert back to the previous behavior of resources-only, you can override *R.bool.ail__use_old_resource_stubs* or call *ImageRequest.setUseOldResourceStubs(true)* and it will use the old default stub container (unless you manually override the stubs). If you choose to do this, just override the drawables:
+```xml
+ail__image_loader_stub_error
+```
 
-    ail__image_loader_stub
-    ail__image_loader_stub_error
+If you want to override the animations globally, you can set the `StubBuilder` class in your Application's onCreate and it will be saved/reloaded as needed.
 
-If you want to create your own animation drawables in code, you can simply supply an AnimatedStubDrawable (simple Drawable extention) with your StubHolder.
+```java
+ImageLoader.getInstance(context)
+    .registerLoadingStub(DefaultLoadingStubBuilder.class)
+    .registerErrorStub(DefaultErrorStubBuilder.class);
+```
+
+If you want to create your own animation drawables in code, you can simply supply an AnimatedStubDrawable (simple Drawable extention) with your request.
 
 By default, the ImageRequest will show the loading stub, but not the error stub, which needs to be manually enabled. I don't remember for the life of me why I did that, but I may consider changing that in the future...
 
@@ -250,7 +248,7 @@ Without a View or an explicit width, none of the ImageFilters can be applied and
 
 ##### Known Issues
 * If trying to load a super large image (like a picture from the Camera) into an ImageView with layout_width as either fill_parent or wrap_cotent, it may run into an OutOfMemoryError with filters due to the barely-downsampled size of the image. To avoid this, either set the LayoutParams's width manually, or use the helper method: **ImageRequest.setRequiredImageWidth(int)**
-* Loading many versions of the same SVG file too quickly can cause the SVGParser to throw an "Invalid Colour Keyword" error due to the version we're using not supporting asynchronous SVG parsing.
+* Loading many versions of the same SVG file too quickly can cause the SVGParser to throw an "Invalid Colour Keyword" error due to the version we're using not supporting asynchronous SVG parsing. Delaying those requests by ~5-10ms is a crappy workaround.
 * Using the DefaultLoadingStub when the request is for View's background may cause a slight vertical rendering shift I don't yet understand.
 
 ##### RotationTransitionModule issues:

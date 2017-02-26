@@ -1,17 +1,14 @@
 package com.guardanis.imageloader;
 
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
-import android.support.v4.content.ContextCompat;
 import android.view.View;
 
-import com.guardanis.imageloader.stubs.DefaultLoadingDrawable;
-import com.guardanis.imageloader.stubs.loaders.DefaultErrorStubBuilder;
-import com.guardanis.imageloader.stubs.loaders.DefaultLoadingStubBuilder;
-import com.guardanis.imageloader.stubs.loaders.EmptyStubBuilder;
-import com.guardanis.imageloader.stubs.loaders.StubBuilder;
+import com.guardanis.imageloader.stubs.builders.DefaultErrorStubBuilder;
+import com.guardanis.imageloader.stubs.builders.DefaultLoadingStubBuilder;
+import com.guardanis.imageloader.stubs.builders.EmptyStubBuilder;
+import com.guardanis.imageloader.stubs.builders.StubBuilder;
 
 import java.io.File;
 import java.io.InputStream;

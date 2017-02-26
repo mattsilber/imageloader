@@ -26,7 +26,7 @@ import com.guardanis.imageloader.processors.ImageAssetProcessor;
 import com.guardanis.imageloader.processors.ImageFileProcessor;
 import com.guardanis.imageloader.processors.ImageProcessor;
 import com.guardanis.imageloader.processors.ImageResourceProcessor;
-import com.guardanis.imageloader.stubs.loaders.StubBuilder;
+import com.guardanis.imageloader.stubs.builders.StubBuilder;
 import com.guardanis.imageloader.transitions.TransitionController;
 import com.guardanis.imageloader.transitions.modules.FadingTransitionModule;
 import com.guardanis.imageloader.transitions.modules.RotationTransitionModule;
@@ -162,6 +162,15 @@ public class ImageRequest<V extends View> implements Runnable {
 
         this.imageProcessor = new ImageResourceProcessor();
 
+        return this;
+    }
+
+    /**
+     * Override the ImageProcessor that was set by calling the setTargetUrl, setTargetAsset, setTargetFile, or setTargetResource methods.
+     * If those methods are called after this, they will override this call. This is really only useful for implementing third-party image libraries.
+     */
+    public ImageRequest<V> overrideImageProcessor(@NonNull ImageProcessor imageProcessor){
+        this.imageProcessor = imageProcessor;
         return this;
     }
 
@@ -310,18 +319,28 @@ public class ImageRequest<V extends View> implements Runnable {
 
     @Deprecated
     public ImageRequest<V> overrideStubs(final StubHolder stubHolder){
-        this.loadingStubBuilder = new StubBuilder() {
+        setLoadingStub(new StubBuilder() {
             public Drawable build(Context context) {
                 return stubHolder.getLoadingDrawable(context);
             }
-        };
+        });
 
-        this.errorStubBuilder = new StubBuilder() {
+        setErrorStub(new StubBuilder() {
             public Drawable build(Context context) {
                 return stubHolder.getErrorDrawable(context);
             }
-        };
+        });
 
+        return this;
+    }
+
+    public ImageRequest<V> setLoadingStub(StubBuilder loadingStubBuilder){
+        this.loadingStubBuilder = loadingStubBuilder;
+        return this;
+    }
+
+    public ImageRequest<V> setErrorStub(StubBuilder errorStubBuilder){
+        this.errorStubBuilder = errorStubBuilder;
         return this;
     }
 

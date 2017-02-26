@@ -28,7 +28,7 @@ import java.util.Locale;
 public class ImageUtils {
 
     public enum ImageType {
-        BITMAP, SVG, GIF;
+        BITMAP, SVG, GIF, CUSTOM;
     }
 
     private static final int MAX_REDUCTION_FACTOR = 16;
@@ -45,7 +45,7 @@ public class ImageUtils {
 
     public static void saveBitmapAsync(final Context context, final File imageFile, final Bitmap bitmap) {
         try{
-            if(bitmap == null || !(isInternalStorageMounted(context) || safelyCreateImageFile(context, imageFile)))
+            if(bitmap == null || !(isInternalStorageMounted() || safelyCreateImageFile(imageFile)))
                 return;
 
             new Thread(new Runnable(){
@@ -65,12 +65,12 @@ public class ImageUtils {
         catch(Exception e){ e.printStackTrace(); }
     }
 
-    private static boolean isInternalStorageMounted(Context context) {
+    private static boolean isInternalStorageMounted() {
         return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED_READ_ONLY)
                 || Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
     }
 
-    private static boolean safelyCreateImageFile(Context context, File imageFile) throws Exception {
+    private static boolean safelyCreateImageFile(File imageFile) throws Exception {
         return imageFile.exists()
                 || imageFile.getParentFile().mkdirs()
                 || imageFile.createNewFile();

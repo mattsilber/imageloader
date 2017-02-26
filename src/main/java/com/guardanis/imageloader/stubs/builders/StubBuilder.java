@@ -1,4 +1,4 @@
-package com.guardanis.imageloader.stubs.loaders;
+package com.guardanis.imageloader.stubs.builders;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
