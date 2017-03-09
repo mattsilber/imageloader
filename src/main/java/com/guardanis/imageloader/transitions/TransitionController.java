@@ -42,7 +42,8 @@ public class TransitionController {
      */
     public void registerModuleInterpolator(Class c, int interpolatorId, Interpolator interpolator){
         if(modules != null)
-            modules.get(c).registerInterpolator(interpolatorId, interpolator);
+            modules.get(c)
+                    .registerInterpolator(interpolatorId, interpolator);
     }
 
     public void unregisterModules(){
@@ -87,7 +88,8 @@ public class TransitionController {
             return ContextCompat.getDrawable(request.getContext(), R.drawable.ail__default_image_placeholder);
         else if(current instanceof TransitionDrawable && ((TransitionDrawable) current).getTargetDrawable() instanceof StubDrawable)
             return ((TransitionDrawable) current).getTargetDrawable();
-        else return current;
+        else
+            return current;
     }
 
     protected Bitmap getTargetBitmap(Drawable drawable, @Nullable View targetView){
@@ -103,11 +105,13 @@ public class TransitionController {
                             Bitmap.Config.ARGB_8888);
                 else if(drawable.getBounds().right - drawable.getBounds().left < 1)
                     bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-                else bitmap = Bitmap.createBitmap(drawable.getBounds().right - drawable.getBounds().left,
+                else
+                    bitmap = Bitmap.createBitmap(drawable.getBounds().right - drawable.getBounds().left,
                         drawable.getBounds().bottom - drawable.getBounds().top,
                         Bitmap.Config.ARGB_8888);
             }
-            else bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
+            else
+                bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(),
                     drawable.getIntrinsicHeight(),
                     Bitmap.Config.ARGB_8888);
 
@@ -123,12 +127,13 @@ public class TransitionController {
     protected void setTransitionDrawable(final TransitionDrawable drawable){
         request.getTargetView().post(new Runnable(){
             public void run(){
-                if (request.isRequestForBackgroundImage())
-                    setBackgroundDrawable(drawable);
-                else ((ImageView) request.getTargetView())
-                        .setImageDrawable(drawable);
-
                 drawable.start(request.getContext());
+
+                if(request.isRequestForBackgroundImage())
+                    setBackgroundDrawable(drawable);
+                else
+                    ((ImageView) request.getTargetView())
+                        .setImageDrawable(drawable);
             }
         });
     }
@@ -138,7 +143,8 @@ public class TransitionController {
             public void run(){
                 if(request.isRequestForBackgroundImage())
                     setBackgroundDrawable(drawable);
-                else ((ImageView) request.getTargetView())
+                else
+                    ((ImageView) request.getTargetView())
                         .setImageDrawable(drawable);
             }
         });
@@ -147,7 +153,10 @@ public class TransitionController {
     @SuppressLint("NewApi")
     protected void setBackgroundDrawable(Drawable drawable) {
         if(android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.JELLY_BEAN)
-            request.getTargetView().setBackgroundDrawable(drawable);
-        else request.getTargetView().setBackground(drawable);
+            request.getTargetView()
+                    .setBackgroundDrawable(drawable);
+        else
+            request.getTargetView()
+                    .setBackground(drawable);
     }
 }
