@@ -1,0 +1,69 @@
+buildscript {
+    repositories {
+        jcenter()
+        maven { url 'https://maven.google.com/' }
+    }
+
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
+        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
+    }
+}
+
+apply plugin: 'com.android.library'
+
+android {
+    compileSdkVersion 27
+    buildToolsVersion "27.0.3"
+
+    defaultConfig {
+        minSdkVersion 9
+        targetSdkVersion 27
+
+        renderscriptTargetApi 19
+        renderscriptSupportModeEnabled true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url 'https://maven.google.com/' }
+    flatDir { dirs 'libs' }
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: '*.jar')
+
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.caverock:androidsvg:1.2.2-beta-1@aar'
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.5'
+}
+
+group = 'com.guardanis'
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'imageloader'
+
+    publishedGroupId = 'com.guardanis'
+    libraryName = 'imageloader'
+    artifact = 'imageloader'
+
+    libraryDescription = 'Another lazy image-loading library with AndroidSVG, Animated GIF, and Bitmap filtering support built-in'
+    libraryVersion = '1.4.1'
+
+    developerId = 'mattsilber'
+    developerName = 'Matt Silber'
+    developerEmail = 'matt@guardanis.com'
+}
+
+apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/bintrayv1.gradle'

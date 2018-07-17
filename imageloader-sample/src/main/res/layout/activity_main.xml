@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/base__primary"
+    android:orientation="vertical"
+    android:paddingTop="24dp"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#22FFFFFF"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/main__test_small"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:scaleType="centerCrop"/>
+
+        <View
+            style="@style/main__separator"/>
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/main__test_medium"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:scaleType="centerCrop"/>
+
+        <View
+            style="@style/main__separator"/>
+
+        <android.support.v7.widget.AppCompatImageView
+            android:id="@+id/main__test_large"
+            android:layout_width="150dp"
+            android:layout_height="150dp"
+            android:scaleType="centerCrop"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal"
+        android:padding="12dp">
+
+        <Button
+            style="@style/main__test_action"
+            android:onClick="standardClicked"
+            android:text="Standard"/>
+
+        <View
+            style="@style/main__separator"/>
+
+        <Button
+            style="@style/main__test_action"
+            android:onClick="svgClicked"
+            android:text="SVG"/>
+
+        <View
+            style="@style/main__separator"/>
+
+        <Button
+            style="@style/main__test_action"
+            android:onClick="gifClicked"
+            android:text="GIF"/>
+
+    </LinearLayout>
+</LinearLayout>

@@ -1,73 +1,21 @@
 task wrapper(type: Wrapper) {
-    gradleVersion = '2.8'
+    gradleVersion = '4.4'
 }
 
 buildscript {
     repositories {
         jcenter()
-        mavenCentral()
+        maven { url 'https://maven.google.com/' }
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.3.1'
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.2'
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:1.3'
+        classpath 'com.android.tools.build:gradle:3.1.2'
     }
 }
 
-apply plugin: 'com.android.library'
-
-android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.1"
-
-    defaultConfig {
-        minSdkVersion 9
-        targetSdkVersion 23
-
-        renderscriptTargetApi 19
-        renderscriptSupportModeEnabled true
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-        }
+allprojects {
+    repositories {
+        jcenter()
+        maven { url 'https://maven.google.com/' }
     }
 }
-
-repositories {
-    mavenCentral()
-    flatDir{
-        dirs 'libs'
-    }
-}
-
-dependencies {
-    compile fileTree(dir: 'libs', include: '*.jar')
-
-    compile 'com.android.support:appcompat-v7:23.4.0'
-    compile 'com.caverock:androidsvg:1.2.2-beta-1@aar'
-    compile 'pl.droidsonroids.gif:android-gif-drawable:1.2.5'
-}
-
-group = 'com.guardanis'
-
-ext {
-    bintrayRepo = 'maven'
-    bintrayName = 'imageloader'
-
-    publishedGroupId = 'com.guardanis'
-    libraryName = 'imageloader'
-    artifact = 'imageloader'
-
-    libraryDescription = 'Another lazy image-loading library with AndroidSVG, Animated GIF, and Bitmap filtering support built-in'
-    libraryVersion = '1.4.1'
-
-    developerId = 'mattsilber'
-    developerName = 'Matt Silber'
-    developerEmail = 'matt@guardanis.com'
-}
-
-apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/attwellBrian/JCenter/master/bintrayv1.gradle'
