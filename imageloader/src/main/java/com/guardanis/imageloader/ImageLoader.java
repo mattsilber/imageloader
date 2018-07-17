@@ -268,8 +268,8 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
 
     protected HttpURLConnection openImageDownloadConnection(URL url) throws Exception {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setConnectTimeout(context.getResources().getInteger(R.integer.ail__connection_timeout));
-        conn.setReadTimeout(context.getResources().getInteger(R.integer.ail__read_timeout));
+        conn.setConnectTimeout(context.getResources().getInteger(R.integer.ail__connection_timeout_ms));
+        conn.setReadTimeout(context.getResources().getInteger(R.integer.ail__read_timeout_ms));
         conn.setInstanceFollowRedirects(true);
 
         return conn;

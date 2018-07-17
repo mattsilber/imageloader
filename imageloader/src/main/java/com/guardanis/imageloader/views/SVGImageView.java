@@ -20,10 +20,10 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.os.Build;
+import android.support.v7.widget.AppCompatImageView;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.ImageView;
 
 import com.caverock.androidsvg.SVG;
 import com.guardanis.imageloader.ImageRequest;
@@ -33,7 +33,7 @@ import com.guardanis.imageloader.R;
 /**
  * Edited / Dumbed-down version of com.caverock.androidsvg.SVGImageView
  */
-public class SVGImageView extends ImageView {
+public class SVGImageView extends AppCompatImageView {
 
 	private interface LayoutEventListener {
 		public void onLaidOut(int width);

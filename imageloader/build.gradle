@@ -34,14 +34,10 @@ android {
 
 repositories {
     jcenter()
-    mavenCentral()
     maven { url 'https://maven.google.com/' }
-    flatDir { dirs 'libs' }
 }
 
 dependencies {
-    implementation fileTree(dir: 'libs', include: '*.jar')
-
     implementation 'com.android.support:appcompat-v7:27.1.1'
     implementation 'com.caverock:androidsvg:1.2.2-beta-1@aar'
     implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.5'

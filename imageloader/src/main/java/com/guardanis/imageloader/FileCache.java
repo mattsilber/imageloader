@@ -34,8 +34,7 @@ public class FileCache {
         if(externalStorageEnabled
                 && ContextCompat.checkSelfPermission(context, Manifest.permission.WRITE_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
                 && Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED)){
-            cacheDir = new File(Environment.getExternalStorageDirectory(),
-                    context.getPackageName());
+            cacheDir = new File(Environment.getExternalStorageDirectory(), context.getPackageName());
 
             targetStorageExternal = true;
         }
