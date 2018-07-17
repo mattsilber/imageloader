@@ -44,6 +44,10 @@ import java.util.Map;
 
 public class ImageRequest<V extends View> implements Runnable {
 
+    public interface RequestStartedCallback {
+        public void onRequestStarted(ImageRequest request);
+    }
+
     public interface ImageSuccessCallback {
         public void onImageReady(ImageRequest request, Drawable result);
     }
@@ -88,6 +92,8 @@ public class ImageRequest<V extends View> implements Runnable {
     protected boolean transitionOnSuccessEnabled = true;
 
     protected Map<String, String> httpRequestParams = new HashMap<String, String>();
+
+    protected RequestStartedCallback requestStartedCallback;
 
     protected ImageSuccessCallback successCallback;
     protected boolean triggerSuccessForValidViewsOnly = true;
@@ -259,6 +265,16 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     /**
+     * Set a callback to be triggered on the main thread once downloading and/or processing this
+     * ImageRequest has begun. This will not be triggered if tag-request-prevention is enabled
+     * and the target view has already been claimed for this target.
+     */
+    public ImageRequest<V> setRequestStartedCallback(RequestStartedCallback requestStartedCallback) {
+        this.requestStartedCallback = requestStartedCallback;
+        return this;
+    }
+
+    /**
      * Set a callback to be triggered on the main thread once the resulting image has been set
      * into the target View. This will not be triggered if the View is null.
      */
@@ -315,18 +331,15 @@ public class ImageRequest<V extends View> implements Runnable {
      * @param replacementColor the 24-bit color value to replace with (0xAARRGGBB)
      */
     public ImageRequest<V> addColorOverrideFilter(int replacementColor){
-        return addImageFilter(new BitmapColorOverrideFilter(context,
-                replacementColor));
+        return addImageFilter(new BitmapColorOverrideFilter(context, replacementColor));
     }
 
     public ImageRequest<V> addColorFilter(ColorFilter filter) {
-        return addImageFilter(new BitmapColorFilter(context,
-                filter));
+        return addImageFilter(new BitmapColorFilter(context, filter));
     }
 
     public ImageRequest<V> addCenterCropFilter(int width, int height) {
-        return addImageFilter(new BitmapCenterCropFilter(context,
-                new int[]{ width, height }));
+        return addImageFilter(new BitmapCenterCropFilter(context, new int[]{ width, height }));
     }
 
     public ImageRequest<V> addImageFilter(ImageFilter<Bitmap> imageFilter){
@@ -457,33 +470,41 @@ public class ImageRequest<V extends View> implements Runnable {
         boolean processableWithoutView = targetView == null
                 && 0 < getRequiredImageWidth();
 
-        if(processableWithView || processableWithoutView){
-            try{
-                String cacheKey = getEditedRequestFileCacheName();
+        if (!(processableWithView || processableWithoutView))
+            return;
 
-                Drawable processed = null;
-
-                if(lruCacheEnabled)
-                    processed = MemoryCache.getInstance(context)
-                            .get(cacheKey);
-
-                if(processed == null){
-                    processed = imageProcessor.process(this, bitmapImageFilters);
-
-                    if(lruCacheEnabled
-                            && processed != null
-                            && processed instanceof BitmapDrawable)
-                        MemoryCache.getInstance(context)
-                                .put(cacheKey, (BitmapDrawable) processed);
-                }
-
-                onRequestCompleted(processed);
+        post(new Runnable() {
+            public void run() {
+                if (requestStartedCallback != null)
+                    requestStartedCallback.onRequestStarted(ImageRequest.this);
             }
-            catch(Throwable e){
-                ImageUtils.log(context, e);
+        });
 
-                onRequestFailed();
+        try{
+            String cacheKey = getEditedRequestFileCacheName();
+
+            Drawable processed = null;
+
+            if(lruCacheEnabled)
+                processed = MemoryCache.getInstance(context)
+                        .get(cacheKey);
+
+            if(processed == null){
+                processed = imageProcessor.process(this, bitmapImageFilters);
+
+                if(lruCacheEnabled
+                        && processed != null
+                        && processed instanceof BitmapDrawable)
+                    MemoryCache.getInstance(context)
+                            .put(cacheKey, (BitmapDrawable) processed);
             }
+
+            onRequestCompleted(processed);
+        }
+        catch(Throwable e){
+            ImageUtils.log(context, e);
+
+            onRequestFailed();
         }
     }
 

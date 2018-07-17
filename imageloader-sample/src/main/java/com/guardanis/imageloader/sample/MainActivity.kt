@@ -3,10 +3,13 @@ package com.guardanis.imageloader.sample
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.AppCompatImageView
+import android.util.Log
 import android.view.View
 import com.guardanis.imageloader.ImageRequest
 
 class MainActivity: AppCompatActivity() {
+
+    private val TAG = "imageloader"
 
     override fun onCreate(savedInstance: Bundle?) {
         super.onCreate(savedInstance)
@@ -17,7 +20,7 @@ class MainActivity: AppCompatActivity() {
     }
 
     fun standardClicked(view: View?) {
-        loadImages("https://d3819ii77zvwic.cloudfront.net/wp-content/uploads/2013/07/awkward_photos.jpg")
+        loadImages("https://upload.wikimedia.org/wikipedia/commons/d/d9/Test.png")
     }
 
     fun svgClicked(view: View?) {
@@ -59,6 +62,18 @@ class MainActivity: AppCompatActivity() {
                 .setTargetUrl(url)
                 .setFadeTransition(150)
                 .setTranslateTransition(1f, 1f, 350)
+                .setMaxCacheDurationMs(1)
+                .setRequestStartedCallback({
+                    Log.d(TAG, "Main test started for $url")
+                })
+                .setSuccessCallback({ _, _ ->
+                    Log.d(TAG, "Main test success for $url")
+                })
+                .setErrorCallback({ _, error->
+                    Log.d(TAG, "Main test error for $url")
+
+                    error?.printStackTrace()
+                })
                 .execute()
     }
 }
