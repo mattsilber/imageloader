@@ -11,7 +11,11 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Environment;
+import android.support.annotation.DrawableRes;
+import android.support.v4.content.ContextCompat;
+import android.support.v4.graphics.drawable.DrawableCompat;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -248,6 +252,24 @@ public class ImageUtils {
         Bitmap bitmap = BitmapFactory.decodeStream(stream, null, options);
 
         stream.close();
+
+        return bitmap;
+    }
+
+    public static Bitmap decodeDrawableResource(Context context, @DrawableRes int resId, int requiredWidth){
+        Drawable drawable = ContextCompat.getDrawable(context, resId);
+
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+            drawable = DrawableCompat.wrap(drawable).mutate();
+
+        double drawableAspectRatio = (double) drawable.getIntrinsicWidth() / (double) drawable.getIntrinsicHeight();
+
+        Bitmap bitmap = Bitmap.createBitmap(requiredWidth, (int) (requiredWidth * drawableAspectRatio), Bitmap.Config.ARGB_8888);
+
+        Canvas canvas = new Canvas(bitmap);
+
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+        drawable.draw(canvas);
 
         return bitmap;
     }

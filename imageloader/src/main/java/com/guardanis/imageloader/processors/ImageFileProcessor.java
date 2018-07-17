@@ -24,29 +24,25 @@ public class ImageFileProcessor extends ImageProcessor {
             case BITMAP:
             case SVG:
             default:
-                return processBitmap(request,
-                        target,
-                        bitmapImageFilters);
+                return processBitmap(request, target, bitmapImageFilters);
         }
     }
 
     protected Drawable processBitmap(ImageRequest request, File originalFile, List<ImageFilter<Bitmap>> bitmapImageFilters) throws Exception {
+        File editedImageFile = request.getEditedRequestFile();
         int requiredImageWidth = request.getTargetImageWidth();
 
-        File editedImageFile = request.getEditedRequestFile();
-        if(!editedImageFile.exists()){
-            if(originalFile.exists())
-                return process(request.getContext(),
-                        ImageUtils.decodeFile(originalFile, requiredImageWidth),
-                        editedImageFile,
-                        bitmapImageFilters);
-        }
-        else
+        if(editedImageFile.exists())
             return decodeBitmapDrawable(request.getContext(),
-                editedImageFile,
-                requiredImageWidth);
+                    editedImageFile,
+                    requiredImageWidth);
+
+        if(originalFile.exists())
+            return process(request.getContext(),
+                    ImageUtils.decodeFile(originalFile, requiredImageWidth),
+                    editedImageFile,
+                    bitmapImageFilters);
 
         return null;
     }
-
 }

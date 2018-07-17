@@ -20,10 +20,7 @@ public class ExternalImageProcessor extends ImageFileProcessor {
             case BITMAP:
             case SVG:
             default:
-                return processBitmap(request,
-                        request.getOriginalRequestFile(),
-                        bitmapImageFilters);
+                return processBitmap(request, request.getOriginalRequestFile(), bitmapImageFilters);
         }
     }
-
 }

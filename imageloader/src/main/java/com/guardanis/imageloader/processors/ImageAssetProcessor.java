@@ -29,22 +29,18 @@ public class ImageAssetProcessor extends ImageFileProcessor {
     }
 
     protected Drawable processAsset(ImageRequest request, List<ImageFilter<Bitmap>> bitmapImageFilters) throws Exception {
+        File editedImageFile = request.getEditedRequestFile();
         int requiredImageWidth = request.getTargetImageWidth();
 
-        File editedImageFile = request.getEditedRequestFile();
-        if(!editedImageFile.exists()){
-            Bitmap asset = request.getTargetImageType() == ImageUtils.ImageType.SVG
-                    ? ImageUtils.decodeSVGAsset(request.getContext(), request.getTargetUrl(), requiredImageWidth)
-                    : ImageUtils.decodeBitmapAsset(request.getContext(), request.getTargetUrl(), requiredImageWidth);
-
-            return process(request.getContext(),
-                    asset,
+        if(editedImageFile.exists())
+            return decodeBitmapDrawable(request.getContext(),
                     editedImageFile,
-                    bitmapImageFilters);
-        }
-        else return decodeBitmapDrawable(request.getContext(),
-                editedImageFile,
-                requiredImageWidth);
-    }
+                    requiredImageWidth);
 
+        Bitmap asset = request.getTargetImageType() == ImageUtils.ImageType.SVG
+                ? ImageUtils.decodeSVGAsset(request.getContext(), request.getTargetUrl(), requiredImageWidth)
+                : ImageUtils.decodeBitmapAsset(request.getContext(), request.getTargetUrl(), requiredImageWidth);
+
+        return process(request.getContext(), asset, editedImageFile, bitmapImageFilters);
+    }
 }

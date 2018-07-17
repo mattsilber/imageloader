@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.guardanis:imageloader:1.4.0')
+    compile('com.guardanis:imageloader:1.4.2')
 }
 ```
 
@@ -99,6 +99,17 @@ or
 As long as the width/height or viewBox are correctly set, everything should be good to go, and all SVGs should scale up/down correctly (all of which the ImageRequest can handle by itself).
 
 Support for the viewBox fallback was added in the release of v1.2.2.
+
+### Vector Asset Support
+
+As of version 1.4.2, this library can now support local vector assets located in the application's drawable resources.
+
+```java
+ImageRequest.create(myImageView)
+    .setTargetDrawable(R.drawable.ic_android_test) // <-- load drawable resources
+    .execute();
+```
+
 
 ### Gif Support
 

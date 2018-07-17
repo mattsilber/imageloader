@@ -13,6 +13,7 @@ class MainActivity: AppCompatActivity() {
 
         setContentView(R.layout.activity_main)
         standardClicked(null)
+        vectorAssetClicked(null)
     }
 
     fun standardClicked(view: View?) {
@@ -25,6 +26,20 @@ class MainActivity: AppCompatActivity() {
 
     fun gifClicked(view: View?) {
         loadImages("https://upload.wikimedia.org/wikipedia/commons/2/2c/Rotating_earth_%28large%29.gif")
+    }
+
+    fun vectorAssetClicked(view: View?) {
+        ImageRequest.create(findViewById<AppCompatImageView>(R.id.main__test__vector_medium))
+                .setTargetDrawable(R.drawable.ic_android_test)
+                .setFadeTransition(150)
+                .setTranslateTransition(-1f, -1f, 350)
+                .execute()
+
+        ImageRequest.create(findViewById<AppCompatImageView>(R.id.main__test__vector_large))
+                .setTargetDrawable(R.drawable.ic_android_test)
+                .setFadeTransition(150)
+                .setScaleTransition(0f, 1f, 750)
+                .execute()
     }
 
     private fun loadImages(url: String) {

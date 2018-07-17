@@ -61,11 +61,8 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
         this.executorService = Executors.newFixedThreadPool(context.getResources()
                 .getInteger(R.integer.ail__thread_pool_size));
 
-        this.loadingStubBuilder = loadStubBuilderClass(PREF__STUB_LOADER,
-                DefaultLoadingStubBuilder.class);
-
-        this.errorStubBuilder = loadStubBuilderClass(PREF__STUB_ERROR,
-                DefaultErrorStubBuilder.class);
+        this.loadingStubBuilder = loadStubBuilderClass(PREF__STUB_LOADER, DefaultLoadingStubBuilder.class);
+        this.errorStubBuilder = loadStubBuilderClass(PREF__STUB_ERROR, DefaultErrorStubBuilder.class);
     }
 
     private <T extends StubBuilder> StubBuilder loadStubBuilderClass(String key, Class<T> defaultClass){
@@ -194,7 +191,9 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
      */
     public File download(ImageRequest request){
         try{
-            HttpURLConnection conn = openImageDownloadConnection(getCorrectDownloadUrl(request.getTargetUrl()));
+            URL downloadUrl = getCorrectDownloadUrl(request.getTargetUrl());
+
+            HttpURLConnection conn = openImageDownloadConnection(downloadUrl);
             setHttpRequestProperties(request, conn);
 
             return download(conn, request.getOriginalRequestFile());
@@ -207,7 +206,10 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     @Deprecated
     public File download(String url, File file) {
         try{
-            return download(openImageDownloadConnection(getCorrectDownloadUrl(url)), file);
+            URL downloadUrl = getCorrectDownloadUrl(url);
+            HttpURLConnection connection = openImageDownloadConnection(downloadUrl);
+
+            return download(connection, file);
         }
         catch(Throwable ex){ ex.printStackTrace(); }
 
@@ -252,18 +254,22 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
         HttpURLConnection.setFollowRedirects(false);
         HttpURLConnection conn = (HttpURLConnection) imageUrl.openConnection();
 
-        URL adjustedImageUrl = new URL(conn.getHeaderField("Location"));
+        String locationHeader = conn.getHeaderField("Location");
+
         conn.disconnect();
 
         HttpURLConnection.setFollowRedirects(true);
 
-        return adjustedImageUrl;
+        if (locationHeader == null)
+            return imageUrl;
+
+        return new URL(locationHeader);
     }
 
     protected HttpURLConnection openImageDownloadConnection(URL url) throws Exception {
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-        conn.setConnectTimeout(30000);
-        conn.setReadTimeout(30000);
+        conn.setConnectTimeout(context.getResources().getInteger(R.integer.ail__connection_timeout));
+        conn.setReadTimeout(context.getResources().getInteger(R.integer.ail__read_timeout));
         conn.setInstanceFollowRedirects(true);
 
         return conn;
@@ -285,9 +291,7 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     }
 
     public void claimViewTarget(ImageRequest request) {
-        claimViewTarget(request.getTargetView(),
-                request.getTargetUrl(),
-                request.getStartedAtMs());
+        claimViewTarget(request.getTargetView(), request.getTargetUrl(), request.getStartedAtMs());
     }
 
     private void claimViewTarget(View view, String targetUrl, long startedAtMs) {
@@ -295,9 +299,7 @@ public class ImageLoader implements ImageDownloader.DownloadEventListener {
     }
 
     public boolean isViewStillUsable(ImageRequest request) {
-        return isViewStillUsable(request.getTargetView(),
-                request.getTargetUrl(),
-                request.getStartedAtMs());
+        return isViewStillUsable(request.getTargetView(), request.getTargetUrl(), request.getStartedAtMs());
     }
 
     private boolean isViewStillUsable(View target, String targetUrl, long startedAtMs) {

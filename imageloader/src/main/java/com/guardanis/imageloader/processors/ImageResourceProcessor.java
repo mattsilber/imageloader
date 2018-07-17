@@ -18,8 +18,7 @@ public class ImageResourceProcessor extends ImageFileProcessor {
     public Drawable process(ImageRequest request, List<ImageFilter<Bitmap>> bitmapImageFilters) throws Exception {
         switch(request.getTargetImageType()){
             case GIF:
-                return new GifDrawable(request.getContext().getResources(),
-                        request.getTargetResourceId());
+                return new GifDrawable(request.getContext().getResources(), request.getTargetResourceId());
             case SVG:
                 return process(request.getContext(),
                         ImageUtils.decodeSvgResource(request.getContext(),
@@ -34,19 +33,17 @@ public class ImageResourceProcessor extends ImageFileProcessor {
     }
 
     protected Drawable processBitmapResource(ImageRequest request, List<ImageFilter<Bitmap>> bitmapImageFilters) throws Exception {
+        File editedImageFile = request.getEditedRequestFile();
         int requiredImageWidth = request.getTargetImageWidth();
 
-        File editedImageFile = request.getEditedRequestFile();
-        if(!editedImageFile.exists())
-            return process(request.getContext(),
-                    ImageUtils.decodeBitmapResource(request.getContext().getResources(),
-                            request.getTargetResourceId(),
-                            request.getTargetImageWidth()),
-                    editedImageFile,
-                    bitmapImageFilters);
-        else return decodeBitmapDrawable(request.getContext(),
-                editedImageFile,
-                requiredImageWidth);
-    }
+        if(editedImageFile.exists())
+            return decodeBitmapDrawable(request.getContext(), editedImageFile, requiredImageWidth);
 
+        return process(request.getContext(),
+                ImageUtils.decodeBitmapResource(request.getContext().getResources(),
+                        request.getTargetResourceId(),
+                        request.getTargetImageWidth()),
+                editedImageFile,
+                bitmapImageFilters);
+    }
 }

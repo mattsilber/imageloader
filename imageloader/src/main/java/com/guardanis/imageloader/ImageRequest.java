@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -23,6 +24,7 @@ import com.guardanis.imageloader.filters.BitmapRotationFilter;
 import com.guardanis.imageloader.filters.ImageFilter;
 import com.guardanis.imageloader.processors.ExternalImageProcessor;
 import com.guardanis.imageloader.processors.ImageAssetProcessor;
+import com.guardanis.imageloader.processors.ImageDrawableResourceProcessor;
 import com.guardanis.imageloader.processors.ImageFileProcessor;
 import com.guardanis.imageloader.processors.ImageProcessor;
 import com.guardanis.imageloader.processors.ImageResourceProcessor;
@@ -161,6 +163,21 @@ public class ImageRequest<V extends View> implements Runnable {
                 .getBoolean(R.bool.ail__local_execution_stubs);
 
         this.imageProcessor = new ImageResourceProcessor();
+
+        return this;
+    }
+
+    /**
+     * @param drawableResourceId A bitmap or Vector Asset from local drawable resources
+     */
+    public ImageRequest<V> setTargetDrawable(@DrawableRes int drawableResourceId){
+        this.targetResourceId = drawableResourceId;
+        this.targetImageType = ImageType.CUSTOM;
+        this.loadingTargetLocally = true;
+        this.showStubOnExecute = context.getResources()
+                .getBoolean(R.bool.ail__local_execution_stubs);
+
+        this.imageProcessor = new ImageDrawableResourceProcessor();
 
         return this;
     }

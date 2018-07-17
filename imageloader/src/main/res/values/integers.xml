@@ -5,4 +5,7 @@
 
     <integer name="ail__lru_available_memory_reciprical">8</integer>
 
+    <integer name="ail__connection_timeout">30000</integer>
+    <integer name="ail__read_timeout">30000</integer>
+
 </resources>
