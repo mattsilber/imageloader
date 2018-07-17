@@ -504,7 +504,7 @@ public class ImageRequest<V extends View> implements Runnable {
         catch(Throwable e){
             ImageUtils.log(context, e);
 
-            onRequestFailed();
+            onRequestFailed(e);
         }
     }
 
@@ -519,7 +519,8 @@ public class ImageRequest<V extends View> implements Runnable {
 
     protected void onRequestCompleted(@Nullable final Drawable targetDrawable){
         if(targetDrawable == null){
-            onRequestFailed();
+            onRequestFailed(new RuntimeException("ImageRequest completed with null image!"));
+
             return;
         }
 
@@ -540,7 +541,11 @@ public class ImageRequest<V extends View> implements Runnable {
         });
     }
 
-    protected void onRequestFailed() {
+    protected void onRequestFailed(Throwable throwable) {
+        final Throwable error = throwable == null
+                ? new RuntimeException("Image could not be loaded")
+                : throwable;
+
         if(targetView != null && ImageLoader.getInstance(context).isViewStillUsable(this))
             handleShowStubOnError();
 
@@ -548,8 +553,7 @@ public class ImageRequest<V extends View> implements Runnable {
             post(new Runnable(){
                 public void run(){
                     if(errorCallback != null)
-                        errorCallback.onImageLoadingFailure(ImageRequest.this,
-                                new RuntimeException("Image could not be loaded"));
+                        errorCallback.onImageLoadingFailure(ImageRequest.this, error);
                 }
             });
     }
@@ -683,8 +687,11 @@ public class ImageRequest<V extends View> implements Runnable {
     }
 
     public ImageRequest<V> execute() {
-        if(!isTargetDefined())
-            throw new RuntimeException("No target URL or resource defined!");
+        if(!isTargetDefined()) {
+            onRequestFailed(new RuntimeException("No target URL or resource defined!"));
+
+            return this;
+        }
 
         final String fullRequestFile = getEditedRequestFileCacheName();
 
