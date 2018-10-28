@@ -23,7 +23,7 @@
             android:orientation="horizontal"
             android:padding="12dp">
 
-            <android.support.v7.widget.AppCompatImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/main__test_small"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
@@ -32,7 +32,7 @@
             <View
                 style="@style/main__separator"/>
 
-            <android.support.v7.widget.AppCompatImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/main__test_medium"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
@@ -41,7 +41,7 @@
             <View
                 style="@style/main__separator"/>
 
-            <android.support.v7.widget.AppCompatImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/main__test_large"
                 android:layout_width="150dp"
                 android:layout_height="150dp"
@@ -88,13 +88,13 @@
             android:orientation="horizontal"
             android:padding="12dp">
 
-            <android.support.v7.widget.AppCompatImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/main__test__vector_medium"
                 android:layout_width="100dp"
                 android:layout_height="100dp"
                 android:scaleType="centerCrop"/>
 
-            <android.support.v7.widget.AppCompatImageView
+            <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/main__test__vector_large"
                 android:layout_width="150dp"
                 android:layout_height="150dp"

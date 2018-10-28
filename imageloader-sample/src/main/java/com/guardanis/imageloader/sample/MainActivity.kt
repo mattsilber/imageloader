@@ -1,8 +1,8 @@
 package com.guardanis.imageloader.sample
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.AppCompatImageView
+import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.AppCompatImageView
 import android.util.Log
 import android.view.View
 import com.guardanis.imageloader.ImageRequest

@@ -3,7 +3,7 @@ package com.guardanis.imageloader;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
-import android.support.v4.util.LruCache;
+import androidx.collection.LruCache;
 
 public class MemoryCache {
 

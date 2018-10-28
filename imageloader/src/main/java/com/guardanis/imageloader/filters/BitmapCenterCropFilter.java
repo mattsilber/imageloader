@@ -3,7 +3,7 @@ package com.guardanis.imageloader.filters;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 public class BitmapCenterCropFilter extends ImageFilter<Bitmap> {
 
