@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    compile('com.guardanis:imageloader:1.4.4')
+    implementation 'com.guardanis:imageloader:2.0.0'
 }
 ```
 

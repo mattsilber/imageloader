@@ -1,10 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.2.41'
-
-    repositories {
-        jcenter()
-        maven { url 'https://maven.google.com/' }
-    }
+    ext.kotlin_version = '1.2.51'
 
     dependencies {
         classpath 'com.novoda:gradle-android-command-plugin:1.2.1'
@@ -17,12 +12,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'android-command'
 
 android {
-    compileSdkVersion 27
-    buildToolsVersion "27.0.3"
+    compileSdkVersion 28
+    buildToolsVersion "28.0.3"
 
     defaultConfig {
-        minSdkVersion 14
-        targetSdkVersion 27
+        minSdkVersion 16
+        targetSdkVersion 28
     }
 
     sourceSets.main.assets.srcDirs = ['assets']
@@ -33,16 +28,11 @@ repositories {
     maven { url 'https://maven.google.com/' }
 }
 
-ext.support_library_version = '27.1.1'
-
 dependencies {
-    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
 
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
-
-    implementation "com.android.support:appcompat-v7:$support_library_version"
-    implementation "com.android.support:support-v4:$support_library_version"
-    implementation "com.android.support:design:$support_library_version"
+    implementation "androidx.appcompat:appcompat:1.0.0"
+    implementation "com.google.android.material:material:1.0.0"
 
     implementation project(path: ':imageloader')
 
